@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,大数据,Presto," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Presto是什么？Presto是一个开源的分布式SQL查询引擎，适用于交互式分析查询，数据量支持GB到PB字节Presto的设计和编写完全是为了解决像Facebook这样规模的商业数据仓库的交互式分析和处理速度的问题">
+<meta name="keywords" content="Linux,大数据,Presto">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Presto Install &amp; Deploy [安装部署]">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/08/20/Presto-Install/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Presto是什么？Presto是一个开源的分布式SQL查询引擎，适用于交互式分析查询，数据量支持GB到PB字节Presto的设计和编写完全是为了解决像Facebook这样规模的商业数据仓库的交互式分析和处理速度的问题">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://7tt05h.com1.z0.glb.clouddn.com/presto-web.png">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.653Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Presto Install &amp; Deploy [安装部署]">
+<meta name="twitter:description" content="Presto是什么？Presto是一个开源的分布式SQL查询引擎，适用于交互式分析查询，数据量支持GB到PB字节Presto的设计和编写完全是为了解决像Facebook这样规模的商业数据仓库的交互式分析和处理速度的问题">
+<meta name="twitter:image" content="http://7tt05h.com1.z0.glb.clouddn.com/presto-web.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/08/20/Presto-Install/"/>
+
+
+
+
+
+  <title>Presto Install & Deploy [安装部署] | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/08/20/Presto-Install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Presto Install & Deploy [安装部署]</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-20T15:15:23+08:00">
+                2016-08-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/Presto/" itemprop="url" rel="index">
+                    <span itemprop="name">Presto</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Presto是什么？<br>Presto是一个开源的分布式SQL查询引擎，适用于交互式分析查询，数据量支持GB到PB字节<br>Presto的设计和编写完全是为了解决像Facebook这样规模的商业数据仓库的交互式分析和处理速度的问题</p>
+</blockquote>
+<a id="more"></a>
+<blockquote>
+<p>Presto可以做什么？<br>Presto支持在线数据查询，包括Hive, Cassandra, 关系数据库以及专有数据存储。 一条Presto查询可以将多个数据源的数据进行合并，可以跨越整个组织进行分析<br>Presto以分析师的需求作为目标，他们期望响应时间小于1秒到几分钟。 Presto终结了数据分析的两难选择，要么使用速度快的昂贵的商业方案，要么使用消耗大量硬件的慢速的“免费”方案。</p>
+<p>(摘自Presto中文网)</p>
+</blockquote>
+<hr>
+<ul>
+<li><p><a href="https://prestodb.io" target="_blank" rel="noopener">官网</a></p>
+</li>
+<li><p><a href="http://prestodb-china.com/" target="_blank" rel="noopener">中国官网</a></p>
+</li>
+<li><p><a href="https://github.com/prestodb/presto" target="_blank" rel="noopener">项目Github</a></p>
+</li>
+</ul>
+<hr>
+<h1 id="测试环境"><a href="#测试环境" class="headerlink" title="测试环境"></a>测试环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Ubuntu Server 14.04 x64</span><br><span class="line">JDK 1.8+</span><br><span class="line">Presto 0.151</span><br></pre></td></tr></table></figure>
+<h1 id="Presto安装"><a href="#Presto安装" class="headerlink" title="Presto安装"></a>Presto安装</h1><h2 id="下载Presto"><a href="#下载Presto" class="headerlink" title="下载Presto"></a>下载Presto</h2><ul>
+<li><a href="https://repo1.maven.org/maven2/com/facebook/presto/presto-server" target="_blank" rel="noopener">下载地址</a></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载</span></span><br><span class="line">wget https://repo1.maven.org/maven2/com/facebook/presto/presto-server/<span class="number">0.151</span>/presto-server<span class="number">-0.151</span>.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解压</span></span><br><span class="line">tar -zxvf presto-server<span class="number">-0.151</span>.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 目录结构（apt-get install tree）</span></span><br><span class="line">tree -L <span class="number">2</span></span><br><span class="line">.</span><br><span class="line">├── bin</span><br><span class="line">│   ├── launcher</span><br><span class="line">│   ├── launcher.properties</span><br><span class="line">│   ├── launcher.py</span><br><span class="line">│   └── procname</span><br><span class="line">├── lib</span><br><span class="line">│   ├── aether-api<span class="number">-1.13</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── aether-connector-asynchttpclient<span class="number">-1.13</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── aether-connector-file<span class="number">-1.13</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── aether-impl<span class="number">-1.13</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── aether-spi<span class="number">-1.13</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── aether-util<span class="number">-1.13</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── annotations<span class="number">-2.0</span><span class="number">.3</span>.jar</span><br><span class="line">│   ├── antlr4-runtime<span class="number">-4.5</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── aopalliance<span class="number">-1.0</span>.jar</span><br><span class="line">│   ├── asm-all<span class="number">-5.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── <span class="keyword">async</span>-http-client<span class="number">-1.6</span><span class="number">.5</span>.jar</span><br><span class="line">│   ├── bootstrap<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── bval-core<span class="number">-0.5</span>.jar</span><br><span class="line">│   ├── bval-jsr303<span class="number">-0.5</span>.jar</span><br><span class="line">│   ├── cglib-nodep<span class="number">-2.2</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── commons-beanutils-core<span class="number">-1.8</span><span class="number">.3</span>.jar</span><br><span class="line">│   ├── commons-lang3<span class="number">-3.1</span>.jar</span><br><span class="line">│   ├── commons-math3<span class="number">-3.2</span>.jar</span><br><span class="line">│   ├── concurrent<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── configuration<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── discovery<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── discovery-server<span class="number">-1.25</span>.jar</span><br><span class="line">│   ├── event<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── fastutil<span class="number">-6.5</span><span class="number">.9</span>.jar</span><br><span class="line">│   ├── guava<span class="number">-18.0</span>.jar</span><br><span class="line">│   ├── guice<span class="number">-4.0</span>.jar</span><br><span class="line">│   ├── guice-multibindings<span class="number">-4.0</span>.jar</span><br><span class="line">│   ├── hk2-api<span class="number">-2.4</span><span class="number">.0</span>-b34.jar</span><br><span class="line">│   ├── hk2-locator<span class="number">-2.4</span><span class="number">.0</span>-b34.jar</span><br><span class="line">│   ├── hk2-utils<span class="number">-2.4</span><span class="number">.0</span>-b34.jar</span><br><span class="line">│   ├── http2-client<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── http2-common<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── http2-hpack<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── http2-http-client-transport<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── http2-server<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── http-client<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── http-server<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── jackson-annotations<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-core<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-databind<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-dataformat-smile<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-datatype-guava<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-datatype-jdk7<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-datatype-jdk8<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-datatype-joda<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── jackson-datatype-jsr310<span class="number">-2.4</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── javassist<span class="number">-3.18</span><span class="number">.1</span>-GA.jar</span><br><span class="line">│   ├── javax.annotation-api<span class="number">-1.2</span>.jar</span><br><span class="line">│   ├── javax.inject<span class="number">-1.j</span>ar</span><br><span class="line">│   ├── javax.servlet-api<span class="number">-3.1</span><span class="number">.0</span>.jar</span><br><span class="line">│   ├── javax.ws.rs-api<span class="number">-2.0</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── jaxrs<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── jcl-over-slf4j<span class="number">-1.7</span><span class="number">.12</span>.jar</span><br><span class="line">│   ├── jersey-client<span class="number">-2.22</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jersey-common<span class="number">-2.22</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jersey-container-servlet<span class="number">-2.22</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jersey-container-servlet-core<span class="number">-2.22</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jersey-guava<span class="number">-2.22</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jersey-media-jaxb<span class="number">-2.22</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jersey-server<span class="number">-2.22</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jetty-alpn-client<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-client<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-http<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-io<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-jmx<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-security<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-server<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-servlet<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jetty-util<span class="number">-9.3</span><span class="number">.11</span>.M0.jar</span><br><span class="line">│   ├── jgrapht-core<span class="number">-0.9</span><span class="number">.0</span>.jar</span><br><span class="line">│   ├── jmx<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── jmx-http<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── jmx-http-rpc<span class="number">-0.118</span>.jar</span><br><span class="line">│   ├── jmxutils<span class="number">-1.19</span>.jar</span><br><span class="line">│   ├── joda-time<span class="number">-2.8</span><span class="number">.2</span>.jar</span><br><span class="line">│   ├── jol-core<span class="number">-0.2</span>.jar</span><br><span class="line">│   ├── joni<span class="number">-2.1</span><span class="number">.5</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── json<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── leveldb<span class="number">-0.7</span>.jar</span><br><span class="line">│   ├── leveldb-api<span class="number">-0.7</span>.jar</span><br><span class="line">│   ├── log<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── log4j-over-slf4j<span class="number">-1.7</span><span class="number">.12</span>.jar</span><br><span class="line">│   ├── logback-core<span class="number">-1.0</span><span class="number">.13</span>.jar</span><br><span class="line">│   ├── log-manager<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── maven-aether-provider<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-artifact<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-compat<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-core<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-embedder<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-model<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-model-builder<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-plugin-api<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-repository-metadata<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-settings<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── maven-settings-builder<span class="number">-3.0</span><span class="number">.4</span>.jar</span><br><span class="line">│   ├── netty<span class="number">-3.7</span><span class="number">.0</span>.Final.jar</span><br><span class="line">│   ├── node<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── osgi-resource-locator<span class="number">-1.0</span><span class="number">.1</span>.jar</span><br><span class="line">│   ├── plexus-cipher<span class="number">-1.7</span>.jar</span><br><span class="line">│   ├── plexus-classworlds<span class="number">-2.4</span>.jar</span><br><span class="line">│   ├── plexus-component-annotations<span class="number">-1.5</span><span class="number">.5</span>.jar</span><br><span class="line">│   ├── plexus-container-default<span class="number">-1.5</span><span class="number">.5</span>.jar</span><br><span class="line">│   ├── plexus-interpolation<span class="number">-1.14</span>.jar</span><br><span class="line">│   ├── plexus-sec-dispatcher<span class="number">-1.3</span>.jar</span><br><span class="line">│   ├── plexus-utils<span class="number">-2.0</span><span class="number">.6</span>.jar</span><br><span class="line">│   ├── presto-bytecode<span class="number">-0.151</span>.jar</span><br><span class="line">│   ├── presto-client<span class="number">-0.151</span>.jar</span><br><span class="line">│   ├── presto-main<span class="number">-0.151</span>.jar</span><br><span class="line">│   ├── presto-parser<span class="number">-0.151</span>.jar</span><br><span class="line">│   ├── presto-spi<span class="number">-0.151</span>.jar</span><br><span class="line">│   ├── re2j-td<span class="number">-1.4</span>.jar</span><br><span class="line">│   ├── resolver<span class="number">-1.3</span>.jar</span><br><span class="line">│   ├── slf4j-api<span class="number">-1.7</span><span class="number">.12</span>.jar</span><br><span class="line">│   ├── slf4j-jdk14<span class="number">-1.7</span><span class="number">.12</span>.jar</span><br><span class="line">│   ├── slice<span class="number">-0.22</span>.jar</span><br><span class="line">│   ├── stats<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── trace-token<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── units<span class="number">-0.131</span>.jar</span><br><span class="line">│   ├── validation-api<span class="number">-1.1</span><span class="number">.0</span>.Final.jar</span><br><span class="line">│   ├── wagon-provider-api<span class="number">-2.2</span>.jar</span><br><span class="line">│   └── xbean-reflect<span class="number">-3.4</span>.jar</span><br><span class="line">├── NOTICE</span><br><span class="line">├── plugin</span><br><span class="line">│   ├── atop</span><br><span class="line">│   ├── blackhole</span><br><span class="line">│   ├── cassandra</span><br><span class="line">│   ├── example-http</span><br><span class="line">│   ├── hive-cdh4</span><br><span class="line">│   ├── hive-cdh5</span><br><span class="line">│   ├── hive-hadoop1</span><br><span class="line">│   ├── hive-hadoop2</span><br><span class="line">│   ├── jmx</span><br><span class="line">│   ├── kafka</span><br><span class="line">│   ├── localfile</span><br><span class="line">│   ├── ml</span><br><span class="line">│   ├── mongodb</span><br><span class="line">│   ├── mysql</span><br><span class="line">│   ├── postgresql</span><br><span class="line">│   ├── raptor</span><br><span class="line">│   ├── redis</span><br><span class="line">│   ├── teradata-functions</span><br><span class="line">│   └── tpch</span><br><span class="line">└── README.txt</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Presto配置"><a href="#Presto配置" class="headerlink" title="Presto配置"></a>Presto配置</h1><blockquote>
+<p>在安装目录中创建一个etc目录。 在这个etc目录中放入以下配置信息：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir etc</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>node.properties</p>
+<ul>
+<li>节点配置：每个节点的环境信息</li>
+</ul>
+</li>
+<li><p>jvm.config</p>
+<ul>
+<li>JVM 配置：JVM的命令行选项</li>
+</ul>
+</li>
+<li><p>config.properties</p>
+<ul>
+<li>参数配置：Presto server的参数信息</li>
+</ul>
+</li>
+<li><p>log.properties</p>
+<ul>
+<li>日志信息：配置输出日志级别</li>
+</ul>
+</li>
+<li><p>catalog目录：</p>
+<ul>
+<li>configuration forConnectors（数据源）的配置信息</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="node-properties"><a href="#node-properties" class="headerlink" title="node.properties"></a>node.properties</h2><p>包含针对于每个节点的特定的配置信息，一个节点就是在一台机器上安装的Presto实例</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim etc/node.properties</span><br><span class="line"></span><br><span class="line">node.environment=production</span><br><span class="line">node.id=ffffffff-ffff-ffff-ffff-ffffffffffff</span><br><span class="line">node.data-dir=/var/presto/data</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>node.environment：集群名称，所有在同一个集群中的Presto节点必须拥有相同的集群名称</p>
+</li>
+<li><p>node.id：每个Presto节点的唯一标示。每个节点的node.id都必须是唯一的。在Presto进行重启或者升级过程中每个节点的node.id必须保持不变。如果在一个节点上安装多个Presto实例（例如：在同一台机器上安装多个Presto节点），那么每个Presto节点必须拥有唯一的node.id</p>
+</li>
+<li><p>node.data-dir：数据存储目录的位置（操作系统上的路径），Presto将会把日期和数据存储在这个目录下</p>
+</li>
+</ul>
+<hr>
+<h2 id="jvm-config"><a href="#jvm-config" class="headerlink" title="jvm.config"></a>jvm.config</h2><p>包含一系列在启动JVM的时候需要使用的命令行选项。这份配置文件的格式是：一系列的选项，每行配置一个单独的选项。由于这些选项不在shell命令中使用。 因此即使将每个选项通过空格或者其他的分隔符分开，java程序也不会将这些选项分开，而是作为一个命令行选项处理</p>
+<p>Presto会将查询编译成字节码文件，因此Presto会生成很多class，因此我们我们应该增大Perm区的大小（在Perm中主要存储class）并且要允许Jvm class unloading</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim etc/jvm.config</span><br><span class="line"></span><br><span class="line">-server</span><br><span class="line">-Xmx4G</span><br><span class="line">-XX:+UseConcMarkSweepGC</span><br><span class="line">-XX:+ExplicitGCInvokesConcurrent</span><br><span class="line">-XX:+CMSClassUnloadingEnabled</span><br><span class="line">-XX:+AggressiveOpts</span><br><span class="line">-XX:+HeapDumpOnOutOfMemoryError</span><br><span class="line">-XX:OnOutOfMemoryError=kill <span class="number">-9</span> %p</span><br><span class="line">-XX:ReservedCodeCacheSize=<span class="number">150</span>M</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="config-properties"><a href="#config-properties" class="headerlink" title="config.properties"></a>config.properties</h2><p>包含了Presto server的所有配置信息。 每个Presto server既是一个coordinator也是一个worker。但是在大型集群中，处于性能考虑，建议单独用一台机器作为 coordinator</p>
+<blockquote>
+<p>新版本中已经不使用一下配置: task.max-memory=1GB</p>
+<p>改为:query.max-memory=1GB和query.max-memory-per-node=1GB</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim etc/config.properties</span><br><span class="line"></span><br><span class="line"><span class="comment"># coordinator最小配置</span></span><br><span class="line"></span><br><span class="line">coordinator=true</span><br><span class="line">node-scheduler.include-coordinator=false</span><br><span class="line">http-server.http.port=<span class="number">8080</span></span><br><span class="line">query.max-memory=<span class="number">2</span>GB</span><br><span class="line">query.max-memory-per-node=<span class="number">1</span>GB</span><br><span class="line">discovery-server.enabled=true</span><br><span class="line">discovery.uri=http://example.net:<span class="number">8080</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vim etc/config.properties</span><br><span class="line"></span><br><span class="line"><span class="comment"># worker最小配置</span></span><br><span class="line"></span><br><span class="line">coordinator=false</span><br><span class="line">http-server.http.port=<span class="number">8080</span></span><br><span class="line">query.max-memory=<span class="number">2</span>GB</span><br><span class="line">query.max-memory-per-node=<span class="number">1</span>GB</span><br><span class="line">discovery.uri=http://example.net:<span class="number">8080</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim etc/config.properties</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最小伪分布式，coordinator和worker在一台机</span></span><br><span class="line"></span><br><span class="line">coordinator=true</span><br><span class="line">node-scheduler.include-coordinator=true</span><br><span class="line">http-server.http.port=<span class="number">8080</span></span><br><span class="line">query.max-memory=<span class="number">2</span>GB</span><br><span class="line">query.max-memory-per-node=<span class="number">1</span>GB</span><br><span class="line">discovery-server.enabled=true</span><br><span class="line">discovery.uri=http://example.net:<span class="number">8080</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>coordinator：指定是否运维Presto实例作为一个coordinator(接收来自客户端的查询情切管理每个查询的执行过程)</p>
+</li>
+<li><p>node-scheduler.include-coordinator：是否允许在coordinator服务中进行调度工作。对于大型的集群，在一个节点上的Presto server即作为coordinator又作为worke将会降低查询性能。因为如果一个服务器作为worker使用，那么大部分的资源都不会被worker占用，那么就不会有足够的资源进行关键任务调度、管理和监控查询执行</p>
+</li>
+<li><p>http-server.http.port：指定HTTP server的端口。Presto 使用 HTTP进行内部和外部的所有通讯</p>
+</li>
+<li><p>query.max-memory：一个提交计划在所有worker节点上占用的内存上限</p>
+</li>
+<li><p>query.max-memory-per-node：一个查询在一个机器上可使用的内存上限</p>
+</li>
+<li><p>discovery-server.enabled：Presto 通过Discovery 服务来找到集群中所有的节点。为了能够找到集群中所有的节点，每一个Presto实例都会在启动的时候将自己注册到discovery服务。Presto为了简化部署，并且也不想再增加一个新的服务进程，Presto coordinator 可以运行一个内嵌在coordinator 里面的Discovery 服务。这个内嵌的Discovery 服务和Presto共享HTTP server并且使用同样的端口</p>
+</li>
+<li><p>discovery.uri：Discovery server的URI。由于启用了Presto coordinator内嵌的Discovery 服务，因此这个uri就是Presto coordinator的uri。修改example.net:8080，根据你的实际环境设置该URI。注意：这个URI一定不能以“/“结尾</p>
+</li>
+</ul>
+<hr>
+<h2 id="log-properties"><a href="#log-properties" class="headerlink" title="log.properties"></a>log.properties</h2><p>在这个配置文件中允许你根据不同的日志结构设置不同的日志级别。每个logger都有一个名字（通常是使用logger的类的全标示类名）. Loggers通过名字中的“.“来表示层级和集成关系</p>
+<blockquote>
+<p>默认就是INFO,四个级别 DEBUG, INFO, WARN and ERROR</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim etc/log.properties</span><br><span class="line"></span><br><span class="line">com.facebook.presto=INFO</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="数据源Catalog-Properties"><a href="#数据源Catalog-Properties" class="headerlink" title="数据源Catalog Properties"></a>数据源Catalog Properties</h2><p>Presto通过connectors访问数据。这些connectors挂载在catalogs上。 connector 可以提供一个catalog中所有的schema和表</p>
+<ul>
+<li>创建catalog目录</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir etc/catalog</span><br></pre></td></tr></table></figure>
+<ul>
+<li>创建jmx连接器</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim etc/catalog/jmx.properties</span><br><span class="line"></span><br><span class="line">connector.name=jmx</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="运行Presto"><a href="#运行Presto" class="headerlink" title="运行Presto"></a>运行Presto</h1><ul>
+<li>后台进程启动</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/launcher start</span><br></pre></td></tr></table></figure>
+<ul>
+<li>前台运行， 日志和相关输出将会写入stdout/stderr</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/launcher run</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="启动成功"><a href="#启动成功" class="headerlink" title="启动成功"></a>启动成功</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">......</span><br><span class="line">......</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.396</span>+<span class="number">0800</span>	INFO	main	com.facebook.presto.metadata.CatalogManager	-- Loading catalog etc/catalog/jmx.properties --</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.675</span>+<span class="number">0800</span>	INFO	main	Bootstrap	PROPERTY         DEFAULT  RUNTIME  DESCRIPTION</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.675</span>+<span class="number">0800</span>	INFO	main	Bootstrap	jmx.dump-period  <span class="number">10.00</span>s   <span class="number">10.00</span>s</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.675</span>+<span class="number">0800</span>	INFO	main	Bootstrap	jmx.dump-tables  []       []</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.675</span>+<span class="number">0800</span>	INFO	main	Bootstrap	jmx.max-entries  <span class="number">86400</span>    <span class="number">86400</span></span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.675</span>+<span class="number">0800</span>	INFO	main	Bootstrap</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.894</span>+<span class="number">0800</span>	INFO	main	io.airlift.bootstrap.LifeCycleManager	Life cycle starting...</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.895</span>+<span class="number">0800</span>	INFO	main	io.airlift.bootstrap.LifeCycleManager	Life cycle startup complete. System ready.</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.895</span>+<span class="number">0800</span>	INFO	main	com.facebook.presto.metadata.CatalogManager	-- Added catalog jmx using connector jmx --</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.897</span>+<span class="number">0800</span>	INFO	main	com.facebook.presto.security.AccessControlManager	-- Loading system access control --</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.897</span>+<span class="number">0800</span>	INFO	main	com.facebook.presto.security.AccessControlManager	-- Loaded system access control allow-all --</span><br><span class="line"><span class="number">2016</span><span class="number">-08</span><span class="number">-21</span>T21:<span class="number">56</span>:<span class="number">25.957</span>+<span class="number">0800</span>	INFO	main	com.facebook.presto.server.PrestoServer	======== SERVER STARTED ========</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>运行bin/launcher–help，Presto将会列出支持的命令和命令行选项。 另外可以通过运行bin/launcher–verbose命令，来调试安装是否正确</p>
+</blockquote>
+<p>启动完之后，日志将会写在data目录下，该目录下有如下文件：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── etc -&gt; /root/sortware/presto-server-0.151/etc</span><br><span class="line">├── plugin -&gt; /root/sortware/presto-server-0.151/plugin</span><br><span class="line">└── var</span><br><span class="line">    ├── log</span><br><span class="line">    │   └── http-request.log</span><br><span class="line">    └── run</span><br><span class="line">        └── launcher.pid</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>打开WEB界面：<a href="http://example.net:8080" target="_blank" rel="noopener">http://example.net:8080</a></p>
+</blockquote>
+<p><img src="http://7tt05h.com1.z0.glb.clouddn.com/presto-web.png" alt=""></p>
+<hr>
+<h1 id="常见问题汇总"><a href="#常见问题汇总" class="headerlink" title="常见问题汇总"></a><span style="color:red">常见问题汇总</span></h1><blockquote>
+<p>1.JDK版本过低</p>
+</blockquote>
+<ul>
+<li>出现以下错误通常是因为JDK版本低于1.8造成的，Presto要求JDK版本必须为1.8+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">"main"</span> java.lang.UnsupportedClassVersionError: com/facebook/presto/server/PrestoServer : Unsupported major.minor version <span class="number">52.0</span></span><br><span class="line">    at java.lang.ClassLoader.defineClass1(Native Method)</span><br><span class="line">    at java.lang.ClassLoader.defineClass(ClassLoader.java:<span class="number">800</span>)</span><br><span class="line">    at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:<span class="number">142</span>)</span><br><span class="line">    at java.net.URLClassLoader.defineClass(URLClassLoader.java:<span class="number">449</span>)</span><br><span class="line">    at java.net.URLClassLoader.access$<span class="number">100</span>(URLClassLoader.java:<span class="number">71</span>)</span><br><span class="line">    at java.net.URLClassLoader$<span class="number">1</span>.run(URLClassLoader.java:<span class="number">361</span>)</span><br><span class="line">    at java.net.URLClassLoader$<span class="number">1</span>.run(URLClassLoader.java:<span class="number">355</span>)</span><br><span class="line">    at java.security.AccessController.doPrivileged(Native Method)</span><br><span class="line">    at java.net.URLClassLoader.findClass(URLClassLoader.java:<span class="number">354</span>)</span><br><span class="line">    at java.lang.ClassLoader.loadClass(ClassLoader.java:<span class="number">425</span>)</span><br><span class="line">    at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:<span class="number">308</span>)</span><br><span class="line">    at java.lang.ClassLoader.loadClass(ClassLoader.java:<span class="number">358</span>)</span><br><span class="line">    at sun.launcher.LauncherHelper.checkAndLoadMain(LauncherHelper.java:<span class="number">482</span>)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2.node.properties配置问题</p>
+</blockquote>
+<ul>
+<li>出现以下错误通常是因为node.properties文件没有配置，或者配置错误引起的，请参照前文重新配置</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2016</span>-<span class="number">08</span>-<span class="number">21</span>T21:<span class="number">50</span>:<span class="number">41.242</span>+<span class="number">0800</span> ERROR main com.facebook.presto.server.PrestoServer Unable to create injector, see the following errors:</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>) Error: Invalid configuration property node.environment: <span class="function">may not be <span class="title">null</span> <span class="params">(<span class="keyword">for</span> class io.airlift.node.NodeConfig.environment)</span></span></span><br><span class="line"><span class="function">  at io.airlift.node.NodeModule.<span class="title">configure</span><span class="params">(NodeModule.java:<span class="number">34</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">1 error</span></span><br><span class="line"><span class="function">com.google.inject.CreationException: Unable to create injector, see the following errors:</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">1) Error: Invalid configuration property node.environment: may not be <span class="title">null</span> <span class="params">(<span class="keyword">for</span> class io.airlift.node.NodeConfig.environment)</span></span></span><br><span class="line"><span class="function">  at io.airlift.node.NodeModule.<span class="title">configure</span><span class="params">(NodeModule.java:<span class="number">34</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">1 error</span></span><br><span class="line"><span class="function">    at com.google.inject.internal.Errors.<span class="title">throwCreationExceptionIfErrorsExist</span><span class="params">(Errors.java:<span class="number">466</span>)</span></span></span><br><span class="line"><span class="function">    at com.google.inject.internal.InternalInjectorCreator.<span class="title">initializeStatically</span><span class="params">(InternalInjectorCreator.java:<span class="number">155</span>)</span></span></span><br><span class="line"><span class="function">    at com.google.inject.internal.InternalInjectorCreator.<span class="title">build</span><span class="params">(InternalInjectorCreator.java:<span class="number">107</span>)</span></span></span><br><span class="line"><span class="function">    at com.google.inject.Guice.<span class="title">createInjector</span><span class="params">(Guice.java:<span class="number">96</span>)</span></span></span><br><span class="line"><span class="function">    at io.airlift.bootstrap.Bootstrap.<span class="title">initialize</span><span class="params">(Bootstrap.java:<span class="number">242</span>)</span></span></span><br><span class="line"><span class="function">    at com.facebook.presto.server.PrestoServer.<span class="title">run</span><span class="params">(PrestoServer.java:<span class="number">111</span>)</span></span></span><br><span class="line"><span class="function">    at com.facebook.presto.server.PrestoServer.<span class="title">main</span><span class="params">(PrestoServer.java:<span class="number">63</span>)</span></span></span><br></pre></td></tr></table></figure>
+<hr>
+<p>参考：<a href="http://prestodb-china.com/docs/current/index.html" target="_blank" rel="noopener">Presto 0.100 Documentation</a></p>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Presto/" rel="tag"># Presto</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/26/Spark-Programming-Guide-2/" rel="next" title="Spark 编程指南 (二) [Spark Programming Guide]">
+                <i class="fa fa-chevron-left"></i> Spark 编程指南 (二) [Spark Programming Guide]
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/15/Cassandra-Install/" rel="prev" title="Cassandra Install & Deploy [安装部署]">
+                Cassandra Install & Deploy [安装部署] <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#测试环境"><span class="nav-number">1.</span> <span class="nav-text">测试环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Presto安装"><span class="nav-number">2.</span> <span class="nav-text">Presto安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#下载Presto"><span class="nav-number">2.1.</span> <span class="nav-text">下载Presto</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Presto配置"><span class="nav-number">3.</span> <span class="nav-text">Presto配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#node-properties"><span class="nav-number">3.1.</span> <span class="nav-text">node.properties</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jvm-config"><span class="nav-number">3.2.</span> <span class="nav-text">jvm.config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#config-properties"><span class="nav-number">3.3.</span> <span class="nav-text">config.properties</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#log-properties"><span class="nav-number">3.4.</span> <span class="nav-text">log.properties</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据源Catalog-Properties"><span class="nav-number">3.5.</span> <span class="nav-text">数据源Catalog Properties</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行Presto"><span class="nav-number">4.</span> <span class="nav-text">运行Presto</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#启动成功"><span class="nav-number">5.</span> <span class="nav-text">启动成功</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常见问题汇总"><span class="nav-number">6.</span> <span class="nav-text">常见问题汇总</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

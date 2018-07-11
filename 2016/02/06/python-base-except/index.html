@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,except," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="什么是异常？当程序运行时发生了某些错误，这时就会引发异常。Python中用异常对象(exception object)来表示异常情况，如果异常对象并没有被处理，程序就会终止，并发出回溯(traceback)显示错误信息">
+<meta name="keywords" content="Python,except">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python基础-异常处理(except)">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/02/06/python-base-except/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="什么是异常？当程序运行时发生了某些错误，这时就会引发异常。Python中用异常对象(exception object)来表示异常情况，如果异常对象并没有被处理，程序就会终止，并发出回溯(traceback)显示错误信息">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.695Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python基础-异常处理(except)">
+<meta name="twitter:description" content="什么是异常？当程序运行时发生了某些错误，这时就会引发异常。Python中用异常对象(exception object)来表示异常情况，如果异常对象并没有被处理，程序就会终止，并发出回溯(traceback)显示错误信息">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/02/06/python-base-except/"/>
+
+
+
+
+
+  <title>Python基础-异常处理(except) | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/02/06/python-base-except/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python基础-异常处理(except)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-06T14:50:52+08:00">
+                2016-02-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>什么是异常？<br>当程序运行时发生了某些错误，这时就会引发异常。Python中用异常对象(exception object)来表示异常情况，如果异常对象并没有被处理，程序就会终止，并发出回溯(traceback)显示错误信息</p>
+</blockquote>
+<hr>
+<a id="more"></a>
+<h1 id="环境及版本"><a href="#环境及版本" class="headerlink" title="环境及版本"></a>环境及版本</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Windows 10 x64</span><br><span class="line">Python 2.7</span><br><span class="line">Pycharm 4.5.1</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="重要内建异常"><a href="#重要内建异常" class="headerlink" title="重要内建异常"></a>重要内建异常</h1><table>
+<thead>
+<tr>
+<th>异常类名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exception</td>
+<td>常规异常的基类</td>
+</tr>
+<tr>
+<td>KeyboardInterrupt</td>
+<td>用户中断执行</td>
+</tr>
+<tr>
+<td>OverflowError</td>
+<td>数值运算超出最大限制</td>
+</tr>
+<tr>
+<td>ZeroDivisionError</td>
+<td>在除法或者取模操作时第二个参数为0时引发</td>
+</tr>
+<tr>
+<td>AttributeError</td>
+<td>特性引用或复制失败时引发</td>
+</tr>
+<tr>
+<td>IOError</td>
+<td>输入、输出错误时引发</td>
+</tr>
+<tr>
+<td>ImportError</td>
+<td>导入模块/对象失败</td>
+</tr>
+<tr>
+<td>IndexError</td>
+<td>在使用不错的索引时引发</td>
+</tr>
+<tr>
+<td>NameError</td>
+<td>找不到变量（名字）时引发</td>
+</tr>
+<tr>
+<td>SyntaxError</td>
+<td>python代码语法错误</td>
+</tr>
+<tr>
+<td>TypeError</td>
+<td>内建函数应用于错误对象类型时引发</td>
+</tr>
+<tr>
+<td>ValueError</td>
+<td>内建函数应用于正确对象，但是该对象使用不合适的值时引发</td>
+</tr>
+<tr>
+<td>UnicodeError</td>
+<td>unicode编码相关错误</td>
+</tr>
+<tr>
+<td>Warning</td>
+<td>警告类型的基类</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h1><hr>
+<h2 id="完整形式"><a href="#完整形式" class="headerlink" title="完整形式"></a>完整形式</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:  </span><br><span class="line">    有异常语句...</span><br><span class="line"><span class="keyword">except</span> &lt;name1&gt;:  </span><br><span class="line">    处理name1异常的语句 </span><br><span class="line"><span class="keyword">except</span> &lt;name2&gt;:  </span><br><span class="line">    处理name2异常的语句</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line">    .</span><br><span class="line"><span class="keyword">else</span>:  </span><br><span class="line">    没有触发异常执行的语句</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">	无论有没有异常都会执行的语句</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    x = input(<span class="string">"Enter the first number: "</span>)</span><br><span class="line">    y = input(<span class="string">"Enter the second number: "</span>)</span><br><span class="line">    <span class="keyword">print</span> x / y</span><br><span class="line"><span class="keyword">except</span> TypeError, e:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"Type Error "</span> + e.message</span><br><span class="line"><span class="keyword">except</span> ZeroDivisionError, e:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"ZeroDivisionError "</span> + e.message</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"No Error"</span></span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"Finish"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果</span></span><br><span class="line"><span class="comment">#（输入5、0）</span></span><br><span class="line">Enter the first number: <span class="number">1</span></span><br><span class="line">Enter the second number: <span class="number">0</span></span><br><span class="line">ZeroDivisionError integer division <span class="keyword">or</span> modulo by zero</span><br><span class="line">Finish</span><br><span class="line"></span><br><span class="line"><span class="comment">#（输入d）</span></span><br><span class="line">Enter the first number: d</span><br><span class="line">Name Error name <span class="string">'d'</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</span><br><span class="line">Finish</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当发生错误没有用try/except时，错误就会被传播到调用的函数中；如果调用函数中也没有捕获异常，这些异常就会传递到程序的最顶层</li>
+<li>Python会从头到尾以及从左到右查看except子句，然后执行第一个相符的except下的语句</li>
+<li>except和else语句只会执行其中的一个，try捕获到异常时会进入except处理异常，try没有捕获到异常会进入else执行相应代码</li>
+<li>finally无论是否捕获到异常，都会去执行里面的语句；通常是将释放资源、关闭IO流等操作放在里面</li>
+</ul>
+<hr>
+<h2 id="except多种形式"><a href="#except多种形式" class="headerlink" title="except多种形式"></a>except多种形式</h2><blockquote>
+<p>上述例子中except后跟的是异常的名字，except语句还有很多种写法</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>形式</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>except:</td>
+<td>捕捉全部异常</td>
+</tr>
+<tr>
+<td>except name:</td>
+<td>捕捉特定name的异常</td>
+</tr>
+<tr>
+<td>except name as value:</td>
+<td>返回一个异常对象赋值给value</td>
+</tr>
+<tr>
+<td>except (name1,name2):</td>
+<td>一个代码块中捕获多个异常</td>
+</tr>
+<tr>
+<td>except (name1,name2) as value:</td>
+<td>一个代码块中捕获多个异常，返回一个异常对象赋值给value</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    x = input(<span class="string">"Enter the first number: "</span>)</span><br><span class="line">    y = input(<span class="string">"Enter the second number: "</span>)</span><br><span class="line">    <span class="keyword">print</span> x / y</span><br><span class="line"><span class="keyword">except</span> ZeroDivisionError <span class="keyword">as</span> msg:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"ZeroDivisionError "</span> + msg.message</span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果（输入8、0）</span></span><br><span class="line">Enter the first number: <span class="number">8</span></span><br><span class="line">Enter the second number: <span class="number">0</span></span><br><span class="line">ZeroDivisionError integer division <span class="keyword">or</span> modulo by zero</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    x = input(<span class="string">"Enter the first number: "</span>)</span><br><span class="line">    y = input(<span class="string">"Enter the second number: "</span>)</span><br><span class="line">    <span class="keyword">print</span> x / y</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"All Except"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果（输入d）</span></span><br><span class="line">Enter the first number: d</span><br><span class="line">All Except</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    x = input(<span class="string">"Enter the first number: "</span>)</span><br><span class="line">    y = input(<span class="string">"Enter the second number: "</span>)</span><br><span class="line">    <span class="keyword">print</span> x / y</span><br><span class="line"><span class="keyword">except</span> (ZeroDivisionError,NameError) <span class="keyword">as</span> msg:</span><br><span class="line">    <span class="keyword">print</span> msg.message</span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果（输入8、0）</span></span><br><span class="line">Enter the first number: <span class="number">8</span></span><br><span class="line">Enter the second number: <span class="number">0</span></span><br><span class="line">integer division <span class="keyword">or</span> modulo by zero</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>只用except:时请注意，这样捕获异常是危险的，因为它会隐藏所有程序员没有想到并且没有做好准备处理的错误；应该使用明确的异常类进行处理</p>
+</blockquote>
+<hr>
+<h1 id="手动引发异常"><a href="#手动引发异常" class="headerlink" title="手动引发异常"></a>手动引发异常</h1><blockquote>
+<p>我们可以使用raise语句来手动引发异常</p>
+</blockquote>
+<ul>
+<li>为了引发异常，可以使用一个类（应该是Exception的子类）或者实例参数调用raise语句</li>
+<li>使用类时，程序会自动创建类的一个实例</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例</span></span><br><span class="line"><span class="keyword">raise</span> IOError</span><br><span class="line"></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"D:/My office/learning-python/learning_except/except_test.py"</span>, line <span class="number">42</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    <span class="keyword">raise</span> IOError</span><br><span class="line">IOError</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例</span></span><br><span class="line"><span class="keyword">raise</span> IOError(<span class="string">"This is a IOError"</span>)</span><br><span class="line"></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"D:/My office/learning-python/learning_except/except_test.py"</span>, line <span class="number">42</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    <span class="keyword">raise</span> IOError(<span class="string">"This is a IOError"</span>)</span><br><span class="line">IOError: This <span class="keyword">is</span> a IOError</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="自定义异常"><a href="#自定义异常" class="headerlink" title="自定义异常"></a>自定义异常</h1><blockquote>
+<p>有些时候我们需要创建自己的异常类，这个类就像其他类一样，只要是确保从Exception类继承<br>不管是简介继承还是直接继承，也就是是继承其他内建异常类也是可以的<br>class SomeOneException(Exception): pass</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyException</span><span class="params">(Exception)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,message)</span>:</span></span><br><span class="line">        self.message = message</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">raise</span> MyException(<span class="string">"This is my exception class"</span>)</span><br><span class="line"><span class="keyword">except</span> MyException, e:</span><br><span class="line">    <span class="keyword">print</span> e.message</span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果</span></span><br><span class="line">This <span class="keyword">is</span> my exception <span class="class"><span class="keyword">class</span></span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="with-as语句"><a href="#with-as语句" class="headerlink" title="with/as语句"></a>with/as语句</h1><blockquote>
+<p>在处理IO流的时候可以用这种方式简化异常处理</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本语法</span></span><br><span class="line"><span class="keyword">with</span> expression [<span class="keyword">as</span> variable]:  </span><br><span class="line">    code</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在这里的expression要返回一个对象，从而支持环境管理协议。如果选用的as字句存在时，此对象也可返回一个值，赋值给变量名variable.</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"test.txt"</span>) <span class="keyword">as</span> message:</span><br><span class="line">    <span class="keyword">for</span> msg <span class="keyword">in</span> message:</span><br><span class="line">        <span class="keyword">print</span> msg</span><br></pre></td></tr></table></figure>
+<ul>
+<li>无论是否引发异常，文件都会被正确关闭</li>
+</ul>
+<hr>
+<h1 id="异常处理注意事项"><a href="#异常处理注意事项" class="headerlink" title="异常处理注意事项"></a>异常处理注意事项</h1><ul>
+<li>一个try就有一个except或多个except，不要只t捕获不处理</li>
+<li>慎用异常：1.找到python的内置异常 2.理解python的内置异常分别对应什么情况 3.阅读你的代码，找到你的代码里可能会抛出内置异常的地方 4.仅对这几行代码做异常处理</li>
+<li>假设你无法知道你的代码会抛出什么异常，那么你的异常处理便是无效的</li>
+</ul>
+<hr>
+<p>参考：Python基础教程(第2版·修订版)</p>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/except/" rel="tag"># except</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/29/Sublime-PackageControl-Failure/" rel="next" title="Sublime Text3 问题汇总">
+                <i class="fa fa-chevron-left"></i> Sublime Text3 问题汇总
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/20/Redis-Install-Config/" rel="prev" title="Redis安装与配置">
+                Redis安装与配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#环境及版本"><span class="nav-number">1.</span> <span class="nav-text">环境及版本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#重要内建异常"><span class="nav-number">2.</span> <span class="nav-text">重要内建异常</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#异常处理"><span class="nav-number">3.</span> <span class="nav-text">异常处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#完整形式"><span class="nav-number">3.1.</span> <span class="nav-text">完整形式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实例"><span class="nav-number">3.2.</span> <span class="nav-text">实例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#except多种形式"><span class="nav-number">3.3.</span> <span class="nav-text">except多种形式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#手动引发异常"><span class="nav-number">4.</span> <span class="nav-text">手动引发异常</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自定义异常"><span class="nav-number">5.</span> <span class="nav-text">自定义异常</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#with-as语句"><span class="nav-number">6.</span> <span class="nav-text">with/as语句</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#异常处理注意事项"><span class="nav-number">7.</span> <span class="nav-text">异常处理注意事项</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

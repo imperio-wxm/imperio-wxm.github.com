@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,string," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="环境及版本123Windows 10 x64Python 2.7Pycharm 4.5.1  字符串(string) 字符串即使一串字符组成的序列">
+<meta name="keywords" content="Python,string">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python基础—字符串(string)">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/01/11/python-base-str/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="环境及版本123Windows 10 x64Python 2.7Pycharm 4.5.1  字符串(string) 字符串即使一串字符组成的序列">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.720Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python基础—字符串(string)">
+<meta name="twitter:description" content="环境及版本123Windows 10 x64Python 2.7Pycharm 4.5.1  字符串(string) 字符串即使一串字符组成的序列">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/01/11/python-base-str/"/>
+
+
+
+
+
+  <title>Python基础—字符串(string) | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/01/11/python-base-str/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python基础—字符串(string)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-11T20:13:44+08:00">
+                2016-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<h1 id="环境及版本"><a href="#环境及版本" class="headerlink" title="环境及版本"></a>环境及版本</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Windows 10 x64</span><br><span class="line">Python 2.7</span><br><span class="line">Pycharm 4.5.1</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="字符串-string"><a href="#字符串-string" class="headerlink" title="字符串(string)"></a>字符串(string)</h1><ul>
+<li>字符串即使一串字符组成的序列</li>
+</ul>
+<a id="more"></a>
+<hr>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><hr>
+<h2 id="引号和转义"><a href="#引号和转义" class="headerlink" title="引号和转义"></a>引号和转义</h2><ul>
+<li>字符串中的单引号和双引号没有区别，可以混用</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">print</span> <span class="string">"hello"</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'hello'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">"'hello'"</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'"hello"'</span></span><br><span class="line"></span><br><span class="line">hello</span><br><span class="line">hello</span><br><span class="line"><span class="string">'hello'</span></span><br><span class="line"><span class="string">"hello"</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="转义"><a href="#转义" class="headerlink" title="转义"></a>转义</h2><ul>
+<li>当字符串中想要出现单引号、百分号、回车等符号时，需要进行转义</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">print</span> <span class="string">"let\'s go"</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">"100\\2=50"</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'\"hello\"'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">"this \nis"</span></span><br><span class="line"></span><br><span class="line">let<span class="string">'s go</span></span><br><span class="line"><span class="string">100\2=50</span></span><br><span class="line"><span class="string">"hello"</span></span><br><span class="line"><span class="string">this </span></span><br><span class="line"><span class="string">is</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="拼接字符串"><a href="#拼接字符串" class="headerlink" title="拼接字符串"></a>拼接字符串</h2><ul>
+<li>通常可以用加号来连接两个字符串</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">str1 = <span class="string">"100+"</span></span><br><span class="line">str2 = <span class="string">"5=105"</span></span><br><span class="line"><span class="keyword">print</span> str1 + str2</span><br><span class="line"></span><br><span class="line"><span class="number">100</span>+<span class="number">5</span>=<span class="number">105</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="长字符串"><a href="#长字符串" class="headerlink" title="长字符串"></a>长字符串</h2><ul>
+<li>如果需要跨多行的字符串，可以用’’’和”””来表示</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">print</span> <span class="string">"""1</span></span><br><span class="line"><span class="string">2</span></span><br><span class="line"><span class="string">3"""</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'''a</span></span><br><span class="line"><span class="string">b</span></span><br><span class="line"><span class="string">c'''</span></span><br><span class="line"></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line">a</span><br><span class="line">b</span><br><span class="line">c</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>用这种方式可以进行多行注释</p>
+</blockquote>
+<hr>
+<h2 id="原始字符串"><a href="#原始字符串" class="headerlink" title="原始字符串"></a>原始字符串</h2><ul>
+<li>原始字符串对于反斜杠不会转义</li>
+<li>原始字符串以r开头</li>
+<li>不能在原始字符串的末尾加反斜杠</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">print</span> <span class="string">r"let\'s go"</span></span><br><span class="line"></span><br><span class="line">let\<span class="string">'s go</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="Unicode字符串"><a href="#Unicode字符串" class="headerlink" title="Unicode字符串"></a>Unicode字符串</h2><ul>
+<li>python中普通字符串在内部是以8为的ASCII码储存，而Unicode字符串储存为16位Unicode字符</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">str3 = <span class="string">u'hello world'</span></span><br><span class="line"><span class="keyword">print</span> str3</span><br><span class="line"><span class="keyword">print</span> isinstance(str3, unicode)</span><br><span class="line"></span><br><span class="line">hello world</span><br><span class="line"><span class="keyword">True</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="字符串操作"><a href="#字符串操作" class="headerlink" title="字符串操作"></a>字符串操作</h1><ul>
+<li>字符串操作和序列的操作基本相同，但字符串不能进行修改</li>
+</ul>
+<hr>
+<h1 id="字符串格式化"><a href="#字符串格式化" class="headerlink" title="字符串格式化"></a>字符串格式化</h1><hr>
+<h2 id="基础格式化"><a href="#基础格式化" class="headerlink" title="基础格式化"></a>基础格式化</h2><ul>
+<li>基础格式化通常用百分号%来完成</li>
+<li>在字符串的左边放一个字符串，右侧是希望被格式化的值</li>
+<li>格式化字符串的%s部分称为转换说明符，它们标记了需要插入转换值的位置，s表示格式化为字符串，d表示格式化为整型，f表示格式化为浮点型</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">format_str = <span class="string">"My %s is %s"</span></span><br><span class="line">values = (<span class="string">'name'</span>,<span class="string">'wxmimperio'</span>)</span><br><span class="line"><span class="keyword">print</span> format_str % values</span><br><span class="line"></span><br><span class="line">My name <span class="keyword">is</span> wxmimperio</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="完整格式化"><a href="#完整格式化" class="headerlink" title="完整格式化"></a>完整格式化</h2><ul>
+<li>格式化操作符的右侧可以是任意类型，如果是元组或者映射类型，那么字符串格式化将会有所不同。</li>
+<li>基本的转换说明符：<ul>
+<li>1.%字符：表示格式化的开始</li>
+<li>2.转换标志：-表示左对齐，+表示在转换值之间加上正负号，””表示正数之前保留空格，0表示转换值若位数不够用0填充</li>
+<li>3.点.表示精度</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> math <span class="keyword">import</span> pi</span><br><span class="line"><span class="keyword">print</span> <span class="string">"%d"</span> % <span class="number">10</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">"%f"</span> % <span class="number">12.5</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">"%s"</span> % <span class="string">'abc'</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">"%10f"</span> % pi</span><br><span class="line"><span class="keyword">print</span> <span class="string">"%10.2f"</span> % pi</span><br><span class="line"><span class="keyword">print</span> <span class="string">"%.2f"</span> % pi</span><br><span class="line"><span class="keyword">print</span> <span class="string">"%010.2f"</span> % pi</span><br><span class="line"><span class="keyword">print</span> <span class="string">"%-10.2f"</span> % pi</span><br><span class="line"><span class="keyword">print</span> <span class="string">"% d,% d"</span> % (<span class="number">10</span>,<span class="number">-20</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"%+d,%+d"</span> % (<span class="number">5</span>,<span class="number">-30</span>)</span><br><span class="line"></span><br><span class="line"><span class="number">10</span></span><br><span class="line"><span class="number">12.500000</span></span><br><span class="line">abc</span><br><span class="line">  <span class="number">3.141593</span></span><br><span class="line">      <span class="number">3.14</span></span><br><span class="line"><span class="number">3.14</span></span><br><span class="line"><span class="number">0000003.14</span></span><br><span class="line"><span class="number">3.14</span>      </span><br><span class="line"> <span class="number">10</span>,<span class="number">-20</span></span><br><span class="line">+<span class="number">5</span>,<span class="number">-30</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="字符串方法"><a href="#字符串方法" class="headerlink" title="字符串方法"></a>字符串方法</h1><hr>
+<h2 id="find方法"><a href="#find方法" class="headerlink" title="find方法"></a>find方法</h2><ul>
+<li>可以在一个较长的字符串中查找子串，返回子串所在位置的最左索引，如果没找到返回-1</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">str4 = <span class="string">"My name is wxmimperio"</span></span><br><span class="line"><span class="keyword">print</span> str4.find(<span class="string">"name"</span>)</span><br><span class="line"><span class="keyword">print</span> str4.find(<span class="string">"we"</span>)</span><br><span class="line"></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">-1</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>还可以由第二个、第三个参数指定索引范围，但不包括第二个索引位置</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">print</span> str4.find(<span class="string">'is'</span>,<span class="number">0</span>,<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"><span class="number">8</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="join方法"><a href="#join方法" class="headerlink" title="join方法"></a>join方法</h2><ul>
+<li>优雅的字符串连接方法，它是split方法的逆方法</li>
+<li>被连接的序列元素都必须是字符串</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">list1 = [<span class="string">'1'</span>,<span class="string">'2'</span>,<span class="string">'3'</span>,<span class="string">'4'</span>,<span class="string">'5'</span>,<span class="string">'6'</span>]</span><br><span class="line"><span class="keyword">print</span> <span class="string">'+'</span>.join(list1)</span><br><span class="line">dict1 = &#123;<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>&#125;</span><br><span class="line"><span class="keyword">print</span> <span class="string">'&amp;'</span>.join(dict1)</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>+<span class="number">2</span>+<span class="number">3</span>+<span class="number">4</span>+<span class="number">5</span>+<span class="number">6</span></span><br><span class="line">a&amp;c&amp;b</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="lower、upper、title方法"><a href="#lower、upper、title方法" class="headerlink" title="lower、upper、title方法"></a>lower、upper、title方法</h2><ul>
+<li>lower将字符串全部变成小写字母后返回</li>
+<li>upper将字符串全部变成大写字母后返回</li>
+<li>title将字符串全部变成起始字母大写后返回</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">str5 = <span class="string">"ABCD EFG"</span></span><br><span class="line"><span class="keyword">print</span> str5.lower()</span><br><span class="line"><span class="keyword">print</span> str5.lower().upper()</span><br><span class="line"><span class="keyword">print</span> str5.title()</span><br><span class="line"></span><br><span class="line">abcd efg</span><br><span class="line">ABCD EFG</span><br><span class="line">Abcd Efg</span><br></pre></td></tr></table></figure>
+<h2 id="replace方法"><a href="#replace方法" class="headerlink" title="replace方法"></a>replace方法</h2><ul>
+<li>将某个字符串被匹配项替换后，返回替换后字符串</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">print</span> str5.replace(<span class="string">'A'</span>,<span class="string">'12345'</span>)</span><br><span class="line"></span><br><span class="line"><span class="number">12345</span>BCD EFG</span><br></pre></td></tr></table></figure>
+<h2 id="split方法"><a href="#split方法" class="headerlink" title="split方法"></a>split方法</h2><ul>
+<li>用来将字符串分割成序列，是join的逆方法</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">str6 = <span class="string">"a+b+-c+d+e-f+g"</span></span><br><span class="line"><span class="keyword">print</span> str6.split(<span class="string">"+"</span>)</span><br><span class="line"></span><br><span class="line">[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'-c'</span>, <span class="string">'d'</span>, <span class="string">'e-f'</span>, <span class="string">'g'</span>]</span><br></pre></td></tr></table></figure>
+<h2 id="strip方法"><a href="#strip方法" class="headerlink" title="strip方法"></a>strip方法</h2><ul>
+<li>去除两侧的空格，但不去除内侧的空格</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">str7 = <span class="string">"    1 2 3 4 5    "</span></span><br><span class="line"><span class="keyword">print</span> str7.strip()</span><br><span class="line"></span><br><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span></span><br></pre></td></tr></table></figure>
+<h2 id="translate方法"><a href="#translate方法" class="headerlink" title="translate方法"></a>translate方法</h2><ul>
+<li>用于同时进行多个字符串的替换</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> string <span class="keyword">import</span> maketrans</span><br><span class="line">table = maketrans(<span class="string">'abc'</span>,<span class="string">'123'</span>)</span><br><span class="line">str8 = <span class="string">'abc'</span></span><br><span class="line"><span class="keyword">print</span> str8.translate(table)</span><br><span class="line"></span><br><span class="line"><span class="number">123</span></span><br></pre></td></tr></table></figure>
+<hr>
+<p>参考：Python基础教程(第2版·修订版)</p>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/string/" rel="tag"># string</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/10/Spark-With-Tachyon-on-Yarn/" rel="next" title="Spark With Tachyon On Yarn">
+                <i class="fa fa-chevron-left"></i> Spark With Tachyon On Yarn
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/13/python-base-assert/" rel="prev" title="Python基础—断言(assert)">
+                Python基础—断言(assert) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#环境及版本"><span class="nav-number">1.</span> <span class="nav-text">环境及版本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#字符串-string"><span class="nav-number">2.</span> <span class="nav-text">字符串(string)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本概念"><span class="nav-number">3.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#引号和转义"><span class="nav-number">3.1.</span> <span class="nav-text">引号和转义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#转义"><span class="nav-number">3.2.</span> <span class="nav-text">转义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拼接字符串"><span class="nav-number">3.3.</span> <span class="nav-text">拼接字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#长字符串"><span class="nav-number">3.4.</span> <span class="nav-text">长字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原始字符串"><span class="nav-number">3.5.</span> <span class="nav-text">原始字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unicode字符串"><span class="nav-number">3.6.</span> <span class="nav-text">Unicode字符串</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#字符串操作"><span class="nav-number">4.</span> <span class="nav-text">字符串操作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#字符串格式化"><span class="nav-number">5.</span> <span class="nav-text">字符串格式化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础格式化"><span class="nav-number">5.1.</span> <span class="nav-text">基础格式化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#完整格式化"><span class="nav-number">5.2.</span> <span class="nav-text">完整格式化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#字符串方法"><span class="nav-number">6.</span> <span class="nav-text">字符串方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#find方法"><span class="nav-number">6.1.</span> <span class="nav-text">find方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#join方法"><span class="nav-number">6.2.</span> <span class="nav-text">join方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lower、upper、title方法"><span class="nav-number">6.3.</span> <span class="nav-text">lower、upper、title方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#replace方法"><span class="nav-number">6.4.</span> <span class="nav-text">replace方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#split方法"><span class="nav-number">6.5.</span> <span class="nav-text">split方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#strip方法"><span class="nav-number">6.6.</span> <span class="nav-text">strip方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#translate方法"><span class="nav-number">6.7.</span> <span class="nav-text">translate方法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

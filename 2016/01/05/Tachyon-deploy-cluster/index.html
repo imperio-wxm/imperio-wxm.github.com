@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,大数据,Tachyon,文件系统," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Tachyon如何进行集群部署？   测试环境12345678910测试环境：  Ubuntu 14.04 LTS x64  Tachyon：tachyon-0.7.1-bin.tar.gz    hostname		IP 		role  spark-master： 192.168.108.20   master &amp;amp; worker  spark-slave1： 192.168.108.2">
+<meta name="keywords" content="Linux,大数据,Tachyon,文件系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tachyon集群部署">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/01/05/Tachyon-deploy-cluster/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Tachyon如何进行集群部署？   测试环境12345678910测试环境：  Ubuntu 14.04 LTS x64  Tachyon：tachyon-0.7.1-bin.tar.gz    hostname		IP 		role  spark-master： 192.168.108.20   master &amp;amp; worker  spark-slave1： 192.168.108.2">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.676Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tachyon集群部署">
+<meta name="twitter:description" content="Tachyon如何进行集群部署？   测试环境12345678910测试环境：  Ubuntu 14.04 LTS x64  Tachyon：tachyon-0.7.1-bin.tar.gz    hostname		IP 		role  spark-master： 192.168.108.20   master &amp;amp; worker  spark-slave1： 192.168.108.2">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/01/05/Tachyon-deploy-cluster/"/>
+
+
+
+
+
+  <title>Tachyon集群部署 | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/01/05/Tachyon-deploy-cluster/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Tachyon集群部署</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-05T17:38:17+08:00">
+                2016-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/Spark/" itemprop="url" rel="index">
+                    <span itemprop="name">Spark</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Tachyon如何进行集群部署？</p>
+</blockquote>
+<hr>
+<h1 id="测试环境"><a href="#测试环境" class="headerlink" title="测试环境"></a>测试环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">测试环境：</span><br><span class="line">  Ubuntu 14.04 LTS x64</span><br><span class="line">  Tachyon：tachyon-0.7.1-bin.tar.gz</span><br><span class="line">  </span><br><span class="line">  hostname		IP 		role</span><br><span class="line">  spark-master： 192.168.108.20   master &amp; worker</span><br><span class="line">  spark-slave1： 192.168.108.21   worker</span><br><span class="line">  spark-slave2： 192.168.108.22   worker</span><br><span class="line">  </span><br><span class="line">  !默认情况全部操作在root下进行</span><br></pre></td></tr></table></figure>
+<hr>
+<a id="more"></a>
+<h1 id="Tachyon集群配置"><a href="#Tachyon集群配置" class="headerlink" title="Tachyon集群配置"></a>Tachyon集群配置</h1><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><h3 id="修改主机名"><a href="#修改主机名" class="headerlink" title="修改主机名"></a>修改主机名</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 分别配置三台主机的主机名</span><br><span class="line"> * hostname：</span><br><span class="line"> *      spark-master</span><br><span class="line"> *      spark-slave1</span><br><span class="line"> *      spark-slave2</span><br><span class="line"> */</span><br><span class="line">sudo vim /etc/hostname</span><br></pre></td></tr></table></figure>
+<h3 id="修改hosts"><a href="#修改hosts" class="headerlink" title="修改hosts"></a>修改hosts</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 分别配置修改三台主机的hosts</span><br><span class="line"> * 添加如下内容：</span><br><span class="line"> *      192.168.108.20 spark-master</span><br><span class="line"> *      192.168.108.21 spark-slave1</span><br><span class="line"> *      192.168.108.22 spark-slave2</span><br><span class="line"> * 如果发现hosts文件中有127.0.1.1或者除了127.0.0.1之外的其他内容，将他们删除</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">sudo vim /etc/hosts</span><br></pre></td></tr></table></figure>
+<h3 id="重启生效"><a href="#重启生效" class="headerlink" title="重启生效"></a>重启生效</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo init 6</span><br></pre></td></tr></table></figure>
+<h2 id="spark-master-配置"><a href="#spark-master-配置" class="headerlink" title="spark-master 配置"></a>spark-master 配置</h2><p>请参考：<a href="http://imperio-wxm.github.io/2016/01/05/Tachyon-deploy-local/">Tachyon本地部署</a></p>
+<h2 id="分配ssh"><a href="#分配ssh" class="headerlink" title="分配ssh"></a>分配ssh</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * master主机中运行</span><br><span class="line"> * 切换至root</span><br><span class="line"> */</span><br><span class="line">su root</span><br><span class="line">ssh-keygen -t rsa</span><br><span class="line"> </span><br><span class="line">/**</span><br><span class="line"> * 分发ssh至每台机子</span><br><span class="line"> */</span><br><span class="line">su root</span><br><span class="line"></span><br><span class="line">scp ~/.ssh/id_rsa.pub root@spark-master:/home</span><br><span class="line">scp ~/.ssh/id_rsa.pub root@spark-slave1:/home</span><br><span class="line">scp ~/.ssh/id_rsa.pub root@spark-slave2:/home</span><br></pre></td></tr></table></figure>
+<h2 id="授权ssh"><a href="#授权ssh" class="headerlink" title="授权ssh"></a>授权ssh</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 分别在所有主机运行</span><br><span class="line"> */</span><br><span class="line">su root</span><br><span class="line"></span><br><span class="line">cat /home/id_rsa.pub &gt;&gt; /root/.ssh/authorized_keys</span><br><span class="line">cd ~/.ssh/</span><br><span class="line">chmod 600 authorized_keys</span><br></pre></td></tr></table></figure>
+<h2 id="修改ssh配置"><a href="#修改ssh配置" class="headerlink" title="修改ssh配置"></a>修改ssh配置</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 分别在所有主机运行</span><br><span class="line"> */</span><br><span class="line">sudo vim /etc/ssh/sshd_config</span><br><span class="line"></span><br><span class="line">注释：PermitRootLogin without-password</span><br><span class="line">添加：PermitRootLogin yes</span><br><span class="line"></span><br><span class="line">sudo service ssh restart</span><br></pre></td></tr></table></figure>
+<h2 id="Tachyon环境变量"><a href="#Tachyon环境变量" class="headerlink" title="Tachyon环境变量"></a>Tachyon环境变量</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 分别在所有主机运行，并添加如下内容</span><br><span class="line"> */</span><br><span class="line">sudo vim /etc/profile</span><br><span class="line"></span><br><span class="line">export TACHYON_HOME=#Tachyon路径</span><br><span class="line">export PATH=$TACHYON_HOME/bin:$PATH</span><br><span class="line"></span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+<h2 id="Tachyon目录分发"><a href="#Tachyon目录分发" class="headerlink" title="Tachyon目录分发"></a>Tachyon目录分发</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 复制master下的Tachyon目录到slave1、slave2下，并修改master配置</span><br><span class="line"> */</span><br><span class="line">sudo vim ./conf/workers</span><br><span class="line">spark-master</span><br><span class="line">spark-slave1</span><br><span class="line">spark-slave2</span><br><span class="line"></span><br><span class="line">sudo vim ./conf/slaves</span><br><span class="line">spark-master</span><br><span class="line">spark-slave1</span><br><span class="line">spark-slave2</span><br></pre></td></tr></table></figure>
+<h2 id="初始化Tachyon"><a href="#初始化Tachyon" class="headerlink" title="初始化Tachyon"></a>初始化Tachyon</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * master主机下运行</span><br><span class="line"> * 要用root权限运行</span><br><span class="line"> */</span><br><span class="line">sudo ./bin/tachyon format</span><br><span class="line"></span><br><span class="line">Connecting to spark-master as root...</span><br><span class="line">root@spark-master&apos;s password: </span><br><span class="line">Formatting Tachyon Worker @ spark-master</span><br><span class="line">Connection to spark-master closed.</span><br><span class="line">Connecting to spark-slave1 as root...</span><br><span class="line">Formatting Tachyon Worker @ spark-slave1</span><br><span class="line">Connection to spark-slave1 closed.</span><br><span class="line">Connecting to spark-slave2 as root...</span><br><span class="line">Formatting Tachyon Worker @ spark-slave2</span><br><span class="line">Connection to spark-slave2 closed.</span><br><span class="line">Formatting Tachyon Master @ spark-master</span><br></pre></td></tr></table></figure>
+<h2 id="启动Tachyon集群"><a href="#启动Tachyon集群" class="headerlink" title="启动Tachyon集群"></a>启动Tachyon集群</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * master主机下运行</span><br><span class="line"> * 要用root权限运行</span><br><span class="line"> */</span><br><span class="line">sudo ./bin/tachyon-start.sh all Mount</span><br><span class="line"> </span><br><span class="line">Killed 0 processes on spark-master</span><br><span class="line">Killed 0 processes on spark-master</span><br><span class="line">Connecting to spark-master as root...</span><br><span class="line">root@spark-master&apos;s password: </span><br><span class="line">Killed 0 processes on spark-master</span><br><span class="line">Connection to spark-master closed.</span><br><span class="line">Connecting to spark-slave1 as root...</span><br><span class="line">Killed 0 processes on spark-slave1</span><br><span class="line">Connection to spark-slave1 closed.</span><br><span class="line">Connecting to spark-slave2 as root...</span><br><span class="line">Killed 0 processes on spark-slave2</span><br><span class="line">Connection to spark-slave2 closed.</span><br><span class="line">Starting master @ spark-master</span><br><span class="line">Connecting to spark-master as root...</span><br><span class="line">root@spark-master&apos;s password: </span><br><span class="line">Formatting RamFS: /mnt/ramdisk (512mb)</span><br><span class="line">Starting worker @ spark-master</span><br><span class="line">Connection to spark-master closed.</span><br><span class="line">Connecting to spark-slave1 as root...</span><br><span class="line">Formatting RamFS: /mnt/ramdisk (512mb)</span><br><span class="line">Starting worker @ spark-slave1</span><br><span class="line">Connection to spark-slave1 closed.</span><br><span class="line">Connecting to spark-slave2 as root...</span><br><span class="line">Formatting RamFS: /mnt/ramdisk (512mb)</span><br><span class="line">Starting worker @ spark-slave2</span><br><span class="line">Connection to spark-slave2 closed.</span><br></pre></td></tr></table></figure>
+<h2 id="运行测试"><a href="#运行测试" class="headerlink" title="运行测试"></a>运行测试</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/tachyon runTests</span><br></pre></td></tr></table></figure>
+<h2 id="查看每个主机Tachyon进程"><a href="#查看每个主机Tachyon进程" class="headerlink" title="查看每个主机Tachyon进程"></a>查看每个主机Tachyon进程</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 每个主机切换到root下</span><br><span class="line"> * su root</span><br><span class="line"> */</span><br><span class="line">root@spark-master:</span><br><span class="line">25598 TachyonWorker</span><br><span class="line">25377 TachyonMaster</span><br><span class="line">28559 Jps</span><br><span class="line"></span><br><span class="line">root@spark-slave1:</span><br><span class="line">4555 Jps</span><br><span class="line">4518 TachyonWorker</span><br><span class="line"></span><br><span class="line">root@spark-slave2:</span><br><span class="line">4467 TachyonWorker</span><br><span class="line">4502 Jps</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="查看Web-UI"><a href="#查看Web-UI" class="headerlink" title="查看Web UI"></a>查看Web UI</h1><p>在master上用浏览器打开：hostname:19999 (spark-master:19999)<br>点击Works页面，会看到三台主机基本信息</p>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Tachyon/" rel="tag"># Tachyon</a>
+          
+            <a href="/tags/文件系统/" rel="tag"># 文件系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/05/Tachyon-deploy-local/" rel="next" title="Tachyon本地部署">
+                <i class="fa fa-chevron-left"></i> Tachyon本地部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/06/zookeeper-deploy-cluster/" rel="prev" title="Zookeeper集群环境搭建">
+                Zookeeper集群环境搭建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#测试环境"><span class="nav-number">1.</span> <span class="nav-text">测试环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tachyon集群配置"><span class="nav-number">2.</span> <span class="nav-text">Tachyon集群配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备工作"><span class="nav-number">2.1.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#修改主机名"><span class="nav-number">2.1.1.</span> <span class="nav-text">修改主机名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改hosts"><span class="nav-number">2.1.2.</span> <span class="nav-text">修改hosts</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重启生效"><span class="nav-number">2.1.3.</span> <span class="nav-text">重启生效</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#spark-master-配置"><span class="nav-number">2.2.</span> <span class="nav-text">spark-master 配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分配ssh"><span class="nav-number">2.3.</span> <span class="nav-text">分配ssh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#授权ssh"><span class="nav-number">2.4.</span> <span class="nav-text">授权ssh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改ssh配置"><span class="nav-number">2.5.</span> <span class="nav-text">修改ssh配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tachyon环境变量"><span class="nav-number">2.6.</span> <span class="nav-text">Tachyon环境变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tachyon目录分发"><span class="nav-number">2.7.</span> <span class="nav-text">Tachyon目录分发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化Tachyon"><span class="nav-number">2.8.</span> <span class="nav-text">初始化Tachyon</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动Tachyon集群"><span class="nav-number">2.9.</span> <span class="nav-text">启动Tachyon集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行测试"><span class="nav-number">2.10.</span> <span class="nav-text">运行测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看每个主机Tachyon进程"><span class="nav-number">2.11.</span> <span class="nav-text">查看每个主机Tachyon进程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查看Web-UI"><span class="nav-number">3.</span> <span class="nav-text">查看Web UI</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

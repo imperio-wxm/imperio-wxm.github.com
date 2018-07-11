@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,大数据,Cassandra," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Cassandra是一套开源分布式NoSQL数据库系统。它最初由Facebook开发，用于储存收件箱等简单格式数据，集GoogleBigTable的数据模型与Amazon Dynamo的完全分布式的架构于一身Facebook于2008将 Cassandra 开源，此后，由于Cassandra良好的可扩展性，被Digg、Twitter等知名Web 2.0网站所采纳，成为了一种流行的分布式结构化数据">
+<meta name="keywords" content="Linux,大数据,Cassandra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cassandra Install &amp; Deploy [安装部署]">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/10/15/Cassandra-Install/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Cassandra是一套开源分布式NoSQL数据库系统。它最初由Facebook开发，用于储存收件箱等简单格式数据，集GoogleBigTable的数据模型与Amazon Dynamo的完全分布式的架构于一身Facebook于2008将 Cassandra 开源，此后，由于Cassandra良好的可扩展性，被Digg、Twitter等知名Web 2.0网站所采纳，成为了一种流行的分布式结构化数据">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.643Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Cassandra Install &amp; Deploy [安装部署]">
+<meta name="twitter:description" content="Cassandra是一套开源分布式NoSQL数据库系统。它最初由Facebook开发，用于储存收件箱等简单格式数据，集GoogleBigTable的数据模型与Amazon Dynamo的完全分布式的架构于一身Facebook于2008将 Cassandra 开源，此后，由于Cassandra良好的可扩展性，被Digg、Twitter等知名Web 2.0网站所采纳，成为了一种流行的分布式结构化数据">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/10/15/Cassandra-Install/"/>
+
+
+
+
+
+  <title>Cassandra Install & Deploy [安装部署] | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/10/15/Cassandra-Install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Cassandra Install & Deploy [安装部署]</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-15T21:27:23+08:00">
+                2016-10-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/Cassandra/" itemprop="url" rel="index">
+                    <span itemprop="name">Cassandra</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Cassandra是一套开源分布式NoSQL数据库系统。它最初由Facebook开发，用于储存收件箱等简单格式数据，集GoogleBigTable的数据模型与Amazon Dynamo的完全分布式的架构于一身Facebook于2008将 Cassandra 开源，此后，由于Cassandra良好的可扩展性，被Digg、Twitter等知名Web 2.0网站所采纳，成为了一种流行的分布式结构化数据存储方案。</p>
+</blockquote>
+<a id="more"></a>
+<hr>
+<ul>
+<li><p><a href="http://cassandra.apache.org/" target="_blank" rel="noopener">官网</a></p>
+</li>
+<li><p><a href="http://cassandra.apache.org/doc/latest/getting_started/index.html" target="_blank" rel="noopener">Documentation</a></p>
+</li>
+<li><p><a href="http://docs.datastax.com/en/landing_page/doc/landing_page/current.html" target="_blank" rel="noopener">Datastax</a></p>
+</li>
+<li><p><a href="https://github.com/datastax/" target="_blank" rel="noopener">Datastax Github</a></p>
+</li>
+</ul>
+<hr>
+<h1 id="测试环境"><a href="#测试环境" class="headerlink" title="测试环境"></a>测试环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Ubuntu Server 14.04 x64</span><br><span class="line">JDK 1.8+</span><br><span class="line">python 2.7.11+</span><br><span class="line">Cassandra 3.0.9</span><br><span class="line"></span><br><span class="line">server1: 192.168.1.110 seeds</span><br><span class="line">server2: 192.168.1.111 seeds</span><br><span class="line">server3: 192.168.1.112</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="cassandra安装"><a href="#cassandra安装" class="headerlink" title="cassandra安装"></a>cassandra安装</h1><ul>
+<li><a href="http://cassandra.apache.org/download/" target="_blank" rel="noopener">下载地址</a></li>
+</ul>
+<h2 id="修改cassandra-yaml配置文件"><a href="#修改cassandra-yaml配置文件" class="headerlink" title="修改cassandra.yaml配置文件"></a>修改cassandra.yaml配置文件</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每一个节点上新建数据目录</span></span><br><span class="line">mdkir cassandra-data</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改参数</span></span><br><span class="line"></span><br><span class="line">vim conf/cassandra.yaml</span><br><span class="line"></span><br><span class="line">cluster_name: <span class="string">'Cassandra Cluster'</span></span><br><span class="line"></span><br><span class="line">hints_directory: /home/wxmimperio/data/cassandra-data/hints</span><br><span class="line"></span><br><span class="line">data_file_directories:</span><br><span class="line">     - /home/wxmimperio/data/cassandra-data/data</span><br><span class="line"></span><br><span class="line">commitlog_directory: /home/wxmimperio/data/cassandra-data/commitlog</span><br><span class="line"></span><br><span class="line">saved_caches_directory: /home/wxmimperio/data/cassandra-data/saved_caches</span><br><span class="line"></span><br><span class="line">- seeds: <span class="string">"192.168.1.110,192.168.1.111"</span></span><br><span class="line"></span><br><span class="line">listen_address: <span class="number">192.168</span><span class="number">.1</span><span class="number">.110</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 开启thrift</span></span><br><span class="line">start_rpc: true</span><br><span class="line"></span><br><span class="line">rpc_address: <span class="number">192.168</span><span class="number">.1</span><span class="number">.110</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># batch 增加批量插入的一次插入量</span></span><br><span class="line">batch_size_warn_threshold_in_kb: <span class="number">150</span></span><br><span class="line"></span><br><span class="line">batch_size_fail_threshold_in_kb: <span class="number">1500</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 节点感知策略</span></span><br><span class="line">endpoint_snitch: GossipingPropertyFileSnitch</span><br></pre></td></tr></table></figure>
+<h2 id="其他节点同步目录"><a href="#其他节点同步目录" class="headerlink" title="其他节点同步目录"></a>其他节点同步目录</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scp -r apache-cassandra<span class="number">-3.0</span><span class="number">.9</span> wxmimperio@<span class="number">192.168</span><span class="number">.1</span><span class="number">.111</span>:/home/wxmimperio/software</span><br><span class="line"></span><br><span class="line">scp -r apache-cassandra<span class="number">-3.0</span><span class="number">.9</span> wxmimperio@<span class="number">192.168</span><span class="number">.1</span><span class="number">.112</span>:/home/wxmimperio/software</span><br></pre></td></tr></table></figure>
+<h2 id="修改其他节点cassandra-yaml"><a href="#修改其他节点cassandra-yaml" class="headerlink" title="修改其他节点cassandra.yaml"></a>修改其他节点cassandra.yaml</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 192.168.1.111</span></span><br><span class="line">- seeds: <span class="string">"192.168.1.111,192.168.1.110"</span></span><br><span class="line">listen_address: <span class="number">192.168</span><span class="number">.1</span><span class="number">.111</span></span><br><span class="line">rpc_address: <span class="number">192.168</span><span class="number">.1</span><span class="number">.111</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 192.168.1.112</span></span><br><span class="line">- seeds: <span class="string">"192.168.1.111,192.168.1.110"</span></span><br><span class="line">listen_address: <span class="number">192.168</span><span class="number">.1</span><span class="number">.112</span></span><br><span class="line">rpc_address: <span class="number">192.168</span><span class="number">.1</span><span class="number">.112</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="启动cassandra"><a href="#启动cassandra" class="headerlink" title="启动cassandra"></a>启动cassandra</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每一个节点</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 前台启动</span></span><br><span class="line">./bin/cassandra -f</span><br><span class="line"></span><br><span class="line"><span class="comment"># 后台启动</span></span><br><span class="line">./bin/cassandra</span><br></pre></td></tr></table></figure>
+<h2 id="检查状态"><a href="#检查状态" class="headerlink" title="检查状态"></a>检查状态</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在任意节点运行</span></span><br><span class="line">./apache-cassandra<span class="number">-3.0</span><span class="number">.9</span>/bin/nodetool status</span><br><span class="line"></span><br><span class="line">--  Address        Load       Tokens       Owns (effective)  Host ID                               Rack</span><br><span class="line">UN  <span class="number">192.168</span><span class="number">.1</span><span class="number">.110</span>  <span class="number">91.9</span> KB    <span class="number">256</span>          <span class="number">65.5</span>%             <span class="number">7</span>ea5d945-fb2f<span class="number">-410</span>e-b03c-da8a1596d150  rack1</span><br><span class="line">UN  <span class="number">192.168</span><span class="number">.1</span><span class="number">.111</span>  <span class="number">112.05</span> KB  <span class="number">256</span>          <span class="number">67.2</span>%             da86d35a<span class="number">-9819</span><span class="number">-4</span>d33-a6df-c378c3872936  rack1</span><br><span class="line">UN  <span class="number">192.168</span><span class="number">.1</span><span class="number">.112</span>  <span class="number">150.97</span> KB  <span class="number">256</span>          <span class="number">67.3</span>%             a851446d-bb15<span class="number">-44</span>b6<span class="number">-9</span>b2e<span class="number">-33</span>fcf7076279  rack1</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="CQL操作"><a href="#CQL操作" class="headerlink" title="CQL操作"></a>CQL操作</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./apache-cassandra<span class="number">-3.0</span><span class="number">.9</span>/bin/cqlsh  --request-timeout=<span class="number">500</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.110</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>创建Keyspace</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 多数据中心策略NetworkTopologyStrategy</span></span><br><span class="line"><span class="comment"># 副本因子2</span></span><br><span class="line">CREATE KEYSPACE IF NOT EXISTS cassandra_test WITH replication =  &#123;<span class="string">'class'</span> : <span class="string">'NetworkTopologyStrategy'</span>, <span class="string">'dc1'</span> : <span class="number">2</span>&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>创建表</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># id、name 为组合primary key</span></span><br><span class="line"><span class="comment"># id 为 partition key</span></span><br><span class="line"><span class="comment"># name、password 为cluster key</span></span><br><span class="line">CREATE TABLE IF NOT EXISTS cassandra_test.user(id text, name text, password text,PRIMARY KEY (id,name)) WITH comment=<span class="string">'UserTable'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查看表结构</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">DESCRIBE TABLE cassandra_test.user;</span><br><span class="line"></span><br><span class="line">CREATE TABLE cassandra_test.user (</span><br><span class="line">    id text,</span><br><span class="line">    name text,</span><br><span class="line">    password text,</span><br><span class="line">    PRIMARY KEY (id, name)</span><br><span class="line">) WITH CLUSTERING ORDER BY (name ASC)</span><br><span class="line">    AND bloom_filter_fp_chance = <span class="number">0.01</span></span><br><span class="line">    AND caching = &#123;<span class="string">'keys'</span>: <span class="string">'ALL'</span>, <span class="string">'rows_per_partition'</span>: <span class="string">'NONE'</span>&#125;</span><br><span class="line">    AND comment = <span class="string">'UserTable'</span></span><br><span class="line">    AND compaction = &#123;<span class="string">'class'</span>: <span class="string">'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy'</span>, <span class="string">'max_threshold'</span>: <span class="string">'32'</span>, <span class="string">'min_threshold'</span>: <span class="string">'4'</span>&#125;</span><br><span class="line">    AND compression = &#123;<span class="string">'chunk_length_in_kb'</span>: <span class="string">'64'</span>, <span class="string">'class'</span>: <span class="string">'org.apache.cassandra.io.compress.LZ4Compressor'</span>&#125;</span><br><span class="line">    AND crc_check_chance = <span class="number">1.0</span></span><br><span class="line">    AND dclocal_read_repair_chance = <span class="number">0.1</span></span><br><span class="line">    AND default_time_to_live = <span class="number">0</span></span><br><span class="line">    AND gc_grace_seconds = <span class="number">864000</span></span><br><span class="line">    AND max_index_interval = <span class="number">2048</span></span><br><span class="line">    AND memtable_flush_period_in_ms = <span class="number">0</span></span><br><span class="line">    AND min_index_interval = <span class="number">128</span></span><br><span class="line">    AND read_repair_chance = <span class="number">0.0</span></span><br><span class="line">    AND speculative_retry = <span class="string">'99PERCENTILE'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>插入数据</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO cassandra_test.user(id,name,password) VALUES(<span class="string">'1'</span>,<span class="string">'wxmimperio'</span>,<span class="string">'123456'</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查询数据</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM cassandra_test.user WHERE id = <span class="string">'1'</span>;</span><br><span class="line"></span><br><span class="line">id | name       | password</span><br><span class="line">----+------------+----------</span><br><span class="line"> <span class="number">1</span> | wxmimperio |   <span class="number">123456</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>更新数据</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">UPDATE cassandra_test.user SET password = <span class="string">'abcde'</span> WHERE id = <span class="string">'1'</span> AND name = <span class="string">'wxmimperio'</span>;</span><br><span class="line"></span><br><span class="line">SELECT * FROM cassandra_test.user WHERE id = <span class="string">'1'</span>;</span><br><span class="line"></span><br><span class="line">id | name       | password</span><br><span class="line">----+------------+----------</span><br><span class="line"> <span class="number">1</span> | wxmimperio |    abcde</span><br></pre></td></tr></table></figure>
+<ul>
+<li>删除数据</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM cassandra_test.user WHERE id = <span class="string">'1'</span> AND name = <span class="string">'wxmimperio'</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="检查数据一致性"><a href="#检查数据一致性" class="headerlink" title="检查数据一致性"></a>检查数据一致性</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用192.168.1.111和192.168.1.112启动CQL进行数据查询</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 192.168.1.111</span></span><br><span class="line">SELECT * FROM cassandra_test.user WHERE id = <span class="string">'1'</span>;</span><br><span class="line"></span><br><span class="line">id | name       | password</span><br><span class="line">----+------------+----------</span><br><span class="line">  <span class="number">1</span> | wxmimperio |   <span class="number">123456</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 192.168.1.112</span></span><br><span class="line">SELECT * FROM cassandra_test.user WHERE id = <span class="string">'1'</span>;</span><br><span class="line"></span><br><span class="line">id | name       | password</span><br><span class="line">----+------------+----------</span><br><span class="line">  <span class="number">1</span> | wxmimperio |   <span class="number">123456</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Cassandra/" rel="tag"># Cassandra</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/20/Presto-Install/" rel="next" title="Presto Install & Deploy [安装部署]">
+                <i class="fa fa-chevron-left"></i> Presto Install & Deploy [安装部署]
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/28/Custom-ThreadPool/" rel="prev" title="Java自定义线程池ThreadPoolExecutor">
+                Java自定义线程池ThreadPoolExecutor <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#测试环境"><span class="nav-number">1.</span> <span class="nav-text">测试环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#cassandra安装"><span class="nav-number">2.</span> <span class="nav-text">cassandra安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改cassandra-yaml配置文件"><span class="nav-number">2.1.</span> <span class="nav-text">修改cassandra.yaml配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他节点同步目录"><span class="nav-number">2.2.</span> <span class="nav-text">其他节点同步目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改其他节点cassandra-yaml"><span class="nav-number">2.3.</span> <span class="nav-text">修改其他节点cassandra.yaml</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#启动cassandra"><span class="nav-number">3.</span> <span class="nav-text">启动cassandra</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#检查状态"><span class="nav-number">3.1.</span> <span class="nav-text">检查状态</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CQL操作"><span class="nav-number">4.</span> <span class="nav-text">CQL操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#检查数据一致性"><span class="nav-number">4.1.</span> <span class="nav-text">检查数据一致性</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

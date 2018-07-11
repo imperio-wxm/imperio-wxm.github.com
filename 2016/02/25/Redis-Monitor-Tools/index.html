@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,数据库,NoSQL,图形监控," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Redis-stat（Ruby）和Redis Live（python）是两款Redis监控工具，下面将介绍如何安装部署这两个工具，监控Redis运行情况">
+<meta name="keywords" content="redis,数据库,NoSQL,图形监控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis监控工具—Redis-stat、RedisLive">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/02/25/Redis-Monitor-Tools/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Redis-stat（Ruby）和Redis Live（python）是两款Redis监控工具，下面将介绍如何安装部署这两个工具，监控Redis运行情况">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/junegunn/redis-stat/raw/master/screenshots/redis-stat-0.3.0.png">
+<meta property="og:image" content="https://github.com/junegunn/redis-stat/raw/master/screenshots/redis-stat-web.png">
+<meta property="og:image" content="https://github.com/kumarnitin/RedisLive/raw/master/design/redis-live.png">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.661Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis监控工具—Redis-stat、RedisLive">
+<meta name="twitter:description" content="Redis-stat（Ruby）和Redis Live（python）是两款Redis监控工具，下面将介绍如何安装部署这两个工具，监控Redis运行情况">
+<meta name="twitter:image" content="https://github.com/junegunn/redis-stat/raw/master/screenshots/redis-stat-0.3.0.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/02/25/Redis-Monitor-Tools/"/>
+
+
+
+
+
+  <title>Redis监控工具—Redis-stat、RedisLive | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/02/25/Redis-Monitor-Tools/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Redis监控工具—Redis-stat、RedisLive</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-25T10:15:32+08:00">
+                2016-02-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/NoSQL/" itemprop="url" rel="index">
+                    <span itemprop="name">NoSQL</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/NoSQL/Redis/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Redis-stat（Ruby）和Redis Live（python）是两款Redis监控工具，下面将介绍如何安装部署这两个工具，监控Redis运行情况</p>
+</blockquote>
+<hr>
+<a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">测试环境：</span><br><span class="line">  Ubuntu 14.04 LTS x64</span><br><span class="line">  Redis redis-3.0.7.tar.gz</span><br><span class="line">  Ruby ruby 1.9.3</span><br><span class="line">  Python 2.7.6</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Redis-安装"><a href="#Redis-安装" class="headerlink" title="Redis 安装"></a>Redis 安装</h1><p>Redis安装请参照：<a href="http://wxmimperio.tk/2016/02/20/Redis-Install-Config/" target="_blank" rel="noopener">Redis安装与配置</a></p>
+<hr>
+<h1 id="Redis-stat-安装部署"><a href="#Redis-stat-安装部署" class="headerlink" title="Redis-stat 安装部署"></a>Redis-stat 安装部署</h1><p>redis-stat is a simple Redis monitoring tool written in Ruby.</p>
+<p>It is based on INFO command of Redis, and thus generally won’t affect the performance of the Redis instance unlike the other monitoring tools based on MONITOR command.</p>
+<p>redis-stat allows you to monitor Redis instances</p>
+<ul>
+<li>either with vmstat-like output from the terminal</li>
+<li>or with the dashboard page served by its embedded web server.</li>
+</ul>
+<p>通常来说，不会像基于MONITOR命令的监控工具一样，对Redis本身有性能上的影响</p>
+<hr>
+<p><a href="https://github.com/junegunn/redis-stat" target="_blank" rel="noopener">Github地址</a></p>
+<hr>
+<h2 id="卸载原有Ruby"><a href="#卸载原有Ruby" class="headerlink" title="卸载原有Ruby"></a>卸载原有Ruby</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get autoremove --purge ruby*</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="安装Ruby"><a href="#安装Ruby" class="headerlink" title="安装Ruby"></a>安装Ruby</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install ruby-full</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="安装Redis-stat"><a href="#安装Redis-stat" class="headerlink" title="安装Redis-stat"></a>安装Redis-stat</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install redis-stat</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><ul>
+<li>redis-stat命令参数</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">usage: redis-stat [HOST[:PORT] ...] [INTERVAL [COUNT]]</span><br><span class="line"></span><br><span class="line">    -a, --auth=PASSWORD             设置密码</span><br><span class="line">    -v, --verbose                   显示更多信息</span><br><span class="line">        --style=STYLE               输出编码类型: unicode|ascii</span><br><span class="line">        --no-color                  取消ANSI颜色编码</span><br><span class="line">        --csv=OUTPUT_CSV_FILE_PATH  以CSV格式存储结果</span><br><span class="line">        --es=ELASTICSEARCH_URL      把结果发送到 ElasticSearch: [http://]HOST[:PORT][/INDEX]</span><br><span class="line"></span><br><span class="line">        --server[=PORT]             运行redis-stat的web server (默认端口号: <span class="number">63790</span>)</span><br><span class="line">        --daemon                    使得redis-stat成为进程。必须使用 --server 选项</span><br><span class="line">        </span><br><span class="line">        --version                   显示版本号</span><br><span class="line">        --help                      显示帮助信息</span><br></pre></td></tr></table></figure>
+<ul>
+<li>redis-stat运行命令行监控</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">redis-stat</span><br><span class="line">redis-stat <span class="number">1</span></span><br><span class="line">redis-stat <span class="number">1</span> <span class="number">10</span></span><br><span class="line">redis-stat --verbose</span><br><span class="line">redis-stat localhost:<span class="number">6380</span> <span class="number">1</span> <span class="number">10</span></span><br><span class="line">redis-stat localhost localhost:<span class="number">6380</span> localhost:<span class="number">6381</span> <span class="number">5</span></span><br><span class="line">redis-stat localhost localhost:<span class="number">6380</span> <span class="number">1</span> <span class="number">10</span> --csv=/tmp/outpu.csv --verbose</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Server端运行界面</li>
+</ul>
+<p><img src="https://github.com/junegunn/redis-stat/raw/master/screenshots/redis-stat-0.3.0.png" alt=""></p>
+<ul>
+<li>Web界面中的redis-stat</li>
+</ul>
+<p>当设置–server选项之后，redis-stat会在后台启动一个嵌入式的web server(默认端口号：63790)，可以让你在浏览器中监控Redis</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">redis-stat --server</span><br><span class="line">redis-stat --verbose --server=<span class="number">8080</span> <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># redis-stat server can be daemonized</span></span><br><span class="line">redis-stat --server --daemon</span><br><span class="line"></span><br><span class="line"><span class="comment"># Kill the daemon</span></span><br><span class="line">killall <span class="number">-9</span> redis-stat-daemon</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Web端运行界面</li>
+</ul>
+<p>然后在你的浏览器中输入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://你的Redis IP:<span class="number">63790</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://github.com/junegunn/redis-stat/raw/master/screenshots/redis-stat-web.png" alt=""></p>
+<hr>
+<h1 id="RedisLive-安装部署"><a href="#RedisLive-安装部署" class="headerlink" title="RedisLive 安装部署"></a>RedisLive 安装部署</h1><p>Redis Live is a dashboard application with a number of useful widgets. At it’s heart is a monitoring script that periodically issues INFO and MONITOR command to the redis instances and stores the data for analytics.</p>
+<p>长时间运行对Redis性能有所影响</p>
+<hr>
+<p><a href="https://github.com/nkrode/RedisLive" target="_blank" rel="noopener">Github地址</a><br><a href="http://www.nkrode.com/article/real-time-dashboard-for-redis" target="_blank" rel="noopener">Real time dashboard for redis</a></p>
+<hr>
+<h2 id="安装运行依赖"><a href="#安装运行依赖" class="headerlink" title="安装运行依赖"></a>安装运行依赖</h2><ul>
+<li>tornado </li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install tornado</span><br></pre></td></tr></table></figure>
+<ul>
+<li>redis.py </li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install redis</span><br></pre></td></tr></table></figure>
+<ul>
+<li>python-dateutil </li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install python-dateutil</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="下载RedisLive"><a href="#下载RedisLive" class="headerlink" title="下载RedisLive"></a>下载RedisLive</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/kumarnitin/RedisLive.git</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="conf配置"><a href="#conf配置" class="headerlink" title="conf配置"></a>conf配置</h2><p>进入src目录</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp redis-live.conf.example ./redis-live.conf</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim redis-live.conf</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&#123;  </span><br><span class="line">        <span class="string">"RedisServers"</span>:  </span><br><span class="line">        [   </span><br><span class="line">                &#123;  </span><br><span class="line">                  <span class="string">"server"</span> : <span class="string">"你的Redis IP地址"</span>,  </span><br><span class="line">                  <span class="string">"port"</span>  : <span class="number">6379</span>  </span><br><span class="line">                &#125;</span><br><span class="line">                ........</span><br><span class="line">                可以多个</span><br><span class="line">        ],  </span><br><span class="line">          </span><br><span class="line"> </span><br><span class="line">        <span class="string">"DataStoreType"</span> : <span class="string">"redis"</span>,  </span><br><span class="line"> </span><br><span class="line">        <span class="string">"RedisStatsServer"</span>:  </span><br><span class="line">        &#123;  </span><br><span class="line">                <span class="string">"server"</span> : <span class="string">"你的Redis 监控IP地址"</span>,  </span><br><span class="line">                <span class="string">"port"</span> : <span class="number">6379</span>  </span><br><span class="line">        &#125;,</span><br><span class="line">        </span><br><span class="line">        <span class="string">"SqliteStatsStore"</span> :</span><br><span class="line">        &#123;</span><br><span class="line">                <span class="string">"path"</span>:  <span class="string">"to your sql lite file"</span></span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>其中RedisServers为你要监控的redis实例，可以添加多个，RedisStatsServer是存储RedisLive监控数据的实例，如果redis有密码，可以在实例配置中加入password选项；如果没有存储RedisLive数据的实例，需要将DataStoreType改成”DataStoreType” : “sqlite”这种设置</li>
+</ul>
+<hr>
+<h2 id="启动RedisLive"><a href="#启动RedisLive" class="headerlink" title="启动RedisLive"></a>启动RedisLive</h2><ul>
+<li>启动监控脚本，监控120秒，duration参数是以秒为单位</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ./redis-monitor.py --duration=<span class="number">120</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>启动webserver。<br>RedisLive使用tornado作为web服务器，所以不需要单独安装服务器<br>Tornado web server 是使用Python编写出來的一个极轻量级、高可伸缩性和非阻塞IO的Web服务器软件</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ./redis-live.py</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="Web运行界面"><a href="#Web运行界面" class="headerlink" title="Web运行界面"></a>Web运行界面</h2><p>然后在你的浏览器中输入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://你的Redis IP:<span class="number">8888</span>/index.html</span><br></pre></td></tr></table></figure>
+<p><img src="https://github.com/kumarnitin/RedisLive/raw/master/design/redis-live.png" alt=""></p>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+            <a href="/tags/数据库/" rel="tag"># 数据库</a>
+          
+            <a href="/tags/NoSQL/" rel="tag"># NoSQL</a>
+          
+            <a href="/tags/图形监控/" rel="tag"># 图形监控</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/20/Redis-Install-Config/" rel="next" title="Redis安装与配置">
+                <i class="fa fa-chevron-left"></i> Redis安装与配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/05/Python-date-time-ops/" rel="prev" title="Python基础—日期与时间操作">
+                Python基础—日期与时间操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-安装"><span class="nav-number">1.</span> <span class="nav-text">Redis 安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-stat-安装部署"><span class="nav-number">2.</span> <span class="nav-text">Redis-stat 安装部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#卸载原有Ruby"><span class="nav-number">2.1.</span> <span class="nav-text">卸载原有Ruby</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Ruby"><span class="nav-number">2.2.</span> <span class="nav-text">安装Ruby</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Redis-stat"><span class="nav-number">2.3.</span> <span class="nav-text">安装Redis-stat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本使用"><span class="nav-number">2.4.</span> <span class="nav-text">基本使用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RedisLive-安装部署"><span class="nav-number">3.</span> <span class="nav-text">RedisLive 安装部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装运行依赖"><span class="nav-number">3.1.</span> <span class="nav-text">安装运行依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载RedisLive"><span class="nav-number">3.2.</span> <span class="nav-text">下载RedisLive</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#conf配置"><span class="nav-number">3.3.</span> <span class="nav-text">conf配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动RedisLive"><span class="nav-number">3.4.</span> <span class="nav-text">启动RedisLive</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Web运行界面"><span class="nav-number">3.5.</span> <span class="nav-text">Web运行界面</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,file," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Python打开文件可以用open函数语法：open(filename, mode[, buffering]),返回一个文件对象mode为文件模式，buffering为缓冲，都是可选参数  Demo Github源码">
+<meta name="keywords" content="Python,file">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python基础—文件和流操作">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/03/10/python-file-stream-ops/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Python打开文件可以用open函数语法：open(filename, mode[, buffering]),返回一个文件对象mode为文件模式，buffering为缓冲，都是可选参数  Demo Github源码">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.722Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python基础—文件和流操作">
+<meta name="twitter:description" content="Python打开文件可以用open函数语法：open(filename, mode[, buffering]),返回一个文件对象mode为文件模式，buffering为缓冲，都是可选参数  Demo Github源码">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/03/10/python-file-stream-ops/"/>
+
+
+
+
+
+  <title>Python基础—文件和流操作 | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/03/10/python-file-stream-ops/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python基础—文件和流操作</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-10T14:03:28+08:00">
+                2016-03-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<blockquote>
+<p>Python打开文件可以用open函数<br>语法：open(filename, mode[, buffering]),返回一个文件对象<br>mode为文件模式，buffering为缓冲，都是可选参数</p>
+</blockquote>
+<p><a href="https://github.com/imperio-wxm/learning-python/tree/master/learning-python/learning_file" target="_blank" rel="noopener">Demo Github源码</a></p>
+<a id="more"></a>
+<h1 id="环境及版本"><a href="#环境及版本" class="headerlink" title="环境及版本"></a>环境及版本</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Windows 10 x64</span><br><span class="line">Python 2.7</span><br><span class="line">Pycharm 4.5.1</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="文件模式（mode）"><a href="#文件模式（mode）" class="headerlink" title="文件模式（mode）"></a>文件模式（mode）</h1><table>
+<thead>
+<tr>
+<th>值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>‘r’</td>
+<td>只读模式</td>
+</tr>
+<tr>
+<td>‘w’</td>
+<td>只写模式（会覆盖掉已经有的内容）</td>
+</tr>
+<tr>
+<td>‘a’</td>
+<td>追加模式（向已有的内容后面进行追加）</td>
+</tr>
+<tr>
+<td>‘b’</td>
+<td>二进制模式</td>
+</tr>
+<tr>
+<td>‘t’</td>
+<td>文本模式</td>
+</tr>
+<tr>
+<td>‘+’</td>
+<td>读写模式</td>
+</tr>
+<tr>
+<td>‘U’</td>
+<td>通用匹配换行符模式</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="文件模式组合"><a href="#文件模式组合" class="headerlink" title="文件模式组合"></a>文件模式组合</h2><table>
+<thead>
+<tr>
+<th>值</th>
+<th>描述</th>
+<th>文件不存在</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>‘r’或’rt’</td>
+<td>只读模式（default）</td>
+<td>报错</td>
+</tr>
+<tr>
+<td>‘rb’</td>
+<td>只读模式（针对二进制文件）</td>
+<td>报错</td>
+</tr>
+<tr>
+<td>‘w’或’wt’</td>
+<td>只写模式（覆盖已有内容）</td>
+<td>创建</td>
+</tr>
+<tr>
+<td>‘wb’</td>
+<td>只写模式（针对二进制文件，覆盖已有内容）</td>
+<td>创建</td>
+</tr>
+<tr>
+<td>‘a’</td>
+<td>只写模式（向已有的内容后面进行追加）</td>
+<td>创建</td>
+</tr>
+<tr>
+<td>‘r+’</td>
+<td>读写模式（覆盖）</td>
+<td>报错</td>
+</tr>
+<tr>
+<td>‘w+’</td>
+<td>读写模式（覆盖）</td>
+<td>创建</td>
+</tr>
+<tr>
+<td>‘a+’</td>
+<td>读写模式（向已有的内容后面进行追加）</td>
+<td>创建</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="缓冲（buffering）"><a href="#缓冲（buffering）" class="headerlink" title="缓冲（buffering）"></a>缓冲（buffering）</h1><table>
+<thead>
+<tr>
+<th>值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0或False</td>
+<td>无缓冲，读写操作直接针对磁盘</td>
+</tr>
+<tr>
+<td>1或True</td>
+<td>有缓冲，只有使用flush或者close时才会写入磁盘</td>
+</tr>
+<tr>
+<td>大于1</td>
+<td>数字表示缓冲区大小（字节）</td>
+</tr>
+<tr>
+<td>任意负数</td>
+<td>表示默认缓冲区大小</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="读和写"><a href="#读和写" class="headerlink" title="读和写"></a>读和写</h1><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>read([size])</td>
+<td>以字符串形式返回数据，可选参数size可以指定读取的字节数，如果未指定表示返回全部数据</td>
+</tr>
+<tr>
+<td>write(str)</td>
+<td>将字符串写入文件</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 读文件</span></span><br><span class="line">file_read = open(file_path, <span class="string">'r+'</span>)</span><br><span class="line"><span class="keyword">print</span> file_read.read()</span><br><span class="line">file_read.close()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写文件</span></span><br><span class="line">file_wtite = open(file_path, <span class="string">'a+'</span>)</span><br><span class="line">file_wtite.write(<span class="string">"This is a test!"</span>.decode(<span class="string">"utf-8"</span>)) <span class="comment"># 中文UTF-8</span></span><br><span class="line">file_wtite.close()</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="读写行"><a href="#读写行" class="headerlink" title="读写行"></a>读写行</h1><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>readline()</td>
+<td>以当前位置，从文件中读取一行，以字符串返回这行数据，offset指向下一行起始位置</td>
+</tr>
+<tr>
+<td>readlines([size])</td>
+<td>将文件返回行为列表（list类型），可选参数size用于指定返回的行数；如果size未指定，表示返回所有行数</td>
+</tr>
+<tr>
+<td>writelines()</td>
+<td>将一个字符串列表一次性写入到文件中，不会加换行符</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 读一行数据</span></span><br><span class="line">file_readline = open(file_path, <span class="string">'r+'</span>)</span><br><span class="line"><span class="keyword">print</span> file_readline.readline().decode(<span class="string">"utf-8"</span>)</span><br><span class="line"><span class="comment"># 读指定行数</span></span><br><span class="line">lines = file_readline.readlines(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> lines:</span><br><span class="line">	<span class="keyword">print</span> line</span><br><span class="line">file_readline.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入一个字符串列表</span></span><br><span class="line">str_list = [<span class="string">"a\n"</span>, <span class="string">"b\n"</span>, <span class="string">"c\n"</span>]</span><br><span class="line">file_writelines = open(file_path, <span class="string">'a+'</span>)</span><br><span class="line">file_writelines.writelines(str_list)</span><br><span class="line">file_writelines.close()</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="随机访问"><a href="#随机访问" class="headerlink" title="随机访问"></a>随机访问</h1><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>seek(offset[, whence])</td>
+<td>把当前位置移动到offset和whence定义的位置。offset时一个字节（字符）偏移量，whence默认0表示偏移量从文件的开头计算；whence为1表示相对于当前位置偏移；whence为2表示从文件的尾部向前偏移</td>
+</tr>
+<tr>
+<td>tell()</td>
+<td>返回当前文件的位置</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># offset偏移</span></span><br><span class="line">offset_path = os.path.abspath(<span class="string">'../doc/offset_test.txt'</span>)</span><br><span class="line">file_offset = open(offset_path, <span class="string">'w'</span>)</span><br><span class="line">file_offset.write(<span class="string">"abcdefg"</span>)</span><br><span class="line">file_offset.seek(<span class="number">2</span>)</span><br><span class="line">file_offset.write(<span class="string">'12346'</span>)</span><br><span class="line">file_offset.close()</span><br><span class="line">file_offset = open(offset_path)</span><br><span class="line"><span class="keyword">print</span> file_offset.read()</span><br><span class="line"></span><br><span class="line"><span class="comment"># tell返回当前文件位置</span></span><br><span class="line">file_tell = open(offset_path, <span class="string">'w'</span>)</span><br><span class="line">file_tell.seek(<span class="number">3</span>)</span><br><span class="line"><span class="keyword">print</span> file_tell.tell()</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="关闭、清空缓冲"><a href="#关闭、清空缓冲" class="headerlink" title="关闭、清空缓冲"></a>关闭、清空缓冲</h1><table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>close()</td>
+<td>关闭文件流</td>
+</tr>
+<tr>
+<td>flush()</td>
+<td>强制写入磁盘，并清空缓冲区</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>通常文件、流的关闭应该在try/except/finally语句中</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 此处打开文件</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">	<span class="comment"># 文件操作</span></span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">	<span class="comment"># 捕获可能出现的异常</span></span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">	<span class="comment"># 关闭文件</span></span><br><span class="line">	file.close()</span><br></pre></td></tr></table></figure>
+<ul>
+<li>还可以使用with语句（上下文管理器）</li>
+<li>文件在语句结束后会自动关闭，即使引发了异常也是这样</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(<span class="string">"file_path"</span>) <span class="keyword">as</span> f:</span><br><span class="line">	do_something(f)</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="文件迭代"><a href="#文件迭代" class="headerlink" title="文件迭代"></a>文件迭代</h1><hr>
+<h2 id="按字节迭代"><a href="#按字节迭代" class="headerlink" title="按字节迭代"></a>按字节迭代</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">file_name = open(file_path)</span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">	char = file_name.read(<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> char:</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line">	process(char)</span><br><span class="line">file_name.close()</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="按行迭代"><a href="#按行迭代" class="headerlink" title="按行迭代"></a>按行迭代</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">file_name = open(file_path)</span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">	line = file_name.readline()</span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> line:</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line">	process(line)</span><br><span class="line">file_name.close()</span><br></pre></td></tr></table></figure>
+<h1 id="迭代全文"><a href="#迭代全文" class="headerlink" title="迭代全文"></a>迭代全文</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">file_name = open(file_path)</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> file_name:</span><br><span class="line">	process(line)</span><br><span class="line">file_name.close()</span><br></pre></td></tr></table></figure>
+<hr>
+<p>参考：Python基础教程(第2版·修订版)</p>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/file/" rel="tag"># file</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/05/Python-date-time-ops/" rel="next" title="Python基础—日期与时间操作">
+                <i class="fa fa-chevron-left"></i> Python基础—日期与时间操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/14/thriftpy-rpc-file/" rel="prev" title="Thriftpy—[RPC文件传输]">
+                Thriftpy—[RPC文件传输] <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#环境及版本"><span class="nav-number">1.</span> <span class="nav-text">环境及版本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#文件模式（mode）"><span class="nav-number">2.</span> <span class="nav-text">文件模式（mode）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#文件模式组合"><span class="nav-number">2.1.</span> <span class="nav-text">文件模式组合</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#缓冲（buffering）"><span class="nav-number">3.</span> <span class="nav-text">缓冲（buffering）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#读和写"><span class="nav-number">4.</span> <span class="nav-text">读和写</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#读写行"><span class="nav-number">5.</span> <span class="nav-text">读写行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#随机访问"><span class="nav-number">6.</span> <span class="nav-text">随机访问</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关闭、清空缓冲"><span class="nav-number">7.</span> <span class="nav-text">关闭、清空缓冲</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#文件迭代"><span class="nav-number">8.</span> <span class="nav-text">文件迭代</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#按字节迭代"><span class="nav-number">8.1.</span> <span class="nav-text">按字节迭代</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#按行迭代"><span class="nav-number">8.2.</span> <span class="nav-text">按行迭代</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#迭代全文"><span class="nav-number">9.</span> <span class="nav-text">迭代全文</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

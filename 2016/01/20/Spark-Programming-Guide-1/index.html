@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,大数据,Spark," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Python Programming Guide - Spark   Spark应用基本概念每一个运行在cluster上的spark应用程序，是由一个运行main函数的driver program和运行多种并行操作的executes组成 其中spark的核心是弹性分布式数据集（Resilient Distributed Dataset—RDD）  Resilient（弹性）：易变化、易计算 Di">
+<meta name="keywords" content="Linux,大数据,Spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark 编程指南 (一) [Spark Programming Guide]">
+<meta property="og:url" content="http://imperio-wxm.github.io/2016/01/20/Spark-Programming-Guide-1/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Python Programming Guide - Spark   Spark应用基本概念每一个运行在cluster上的spark应用程序，是由一个运行main函数的driver program和运行多种并行操作的executes组成 其中spark的核心是弹性分布式数据集（Resilient Distributed Dataset—RDD）  Resilient（弹性）：易变化、易计算 Di">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-30T13:01:49.667Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark 编程指南 (一) [Spark Programming Guide]">
+<meta name="twitter:description" content="Python Programming Guide - Spark   Spark应用基本概念每一个运行在cluster上的spark应用程序，是由一个运行main函数的driver program和运行多种并行操作的executes组成 其中spark的核心是弹性分布式数据集（Resilient Distributed Dataset—RDD）  Resilient（弹性）：易变化、易计算 Di">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2016/01/20/Spark-Programming-Guide-1/"/>
+
+
+
+
+
+  <title>Spark 编程指南 (一) [Spark Programming Guide] | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/01/20/Spark-Programming-Guide-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spark 编程指南 (一) [Spark Programming Guide]</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-20T15:58:24+08:00">
+                2016-01-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/Spark/" itemprop="url" rel="index">
+                    <span itemprop="name">Spark</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Python Programming Guide - Spark</p>
+</blockquote>
+<hr>
+<h1 id="Spark应用基本概念"><a href="#Spark应用基本概念" class="headerlink" title="Spark应用基本概念"></a>Spark应用基本概念</h1><p>每一个运行在cluster上的spark应用程序，是由一个运行main函数的driver program和运行多种并行操作的executes组成</p>
+<p>其中spark的核心是弹性分布式数据集（Resilient Distributed Dataset—RDD）</p>
+<ul>
+<li>Resilient（弹性）：易变化、易计算</li>
+<li>Distributed（分布式）：可横跨多台机器，集群分布</li>
+<li>Dataset（数据集）：大批量数据的集合</li>
+</ul>
+<a id="more"></a>
+<hr>
+<h2 id="RDD基本概念"><a href="#RDD基本概念" class="headerlink" title="RDD基本概念"></a>RDD基本概念</h2><p>RDD是逻辑集中的实体，代表一个分区的只读数据集，不可发生改变</p>
+<p>【RDD的重要内部属性】</p>
+<ul>
+<li><p>分区列表(partitions)<br>对于一个RDD而言，分区的多少涉及对这个RDD并行计算的粒度，每一个RDD分区的计算都会在一个单独的任务中执行，每一个分区对应一个Task，分区后的数据存放在内存当中</p>
+</li>
+<li><p>计算每个分区的函数(compute)<br>对于Spark中每个RDD都是以分区进行计算的，并且每个分区的compute函数是在对迭代器进行复合操作，不需要每次计算，直到提交动作触发才会将之前所有的迭代操作进行计算，lineage在容错中有重要作用</p>
+</li>
+<li><p>对父级RDD的依赖(dependencies)<br>由于RDD存在转换关系，所以新生成的RDD对上一个RDD有依赖关系，RDD之间通过lineage产生依赖关系</p>
+<blockquote>
+<p>【窄依赖】<br>每一个父RDD的分区最多只被子RDD的一个分区所使用，可以类似于流水线一样，计算所有父RDD的分区；在节点计算失败的恢复上也更有效，可以直接计算其父RDD的分区，还可以进行并行计算    </p>
+<p>子RDD的每个分区依赖于常数个父分区（即与数据规模无关）<br>输入输出一对一的算子，且结果RDD的分区结构不变，主要是map、flatmap<br>输入输出一对一，但结果RDD的分区结构发生了变化，如union、coalesce<br>从输入中选择部分元素的算子，如filter、distinct、subtract、sample</p>
+<p>【宽依赖】<br>多个子RDD的分区会依赖于同一个父RDD的分区，需要取得其父RDD的所有分区数据进行计算，而一个节点的计算失败，将会导致其父RDD上多个分区重新计算</p>
+<p>子RDD的每个分区依赖于所有父RDD分区<br>对单个RDD基于key进行重组和reduce，如groupByKey、reduceByKey<br>对两个RDD基于key进行jion和重组，如jion</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><p>对key-value数据类型RDD的分区器，控制分区策略和分区数(partitioner)<br>  partitioner就是RDD的分区函数，即HashPartitioner（哈希分区）和RangePartitioner（区域分区），分区函数决定了每个RDD的分区策略和分区数，并且这个函数只在(k-v)类型的RDD中存在，在非(k-v)结构的RDD中是None</p>
+</li>
+<li><p>每个数据分区的地址列表(preferredLocations)<br>与Spark中的调度相关，返回的是此RDD的每个partition所出储存的位置，按照“移动数据不如移动计算”的理念，在spark进行任务调度的时候，尽可能将任务分配到数据块所存储的位置</p>
+</li>
+<li><p>控制操作（control operation）<br>spark中对RDD的持久化操作是很重要的，可以将RDD存放在不同的存储介质中，方便后续的操作可以重复使用。<br>主要有cache、persist、checkpoint，checkpoint接口是将RDD持久化到HDFS中，与persist的区别是checkpoint会切断此RDD之前的依赖关系，而persist会保留依赖关系。checkpoint的两大作用：一是spark程序长期驻留，过长的依赖会占用很多的系统资源，定期checkpoint可以有效的节省资源；二是维护过长的依赖关系可能会出现问题，一旦spark程序运行失败，RDD的容错成本会很高</p>
+</li>
+</ul>
+<hr>
+<h1 id="Python连接Spark"><a href="#Python连接Spark" class="headerlink" title="Python连接Spark"></a>Python连接Spark</h1><p>Spark 1.6.0 支持 Python 2.6+ 或者 Python 3.4+，它使用标准的CPython解释器, 所以像NumPy这样的C语言类库也可以使用，同样也支持PyPy 2.3+</p>
+<p>可以用spark目录里的bin/spark-submit脚本在python中运行spark应用程序，这个脚本可以加载Java/Scala类库，让你提交应用程序到集群当中。你也可以使用bin/pyspark脚本去启动python交互界面</p>
+<p>如果你希望访问HDFS上的数据集，你需要建立对应HDFS版本的PySpark连接。</p>
+<p>最后，你的程序需要import一些spark类库：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark <span class="keyword">import</span> SparkContext, SparkConf</span><br></pre></td></tr></table></figure></p>
+<p>PySpark 要求driver和workers需要相同的python版本，它通常引用环境变量PATH默认的python版本；你也可以自己指定PYSPARK_PYTHON所用的python版本，例如：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PYSPARK_PYTHON=python3<span class="number">.4</span> bin/pyspark</span><br><span class="line">PYSPARK_PYTHON=/opt/pypy<span class="number">-2.5</span>/bin/pypy bin/spark-submit examples/src/main/python/pi.py</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h1 id="初始化Spark"><a href="#初始化Spark" class="headerlink" title="初始化Spark"></a>初始化Spark</h1><p>一个Spark应用程序的第一件事就是去创建SparkContext对象，它的作用是告诉Spark如何建立一个集群。创建SparkContext之前，先要创建SparkConf对象，SparkConf包含了应用程序的相关信息。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conf = SparkConf().setAppName(appName).setMaster(master)</span><br><span class="line">sc = SparkContext(conf=conf)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>appName：应用的名称，用户显示在集群UI上</li>
+<li>master：Spark、Mesos或者YARN集群的URL，如果是本地运行，则应该是特殊的’local’字符串</li>
+</ul>
+<p>在实际运行时，你不会讲master参数写死在程序代码里，而是通过spark-submit来获取这个参数；在本地测试和单元测试中，你仍然需要’local’去运行Spark应用程序</p>
+<hr>
+<h1 id="使用Shell"><a href="#使用Shell" class="headerlink" title="使用Shell"></a>使用Shell</h1><p>在PySpark Shell中，一个特殊SparkContext已经帮你创建好了，变量名是：sc，然而在Shell中创建你自己的SparkContext是不起作用的。</p>
+<p>你可以通过–master参数设置master所连接的上下文主机；你也可以通过–py-files参数传递一个用逗号作为分割的列表，将Python中的.zip、.egg、.py等文件添加到运行路径当中；你同样可以通过–packages参数，传递一个用逗号分割的maven列表，来个这个Shell会话添加依赖（例如Spark的包）</p>
+<p>任何额外的包含依赖的仓库（如SonaType），都可以通过–repositories参数添加进来。<br>Spark中所有的Python依赖（requirements.txt的依赖包列表），在必要时都必须通过pip手动安装</p>
+<p>例如用4个核来运行bin/pyspark：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/pyspark --master local[<span class="number">4</span>]</span><br></pre></td></tr></table></figure></p>
+<p>或者，将code.py添加到搜索路径中（为了后面可以import）：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/pyspark --master local[<span class="number">4</span>] --py-files code.py</span><br></pre></td></tr></table></figure></p>
+<p>通过运行pyspark –help来查看完整的操作帮助信息，在这种情况下，pyspark会调用一个通用的spark-submit脚本</p>
+<p>在IPython这样增强Python解释器中，也可以运行PySpark Shell；支持IPython 1.0.0+；在利用IPython运行bin/pyspark时，必须将PYSPARK_DRIVER_PYTHON变量设置成ipython：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PYSPARK_DRIVER_PYTHON=ipython ./bin/pyspark</span><br></pre></td></tr></table></figure></p>
+<p>你可以通过PYSPARK_DRIVER_PYTHON_OPTS参数来自己定制ipython命令，比如在IPython Notebook中开启PyLab图形支持：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PYSPARK_DRIVER_PYTHON=ipython PYSPARK_DRIVER_PYTHON_OPTS=<span class="string">"notebook"</span> ./bin/pyspark</span><br></pre></td></tr></table></figure></p>
+<hr>
+<p>参考：<a href="http://spark.apache.org/docs/latest/programming-guide.html#overview" target="_blank" rel="noopener">Spark Programming  Guide 官方文档</a></p>
+<hr>
+<blockquote>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/13/python-base-assert/" rel="next" title="Python基础—断言(assert)">
+                <i class="fa fa-chevron-left"></i> Python基础—断言(assert)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/22/Spark-JobHistory-Monitoring/" rel="prev" title="Spark 历史记录 Web 监控 [Spark JobHistory Web UI]">
+                Spark 历史记录 Web 监控 [Spark JobHistory Web UI] <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark应用基本概念"><span class="nav-number">1.</span> <span class="nav-text">Spark应用基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RDD基本概念"><span class="nav-number">1.1.</span> <span class="nav-text">RDD基本概念</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Python连接Spark"><span class="nav-number">2.</span> <span class="nav-text">Python连接Spark</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化Spark"><span class="nav-number">3.</span> <span class="nav-text">初始化Spark</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用Shell"><span class="nav-number">4.</span> <span class="nav-text">使用Shell</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
