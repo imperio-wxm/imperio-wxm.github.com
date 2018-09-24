@@ -89,7 +89,7 @@
 <meta property="og:site_name" content="logging.DEBUG">
 <meta property="og:description" content="hbsae表进行数据清洗，在清空数据的时候发生错误，引发后续问题">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-24T04:23:11.835Z">
+<meta property="og:updated_time" content="2018-09-24T04:26:06.988Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记一次HBase Drop的错误">
 <meta name="twitter:description" content="hbsae表进行数据清洗，在清空数据的时候发生错误，引发后续问题">
@@ -425,23 +425,23 @@
 <blockquote>
 <p>发现文件目录存在，但是里面没有任何文件，是空目录。推断可能是文件已经删掉了，但是缓存中或者zk中还是有这张表的信息，因为突然中止导致table meta没有生成</p>
 </blockquote>
-<h2 id="尝试恢复"><a href="#尝试恢复" class="headerlink" title="尝试恢复"></a>尝试恢复</h2><ol>
+<h2 id="尝试恢复"><a href="#尝试恢复" class="headerlink" title="尝试恢复"></a>尝试恢复</h2><ul>
 <li>snapshot 恢复（失败）</li>
-</ol>
+</ul>
 <p>因为这张表之前做过snapshot备份，想从snapshot恢复</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">clone_snapshot <span class="string">'TableName_Bak'</span>, <span class="string">'TableName'</span></span><br><span class="line">restore_snapshot <span class="string">'TableName_Bak'</span></span><br></pre></td></tr></table></figure>
 <p>发现一只会卡在<code>restore_snapshot &#39;TableName_Bak&#39;</code>，应该是找不到这张表的meta</p>
-<ol>
-<li>hbck修复（失败）</li>
-</ol>
 <ul>
-<li>想着通过meta修复，可以自动生成desc文件</li>
+<li><p>hbck修复（失败）</p>
+</li>
+<li><p>想着通过meta修复，可以自动生成desc文件</p>
+</li>
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#修复 meta</span><br><span class="line">hbase hbck -fixMeta</span><br><span class="line"></span><br><span class="line">#重新分配rs</span><br><span class="line">hbase hbck -fixAssignments</span><br></pre></td></tr></table></figure>
 <p>执行这两条语句后发现日志中均没有该表名，也没有任何异常，问题依旧</p>
-<ol>
+<ul>
 <li>zookeeper删除信息（成功）</li>
-</ol>
+</ul>
 <p>登录hbase zk：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">zkCli.sh</span><br><span class="line"></span><br><span class="line">ls /hbase/table</span><br><span class="line">rmr  /hbase/table/TableName 相关信息</span><br><span class="line"></span><br><span class="line">ls /hbase/table-lock</span><br><span class="line">rmr /hbase/table-lock/TableName 相关信息</span><br></pre></td></tr></table></figure>
 <p>重启hbase 集群后这张表已经不存在，重新建表后正常</p>
