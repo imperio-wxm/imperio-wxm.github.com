@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,大数据,Cassandra," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="在对Cassandra进行维护的时候，通常需要扩集群或者迁移数据，涉及到添加、移除节点。">
+<meta name="keywords" content="Linux,大数据,Cassandra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cassandra集群运维[Add &amp; Remove Nodes]">
+<meta property="og:url" content="http://imperio-wxm.github.io/2018/10/20/Cassandra-Cluster-Operation/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="在对Cassandra进行维护的时候，通常需要扩集群或者迁移数据，涉及到添加、移除节点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-10-20T15:09:15.940Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Cassandra集群运维[Add &amp; Remove Nodes]">
+<meta name="twitter:description" content="在对Cassandra进行维护的时候，通常需要扩集群或者迁移数据，涉及到添加、移除节点。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2018/10/20/Cassandra-Cluster-Operation/"/>
+
+
+
+
+
+  <title>Cassandra集群运维[Add & Remove Nodes] | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th-list"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'j7qmCL9tZCahcz3_Wyoa','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2018/10/20/Cassandra-Cluster-Operation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Cassandra集群运维[Add & Remove Nodes]</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-20T22:47:36+08:00">
+                2018-10-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/Cassandra/" itemprop="url" rel="index">
+                    <span itemprop="name">Cassandra</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>在对Cassandra进行维护的时候，通常需要扩集群或者迁移数据，涉及到添加、移除节点。</p>
+</blockquote>
+<a id="more"></a>
+<blockquote>
+<p>Cassandra Version: Apache Cassandra 3.0.6</p>
+</blockquote>
+<h1 id="Add-Nodes"><a href="#Add-Nodes" class="headerlink" title="Add Nodes"></a>Add Nodes</h1><p>Virtual nodes (vnodes) greatly simplify adding nodes to an existing cluster:<br>Calculating tokens and assigning them to each node is no longer required.<br>Rebalancing a cluster is no longer necessary because a node joining the cluster assumes responsibility for an even portion of the data.</p>
+<blockquote>
+<p style="color:red">确保新加节点和现有集群的Cassandra 版本一致</p>
+
+</blockquote>
+<hr>
+<h2 id="【操作步骤】"><a href="#【操作步骤】" class="headerlink" title="【操作步骤】"></a>【操作步骤】</h2><h3 id="在新的机器上部署cassandra，但不要启动"><a href="#在新的机器上部署cassandra，但不要启动" class="headerlink" title="在新的机器上部署cassandra，但不要启动"></a>在新的机器上部署cassandra，但不要启动</h3><p>通常都是从现有集群的一台机器上scp cassandra目录到新机器</p>
+<h3 id="基于现有集群所用的snitch算法修改配置文件"><a href="#基于现有集群所用的snitch算法修改配置文件" class="headerlink" title="基于现有集群所用的snitch算法修改配置文件"></a>基于现有集群所用的<code>snitch</code>算法修改配置文件</h3><blockquote>
+<p style="color:blue">cassandra-topology.properties or the cassandra-rackdc.properties</p>
+
+</blockquote>
+<ul>
+<li>使用<code>PropertyFileSnitch</code>算法配置：cassandra-topology.properties</li>
+<li>使用<code>GossipingPropertyFileSnitch</code>, <code>Ec2Snitch</code>, <code>Ec2MultiRegionSnitch</code>, and <code>GoogleCloudSnitch</code>算法配置：cassandra-rackdc.properties</li>
+</ul>
+<blockquote>
+<p>ps: 这两个配置与机架和多数据中心有关，如果是同机架单数据中心则不用配置</p>
+</blockquote>
+<h3 id="修改配置cassandra-yaml文件"><a href="#修改配置cassandra-yaml文件" class="headerlink" title="修改配置cassandra.yaml文件"></a>修改配置<code>cassandra.yaml</code>文件</h3><table>
+<thead>
+<tr>
+<th style="text-align:left">name</th>
+<th>desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">auto_bootstrap</td>
+<td>默认文件中是没有这个参数的，如果没有默认为true；如果有且为false修改为true</td>
+</tr>
+<tr>
+<td style="text-align:left">cluster_name</td>
+<td>需要加入的集群名称</td>
+</tr>
+<tr>
+<td style="text-align:left">listen_address/broadcast_address</td>
+<td>用来与集群内其他节点通信的ip，通常为本机真实ip，不要填写127.0.0.1或localhost</td>
+</tr>
+<tr>
+<td style="text-align:left">endpoint_snitch</td>
+<td>用于定位节点和路由请求的算法，与现有集群保持一致</td>
+</tr>
+<tr>
+<td style="text-align:left">num_tokens</td>
+<td>节点中vnodes的数量，与现有集群配置保持一致，如果当前机器配置更高可以按比例增加这个值，可以有更好的性能</td>
+</tr>
+<tr>
+<td style="text-align:left">seed_provider</td>
+<td>种子节点，至少保证有一个现有集群的节点，-seeds列表表示了新节点与现有集群通过哪些节点通信（种子节点无法引导，所以不要仅仅把要加入的新节点配置进去，也不要将集群所有节点配置成种子节点）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="启动新节点Cassandra"><a href="#启动新节点Cassandra" class="headerlink" title="启动新节点Cassandra"></a>启动新节点Cassandra</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/cassandra</span><br></pre></td></tr></table></figure>
+<ul>
+<li>初始化system相关信息</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">INFO  06:14:41 Initializing system.IndexInfo</span><br><span class="line">INFO  06:14:42 Initializing system.batches</span><br><span class="line">INFO  06:14:42 Initializing system.paxos</span><br><span class="line">INFO  06:14:42 Initializing system.local</span><br><span class="line">INFO  06:14:42 Initializing system.peers</span><br><span class="line">INFO  06:14:42 Initializing system.peer_events</span><br><span class="line">INFO  06:14:42 Initializing system.range_xfers</span><br><span class="line">INFO  06:14:42 Initializing system.compaction_history</span><br><span class="line">INFO  06:14:42 Initializing system.sstable_activity</span><br><span class="line">INFO  06:14:42 Initializing system.size_estimates</span><br><span class="line">INFO  06:14:42 Initializing system.available_ranges</span><br><span class="line">INFO  06:14:42 Initializing system.views_builds_in_progress</span><br><span class="line">INFO  06:14:42 Initializing system.built_views</span><br><span class="line">INFO  06:14:42 Initializing system.hints</span><br><span class="line">INFO  06:14:42 Initializing system.batchlog</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<ul>
+<li>寻找现有集群节点</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">INFO  06:14:44 Node /xx.xxx.xx.xx is now part of the cluster</span><br><span class="line">INFO  06:14:44 Node /xx.xxx.xx.xx is now part of the cluster</span><br><span class="line">INFO  06:14:44 Node /xx.xxx.xx.xx is now part of the cluster</span><br><span class="line">INFO  06:14:44 Handshaking version with /xx.xxx.xx.xx</span><br><span class="line">INFO  06:14:44 Handshaking version with /xx.xxx.xx.xx</span><br><span class="line">INFO  06:14:44 InetAddress /xx.xxx.xx.xx is now UP</span><br><span class="line">INFO  06:14:44 InetAddress /xx.xxx.xx.xx is now UP</span><br><span class="line">INFO  06:14:44 InetAddress /xx.xxx.xx.xx is now UP</span><br></pre></td></tr></table></figure>
+<ul>
+<li>新节点加入集群</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO  06:14:45 JOINING: waiting for ring information</span><br><span class="line">INFO  06:14:45 Updating topology for all endpoints that have changed</span><br></pre></td></tr></table></figure>
+<ul>
+<li>同步schema</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">INFO  06:14:49 Initializing system_traces.events</span><br><span class="line">INFO  06:14:49 Initializing system_traces.sessions</span><br><span class="line">INFO  06:14:49 Initializing system_distributed.parent_repair_history</span><br><span class="line">INFO  06:14:49 Initializing system_distributed.repair_history</span><br><span class="line">INFO  06:14:49 Initializing system_auth.resource_role_permissons_index</span><br><span class="line">INFO  06:14:49 Initializing system_auth.role_members</span><br><span class="line">INFO  06:14:49 Initializing system_auth.role_permissions</span><br><span class="line">INFO  06:14:49 Initializing system_auth.roles</span><br><span class="line">INFO  06:14:49 JOINING: waiting for schema information to complete</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Copy Schema数据</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] Executing streaming plan for Bootstrap</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] Starting streaming to /xx.xxx.xx.xx</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] Starting streaming to /xx.xxx.xx.xx</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] Starting streaming to /xx.xxx.xx.xx</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4, ID#0] Beginning stream session with /xx.xxx.xx.xx</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4, ID#0] Beginning stream session with /xx.xxx.xx.xx</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4, ID#0] Beginning stream session with /xx.xxx.xx.xx</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4 ID#0] Prepare completed. Receiving 48 files(358160851 bytes), sending 0 files(0 bytes)</span><br><span class="line">INFO  06:15:22 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4 ID#0] Prepare completed. Receiving 35 files(132483825 bytes), sending 0 files(0 bytes)</span><br><span class="line">INFO  06:15:23 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4 ID#0] Prepare completed. Receiving 46 files(174538642 bytes), sending 0 files(0 bytes)</span><br><span class="line">INFO  06:16:54 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] Session with /xx.xxx.xx.xx is complete</span><br><span class="line">INFO  06:17:38 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] Session with /xx.xxx.xx.xx is complete</span><br><span class="line">INFO  06:20:28 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] Session with /xx.xxx.xx.xx is complete</span><br><span class="line">INFO  06:20:28 [Stream #317a30b0-d29d-11e8-aa92-e9ebc9b827d4] All sessions completed</span><br></pre></td></tr></table></figure>
+<ul>
+<li>节点切换成NORMAL</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO  06:20:29 Node /xx.xxx.xx.xx state jump to NORMAL</span><br><span class="line">INFO  06:20:29 Waiting for gossip to settle before accepting client requests...</span><br></pre></td></tr></table></figure>
+<h3 id="查看节点同步状态"><a href="#查看节点同步状态" class="headerlink" title="查看节点同步状态"></a>查看节点同步状态</h3><blockquote>
+<p>./bin/nodetool status</p>
+</blockquote>
+<ul>
+<li>数据同步期间节点的状态：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Datacenter: dc1</span><br><span class="line">===============</span><br><span class="line">Status=Up/Down</span><br><span class="line">|/ State=Normal/Leaving/Joining/Moving</span><br><span class="line">--  Address       Load       Tokens       Owns (effective)  Host ID                               Rack</span><br><span class="line">UN  xx.xxx.xx.xx  1.53 GB    256          100.0%            30ed942d-6827-469b-aab9-7fb649c6c3d7  rack1</span><br><span class="line">UN  xx.xxx.xx.xx  1.38 GB    256          100.0%            96736106-e95d-4c54-aabf-41666071bc59  rack1</span><br><span class="line">UN  xx.xxx.xx.xx  1.07 GB    256          100.0%            4351af17-2e68-4b46-a78f-fad900e44d13  rack1</span><br><span class="line">UJ  新加节点      57.87 MB   256          ?                 f3f590ac-9835-47bb-b4d8-6e17ea2916ac  rack1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>数据同步结束后的状态：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Datacenter: dc1</span><br><span class="line">===============</span><br><span class="line">Status=Up/Down</span><br><span class="line">|/ State=Normal/Leaving/Joining/Moving</span><br><span class="line">--  Address       Load       Tokens       Owns (effective)  Host ID                               Rack</span><br><span class="line">UN  xx.xxx.xx.xx  1.53 GB    256          69.2%             30ed942d-6827-469b-aab9-7fb649c6c3d7  rack1</span><br><span class="line">UN  xx.xxx.xx.xx  1.38 GB    256          79.3%             96736106-e95d-4c54-aabf-41666071bc59  rack1</span><br><span class="line">UN  xx.xxx.xx.xx  1.07 GB    256          78.0%             4351af17-2e68-4b46-a78f-fad900e44d13  rack1</span><br><span class="line">UN  xx.xxx.xx.xx  581.43 MB  256          73.5%             f3f590ac-9835-47bb-b4d8-6e17ea2916ac  rack1</span><br></pre></td></tr></table></figure>
+<h3 id="运行nodetool-cleanup"><a href="#运行nodetool-cleanup" class="headerlink" title="运行nodetool cleanup"></a>运行nodetool cleanup</h3><blockquote>
+<p>nodetool options cleanup [keyspace_name [table_name] […] ]</p>
+</blockquote>
+<p>在所有新节点都加入集群并且数据同步完成后，在之前旧的每一个节点上运行nodetool cleanup操作删除keys。<br>在做操作时保证一个节点结束后再运行下一个节点，不要并发执行，这样可以安全地推迟清理</p>
+<hr>
+<h1 id="Reomve-Nodes"><a href="#Reomve-Nodes" class="headerlink" title="Reomve Nodes"></a>Reomve Nodes</h1><h2 id="UN状态的节点下线"><a href="#UN状态的节点下线" class="headerlink" title="UN状态的节点下线"></a>UN状态的节点下线</h2><p>在要下线的节点运行<code>nodetool decommission</code>命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nodetool &lt;options&gt; decommission</span><br></pre></td></tr></table></figure>
+<p>该命令会将当前节点的range和请求交给其他节点管理，并且将数据同步给其他节点</p>
+<h2 id="DN状态的节点下线"><a href="#DN状态的节点下线" class="headerlink" title="DN状态的节点下线"></a>DN状态的节点下线</h2><p>在任何存活的节点运行<code>nodetool removenode</code>命令</p>
+<p>该命令会将当前集群下线的节点移除，并且将数据同步给其他节点</p>
+<ul>
+<li>查看节点状态：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Datacenter: DC1</span><br><span class="line">===============</span><br><span class="line">Status=Up/Down</span><br><span class="line">|/ State=Normal/Leaving/Joining/Moving</span><br><span class="line">--  <span class="function">Address        Load       Tokens  <span class="title">Owns</span> <span class="params">(effective)</span>  Host ID                               Rack</span></span><br><span class="line"><span class="function">UN  192.168.2.101  112.82 KB  256     31.7%             420129fc-0d84-42b0-be41-ef7dd3a8ad06  RAC1</span></span><br><span class="line"><span class="function">DN  192.168.2.103  91.11 KB   256     33.9%             d0844a21-3698-4883-ab66-9e2fd5150edd  RAC1</span></span><br><span class="line"><span class="function">UN  192.168.2.102  124.42 KB  256     32.6%             8d5ed9f4-7764-4dbd-bad8-43fddce94b7c  RAC1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span> nodetool &lt;options&gt; removenode -- &lt;status&gt; | &lt;force&gt; | &lt;ID&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span> nodetool removenode d0844a21-3698-4883-ab66-9e2fd5150edd</span><br></pre></td></tr></table></figure>
+<h2 id="节点下线失败"><a href="#节点下线失败" class="headerlink" title="节点下线失败"></a>节点下线失败</h2><blockquote>
+<p> nodetool assassinate</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nodetool [options] assassinate &lt;ip_address&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nodetool -u cassandra -pw cassandra assassinate 192.168.100.2</span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>转载请注明出处</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Cassandra/" rel="tag"># Cassandra</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/24/HBase-DropTable-Error/" rel="next" title="记一次HBase Drop的错误">
+                <i class="fa fa-chevron-left"></i> 记一次HBase Drop的错误
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://7tt05h.com1.z0.glb.clouddn.com/wxmimperiologo-site.png"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-Nodes"><span class="nav-number">1.</span> <span class="nav-text">Add Nodes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#【操作步骤】"><span class="nav-number">1.1.</span> <span class="nav-text">【操作步骤】</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在新的机器上部署cassandra，但不要启动"><span class="nav-number">1.1.1.</span> <span class="nav-text">在新的机器上部署cassandra，但不要启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于现有集群所用的snitch算法修改配置文件"><span class="nav-number">1.1.2.</span> <span class="nav-text">基于现有集群所用的snitch算法修改配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改配置cassandra-yaml文件"><span class="nav-number">1.1.3.</span> <span class="nav-text">修改配置cassandra.yaml文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动新节点Cassandra"><span class="nav-number">1.1.4.</span> <span class="nav-text">启动新节点Cassandra</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看节点同步状态"><span class="nav-number">1.1.5.</span> <span class="nav-text">查看节点同步状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行nodetool-cleanup"><span class="nav-number">1.1.6.</span> <span class="nav-text">运行nodetool cleanup</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reomve-Nodes"><span class="nav-number">2.</span> <span class="nav-text">Reomve Nodes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#UN状态的节点下线"><span class="nav-number">2.1.</span> <span class="nav-text">UN状态的节点下线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DN状态的节点下线"><span class="nav-number">2.2.</span> <span class="nav-text">DN状态的节点下线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#节点下线失败"><span class="nav-number">2.3.</span> <span class="nav-text">节点下线失败</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
