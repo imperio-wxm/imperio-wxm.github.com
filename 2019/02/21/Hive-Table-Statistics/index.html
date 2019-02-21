@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="大数据,Hive," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="在Hadoop平台运维监控中，Hive表的统计信息通常是作为集群数据质量的关键依据；通常以Hive表的大小、行数、分区数等信息来衡量集群数据量的增减趋势；本文以Hive表Size大小和数据行数作为重点，对于超大表统计时避免过多的资源消耗">
+<meta name="keywords" content="大数据,Hive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hive 优雅的统计表（分区）Size and RowCount">
+<meta property="og:url" content="http://imperio-wxm.github.io/2019/02/21/Hive-Table-Statistics/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="在Hadoop平台运维监控中，Hive表的统计信息通常是作为集群数据质量的关键依据；通常以Hive表的大小、行数、分区数等信息来衡量集群数据量的增减趋势；本文以Hive表Size大小和数据行数作为重点，对于超大表统计时避免过多的资源消耗">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-02-21T15:18:40.682Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hive 优雅的统计表（分区）Size and RowCount">
+<meta name="twitter:description" content="在Hadoop平台运维监控中，Hive表的统计信息通常是作为集群数据质量的关键依据；通常以Hive表的大小、行数、分区数等信息来衡量集群数据量的增减趋势；本文以Hive表Size大小和数据行数作为重点，对于超大表统计时避免过多的资源消耗">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2019/02/21/Hive-Table-Statistics/"/>
+
+
+
+
+
+  <title>Hive 优雅的统计表（分区）Size and RowCount | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/02/21/Hive-Table-Statistics/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://wx1.sinaimg.cn/mw690/0060lm7Tly1fwf44ggkonj306o06owf1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hive 优雅的统计表（分区）Size and RowCount</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-02-21T22:07:43+08:00">
+                2019-02-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/Hive/" itemprop="url" rel="index">
+                    <span itemprop="name">Hive</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>在Hadoop平台运维监控中，Hive表的统计信息通常是作为集群数据质量的关键依据；通常以Hive表的大小、行数、分区数等信息来衡量集群数据量的增减趋势；本文以Hive表Size大小和数据行数作为重点，对于超大表统计时避免过多的资源消耗</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="两种常规方式统计："><a href="#两种常规方式统计：" class="headerlink" title="两种常规方式统计："></a>两种常规方式统计：</h2><ul>
+<li>方式一：</li>
+</ul>
+<p>size 统计：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> size = FileSystem.getContentSummary(<span class="keyword">new</span> Path(tablePath)).getLength();</span><br></pre></td></tr></table></figure></p>
+<p>rowCount统计：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">select <span class="title">count</span><span class="params">(*)</span> from tableName</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>方式二：</li>
+</ul>
+<p>size统计：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop fs -du -s tablePath</span><br></pre></td></tr></table></figure>
+<p>rowCount统计（非Orc、Parquet）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hadoop fs -text tablePath | wc -l</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>常规方式在获取rowCount时都有局限性（例如OrcFile无法用hadoop fs -text），并且效率不高</p>
+</blockquote>
+<h2 id="ANALYZE-方式统计"><a href="#ANALYZE-方式统计" class="headerlink" title="ANALYZE 方式统计"></a>ANALYZE 方式统计</h2><blockquote>
+<p>ANALYZE TABLE tablename [PARTITION(partcol1[=val1], partcol2[=val2], …)] COMPUTE STATISTICS [noscan];</p>
+</blockquote>
+<p><code>考虑到表的统计值通常是要通过计算后记录到某个地方，执行ANALYZE的时候才会快速显示；为此探究什么情况下导入Hive数据，ANALYZE的结果准确</code></p>
+<p><code>下文会以TextFile、SequenceFile、OrcFile、ParquetFile，四种常见的Hive表文件格式来做测试</code></p>
+<blockquote>
+<p>Hive数据导入途径：</p>
+</blockquote>
+<p><strong><em>1. Load file to hive table</em></strong></p>
+<p><strong><em>2. Add partition and mv file to partition path</em></strong></p>
+<p><strong><em>3. Insert into</em></strong></p>
+<blockquote>
+<p>测试数据文件</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数据文件 count = 20</span></span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br><span class="line"><span class="number">1</span>	wxmimperio1</span><br><span class="line"><span class="number">2</span>	wxmimperio2</span><br></pre></td></tr></table></figure>
+<h3 id="TextFile"><a href="#TextFile" class="headerlink" title="TextFile"></a>TextFile</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create table </span></span><br><span class="line">CREATE TABLE `analyze_text` (`id` string, `name` string) COMMENT <span class="string">'test'</span> <span class="function">PARTITIONED <span class="title">BY</span> <span class="params">(`part_date` string)</span> </span></span><br><span class="line"><span class="function">ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' WITH <span class="title">SERDEPROPERTIES</span> <span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	<span class="string">'field.delim'</span> = <span class="string">'\t'</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	<span class="string">'serialization.format'</span> = <span class="string">'\t'</span></span></span></span><br><span class="line"><span class="function"><span class="params">)</span> STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><ol>
+<li>Load file to table</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; LOAD DATA LOCAL INPATH <span class="string">'/home/hadoop/wxm/test.txt'</span> <span class="function">OVERWRITE INTO TABLE analyze_text <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">Loading data to table dw.<span class="function">analyze_text <span class="title">partition</span> <span class="params">(part_date=<span class="number">2019</span><span class="number">-02</span><span class="number">-21</span>)</span></span></span><br><span class="line"><span class="function">Partition dw.analyze_text</span>&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">0</span>, totalSize=<span class="number">298</span>, rawDataSize=<span class="number">0</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">1.035</span> seconds</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_text <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_text&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">0</span>, totalSize=<span class="number">298</span>, rawDataSize=<span class="number">0</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.463</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>Load 操作实际上是执行了 mv 操作，将文件移动到表目录下面；ANALYZE 只能查看到numFiles（文件数）和totalSize（分区总大小）</code></p>
+<ul>
+<li><ol>
+<li>Add partition and mv file to partition path</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// add partition</span></span><br><span class="line"><span class="function">alter table analyze_text add <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cp files</span></span><br><span class="line">hadoop fs -cp hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_text/part_date=2019-02-21/* hdfs://sdg/user/hive/warehouse/dw.db/analyze_text/part_date=2019-02-20/</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_text <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_text&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">20</span>&#125; stats: [numFiles=<span class="number">1</span>, totalSize=<span class="number">298</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.202</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>和Load操作一样，ANALYZE 只能查看到numFiles（文件数）和totalSize（分区总大小）</code></p>
+<ul>
+<li><ol>
+<li>Insert into</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">insert into table analyze_text <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> select `id`,`name` from analyze_text_copy where part_date</span>=<span class="string">'2019-02-21'</span>;</span><br><span class="line"></span><br><span class="line">Query ID = hadoop_20190221143232_fbc19f00-d0af-<span class="number">4278</span>-a644-<span class="number">924</span>c92994a75</span><br><span class="line">Total jobs = <span class="number">3</span></span><br><span class="line">Launching Job <span class="number">1</span> out of <span class="number">3</span></span><br><span class="line">Number of reduce tasks is set to <span class="number">0</span> since there<span class="string">'s no reduce operator</span></span><br><span class="line"><span class="string">Starting Job = job_1535945194143_1278, Tracking URL = http://wh-8-211:8088/proxy/application_1535945194143_1278/</span></span><br><span class="line"><span class="string">Kill Command = /app/opt/cloudera/parcels/CDH-5.11.1-1.cdh5.11.1.p0.4/lib/hadoop/bin/hadoop job  -kill job_1535945194143_1278</span></span><br><span class="line"><span class="string">Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0</span></span><br><span class="line"><span class="string">2019-02-21 14:32:54,087 Stage-1 map = 0%,  reduce = 0%</span></span><br><span class="line"><span class="string">2019-02-21 14:33:01,381 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 3.3 sec</span></span><br><span class="line"><span class="string">MapReduce Total cumulative CPU time: 3 seconds 300 msec</span></span><br><span class="line"><span class="string">Ended Job = job_1535945194143_1278</span></span><br><span class="line"><span class="string">Stage-4 is selected by condition resolver.</span></span><br><span class="line"><span class="string">Stage-3 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Stage-5 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Moving data to: hdfs://sdg/user/hive/warehouse/dw.db/analyze_text/part_date=2019-02-19/.hive-staging_hive_2019-02-21_14-32-46_291_8677282162206970479-1/-ext-10000</span></span><br><span class="line"><span class="string">Loading data to table dw.analyze_text partition (part_date=2019-02-19)</span></span><br><span class="line"><span class="string">Partition dw.analyze_text&#123;part_date=2019-02-19&#125; stats: [numFiles=1, numRows=20, totalSize=280, rawDataSize=260]</span></span><br><span class="line"><span class="string">MapReduce Jobs Launched: </span></span><br><span class="line"><span class="string">Stage-Stage-1: Map: 1   Cumulative CPU: 3.3 sec   HDFS Read: 3699 HDFS Write: 373 SUCCESS</span></span><br><span class="line"><span class="string">Total MapReduce CPU Time Spent: 3 seconds 300 msec</span></span><br><span class="line"><span class="string">OK</span></span><br><span class="line"><span class="string">Time taken: 20.567 seconds</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_text <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_text&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">19</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">20</span>, totalSize=<span class="number">280</span>, rawDataSize=<span class="number">260</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.197</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>由于insert into 用了 MapReduce，在计算的过程中就已经将表的统计信息记录了下来，所以numRows、rawDataSize都有</code></p>
+<h3 id="SequenceFile"><a href="#SequenceFile" class="headerlink" title="SequenceFile"></a>SequenceFile</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create table </span></span><br><span class="line">CREATE TABLE `analyze_sequence_test` (`id` string, `name` string) <span class="function">PARTITIONED <span class="title">BY</span> <span class="params">(`part_date` string)</span> </span></span><br><span class="line"><span class="function">ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' WITH <span class="title">SERDEPROPERTIES</span> <span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	<span class="string">'field.delim'</span> = <span class="string">'\t'</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	<span class="string">'serialization.format'</span> = <span class="string">'\t'</span></span></span></span><br><span class="line"><span class="function"><span class="params">)</span> STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.SequenceFileInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><ol>
+<li>Load file to table</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; LOAD DATA LOCAL INPATH <span class="string">'/home/hadoop/wxm/analyze_sequence_test_file'</span> <span class="function">OVERWRITE INTO TABLE analyze_sequence_test <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">Loading data to table dw.<span class="function">analyze_sequence_test <span class="title">partition</span> <span class="params">(part_date=<span class="number">2019</span><span class="number">-02</span><span class="number">-21</span>)</span></span></span><br><span class="line"><span class="function">Partition dw.analyze_sequence_test</span>&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">0</span>, totalSize=<span class="number">607</span>, rawDataSize=<span class="number">0</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">1.525</span> seconds</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_sequence_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_sequence_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">0</span>, totalSize=<span class="number">607</span>, rawDataSize=<span class="number">0</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.547</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, numRows=0, totalSize=607, rawDataSize=0]</code></p>
+<ul>
+<li><ol>
+<li>Add partition and mv file to partition path</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// add partition</span></span><br><span class="line"><span class="function">alter table analyze_sequence_test add <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cp files</span></span><br><span class="line">hadoop fs -cp hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_sequence_test/part_date=2019-02-19/* hdfs://sdg/user/hive/warehouse/dw.db/analyze_sequence_test/part_date=2019-02-20/</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ANALYZE TABLE analyze_sequence_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_sequence_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">20</span>&#125; stats: [numFiles=<span class="number">1</span>, totalSize=<span class="number">607</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.875</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>由于sequenceFile文件的head中没有存储row的相关信息，所以获取不到</code></p>
+<ul>
+<li><ol>
+<li>Insert into</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">hive&gt;  <span class="function">insert into table analyze_sequence_test <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> select `id`,`name` from analyze_text_copy where part_date</span>=<span class="string">'2019-02-21'</span>;</span><br><span class="line"></span><br><span class="line">Query ID = hadoop_20190221144141_f9ffbdc3-<span class="number">9e68</span>-<span class="number">43</span>d4-af7c-b8f883e84d3a</span><br><span class="line">Total jobs = <span class="number">3</span></span><br><span class="line">Launching Job <span class="number">1</span> out of <span class="number">3</span></span><br><span class="line">Number of reduce tasks is set to <span class="number">0</span> since there<span class="string">'s no reduce operator</span></span><br><span class="line"><span class="string">Starting Job = job_1535945194143_1279, Tracking URL = http://wh-8-211:8088/proxy/application_1535945194143_1279/</span></span><br><span class="line"><span class="string">Kill Command = /app/opt/cloudera/parcels/CDH-5.11.1-1.cdh5.11.1.p0.4/lib/hadoop/bin/hadoop job  -kill job_1535945194143_1279</span></span><br><span class="line"><span class="string">Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0</span></span><br><span class="line"><span class="string">2019-02-21 14:41:12,146 Stage-1 map = 0%,  reduce = 0%</span></span><br><span class="line"><span class="string">2019-02-21 14:41:18,387 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.94 sec</span></span><br><span class="line"><span class="string">MapReduce Total cumulative CPU time: 2 seconds 940 msec</span></span><br><span class="line"><span class="string">Ended Job = job_1535945194143_1279</span></span><br><span class="line"><span class="string">Stage-4 is selected by condition resolver.</span></span><br><span class="line"><span class="string">Stage-3 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Stage-5 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Moving data to: hdfs://sdg/user/hive/warehouse/dw.db/analyze_sequence_test/part_date=2019-02-19/.hive-staging_hive_2019-02-21_14-41-04_329_3570329183914133571-1/-ext-10000</span></span><br><span class="line"><span class="string">Loading data to table dw.analyze_sequence_test partition (part_date=2019-02-19)</span></span><br><span class="line"><span class="string">Partition dw.analyze_sequence_test&#123;part_date=2019-02-19&#125; stats: [numFiles=1, numRows=20, totalSize=607, rawDataSize=260]</span></span><br><span class="line"><span class="string">MapReduce Jobs Launched: </span></span><br><span class="line"><span class="string">Stage-Stage-1: Map: 1   Cumulative CPU: 2.94 sec   HDFS Read: 3954 HDFS Write: 709 SUCCESS</span></span><br><span class="line"><span class="string">Total MapReduce CPU Time Spent: 2 seconds 940 msec</span></span><br><span class="line"><span class="string">OK</span></span><br><span class="line"><span class="string">Time taken: 20.673 seconds</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_sequence_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_sequence_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">19</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">20</span>, totalSize=<span class="number">607</span>, rawDataSize=<span class="number">260</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.191</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, numRows=20, totalSize=607, rawDataSize=260]</code></p>
+<h3 id="OrcFile"><a href="#OrcFile" class="headerlink" title="OrcFile"></a>OrcFile</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create table</span></span><br><span class="line">CREATE TABLE `analyze_orc_test` (`id` string, `name` string) <span class="function">PARTITIONED <span class="title">BY</span> <span class="params">(`part_date` string)</span> </span></span><br><span class="line"><span class="function">ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.orc.OrcSerde' </span></span><br><span class="line"><span class="function">STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><ol>
+<li>Load file to table</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; LOAD DATA LOCAL INPATH <span class="string">'/home/hadoop/wxm/analyze_orc_test_file'</span> <span class="function">OVERWRITE INTO TABLE analyze_orc_test <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">Loading data to table dw.<span class="function">analyze_orc_test <span class="title">partition</span> <span class="params">(part_date=<span class="number">2019</span><span class="number">-02</span><span class="number">-21</span>)</span></span></span><br><span class="line"><span class="function">Partition dw.analyze_orc_test</span>&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">0</span>, totalSize=<span class="number">365</span>, rawDataSize=<span class="number">0</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.991</span> seconds</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_orc_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_orc_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">20</span>, totalSize=<span class="number">365</span>, rawDataSize=<span class="number">3600</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.661</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, numRows=20, totalSize=365, rawDataSize=3600]</code></p>
+<ul>
+<li><ol>
+<li>Add partition and mv file to partition path</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// add partition</span></span><br><span class="line"><span class="function">alter table analyze_orc_test add <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cp files</span></span><br><span class="line">hadoop fs -cp hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_orc_test/part_date=2019-02-19/* hdfs://sdg/user/hive/warehouse/dw.db/analyze_orc_test/part_date=2019-02-20/</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_orc_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_orc_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">20</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">20</span>, totalSize=<span class="number">365</span>, rawDataSize=<span class="number">3600</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.469</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, numRows=20, totalSize=365, rawDataSize=3600]</code></p>
+<ul>
+<li><ol>
+<li>Insert into</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">insert into table analyze_orc_test <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> select `id`,`name` from analyze_text_copy where part_date</span>=<span class="string">'2019-02-21'</span>;</span><br><span class="line"></span><br><span class="line">Query ID = hadoop_20190221145353_70e75ca0-<span class="number">210f</span>-<span class="number">48</span>d1-bbd0-b4b0ed01c0cf</span><br><span class="line">Total jobs = <span class="number">1</span></span><br><span class="line">Launching Job <span class="number">1</span> out of <span class="number">1</span></span><br><span class="line">Number of reduce tasks is set to <span class="number">0</span> since there<span class="string">'s no reduce operator</span></span><br><span class="line"><span class="string">Starting Job = job_1535945194143_1281, Tracking URL = http://wh-8-211:8088/proxy/application_1535945194143_1281/</span></span><br><span class="line"><span class="string">Kill Command = /app/opt/cloudera/parcels/CDH-5.11.1-1.cdh5.11.1.p0.4/lib/hadoop/bin/hadoop job  -kill job_1535945194143_1281</span></span><br><span class="line"><span class="string">Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0</span></span><br><span class="line"><span class="string">2019-02-21 14:53:53,124 Stage-1 map = 0%,  reduce = 0%</span></span><br><span class="line"><span class="string">2019-02-21 14:54:00,420 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 3.6 sec</span></span><br><span class="line"><span class="string">MapReduce Total cumulative CPU time: 3 seconds 600 msec</span></span><br><span class="line"><span class="string">Ended Job = job_1535945194143_1281</span></span><br><span class="line"><span class="string">Stage-4 is selected by condition resolver.</span></span><br><span class="line"><span class="string">Stage-3 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Stage-5 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Moving data to: hdfs://sdg/user/hive/warehouse/dw.db/analyze_orc_test/part_date=2019-02-19/.hive-staging_hive_2019-02-21_14-53-45_113_8780230061527813380-1/-ext-10000</span></span><br><span class="line"><span class="string">Loading data to table dw.analyze_orc_test partition (part_date=2019-02-19)</span></span><br><span class="line"><span class="string">Partition dw.analyze_orc_test&#123;part_date=2019-02-19&#125; stats: [numFiles=1, numRows=20, totalSize=365, rawDataSize=3600]</span></span><br><span class="line"><span class="string">MapReduce Jobs Launched: </span></span><br><span class="line"><span class="string">Stage-Stage-1: Map: 1   Cumulative CPU: 3.6 sec   HDFS Read: 3947 HDFS Write: 463 SUCCESS</span></span><br><span class="line"><span class="string">Total MapReduce CPU Time Spent: 3 seconds 600 msec</span></span><br><span class="line"><span class="string">OK</span></span><br><span class="line"><span class="string">Time taken: 18.592 seconds</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_orc_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_orc_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">19</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">20</span>, totalSize=<span class="number">365</span>, rawDataSize=<span class="number">3600</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.274</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, numRows=20, totalSize=365, rawDataSize=3600]</code></p>
+<h3 id="Parquet"><a href="#Parquet" class="headerlink" title="Parquet"></a>Parquet</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create table</span></span><br><span class="line">CREATE TABLE `analyze_parquet_test` (`id` string, `name` string) <span class="function">PARTITIONED <span class="title">BY</span> <span class="params">(`part_date` string)</span> </span></span><br><span class="line"><span class="function">ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' </span></span><br><span class="line"><span class="function">STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><ol>
+<li>Load file to table</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hive&gt;  LOAD DATA LOCAL INPATH <span class="string">'/home/hadoop/wxm/analyze_parquet_test_file'</span> <span class="function">OVERWRITE INTO TABLE analyze_parquet_test <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">Loading data to table dw.<span class="function">analyze_parquet_test <span class="title">partition</span> <span class="params">(part_date=<span class="number">2019</span><span class="number">-02</span><span class="number">-21</span>)</span></span></span><br><span class="line"><span class="function">Partition dw.analyze_parquet_test</span>&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">0</span>, totalSize=<span class="number">390</span>, rawDataSize=<span class="number">0</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.972</span> seconds</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_parquet_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_parquet_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">0</span>, totalSize=<span class="number">390</span>, rawDataSize=<span class="number">0</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.576</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, numRows=0, totalSize=390, rawDataSize=0]</code></p>
+<ul>
+<li><ol>
+<li>Add partition and mv file to partition path</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// add partition</span></span><br><span class="line"><span class="function">alter table analyze_parquet_test add <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cp files</span></span><br><span class="line">hadoop fs -cp hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_parquet_test/part_date=2019-02-19/* hdfs://sdg/user/hive/warehouse/dw.db/analyze_parquet_test/part_date=2019-02-20/</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_parquet_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-20'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_parquet_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">20</span>&#125; stats: [numFiles=<span class="number">1</span>, totalSize=<span class="number">390</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.799</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, totalSize=390]</code></p>
+<ul>
+<li><ol>
+<li>Insert into</li>
+</ol>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">insert into table analyze_parquet_test <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> select `id`,`name` from analyze_text_copy where part_date</span>=<span class="string">'2019-02-21'</span>;</span><br><span class="line"></span><br><span class="line">Query ID = hadoop_20190221150303_86874b16-b4c6-<span class="number">4e6</span>d-a2e6-c1a02aaae3b8</span><br><span class="line">Total jobs = <span class="number">3</span></span><br><span class="line">Launching Job <span class="number">1</span> out of <span class="number">3</span></span><br><span class="line">Number of reduce tasks is set to <span class="number">0</span> since there<span class="string">'s no reduce operator</span></span><br><span class="line"><span class="string">Starting Job = job_1535945194143_1282, Tracking URL = http://wh-8-211:8088/proxy/application_1535945194143_1282/</span></span><br><span class="line"><span class="string">Kill Command = /app/opt/cloudera/parcels/CDH-5.11.1-1.cdh5.11.1.p0.4/lib/hadoop/bin/hadoop job  -kill job_1535945194143_1282</span></span><br><span class="line"><span class="string">Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0</span></span><br><span class="line"><span class="string">2019-02-21 15:03:27,069 Stage-1 map = 0%,  reduce = 0%</span></span><br><span class="line"><span class="string">2019-02-21 15:03:35,527 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.98 sec</span></span><br><span class="line"><span class="string">MapReduce Total cumulative CPU time: 4 seconds 980 msec</span></span><br><span class="line"><span class="string">Ended Job = job_1535945194143_1282</span></span><br><span class="line"><span class="string">Stage-4 is selected by condition resolver.</span></span><br><span class="line"><span class="string">Stage-3 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Stage-5 is filtered out by condition resolver.</span></span><br><span class="line"><span class="string">Moving data to: hdfs://sdg/user/hive/warehouse/dw.db/analyze_parquet_test/part_date=2019-02-19/.hive-staging_hive_2019-02-21_15-03-17_975_7489031492557604858-1/-ext-10000</span></span><br><span class="line"><span class="string">Loading data to table dw.analyze_parquet_test partition (part_date=2019-02-19)</span></span><br><span class="line"><span class="string">Partition dw.analyze_parquet_test&#123;part_date=2019-02-19&#125; stats: [numFiles=1, numRows=20, totalSize=390, rawDataSize=40]</span></span><br><span class="line"><span class="string">MapReduce Jobs Launched: </span></span><br><span class="line"><span class="string">Stage-Stage-1: Map: 1   Cumulative CPU: 4.98 sec   HDFS Read: 4039 HDFS Write: 490 SUCCESS</span></span><br><span class="line"><span class="string">Total MapReduce CPU Time Spent: 4 seconds 980 msec</span></span><br><span class="line"><span class="string">OK</span></span><br><span class="line"><span class="string">Time taken: 22.794 seconds</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_parquet_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-19'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_parquet_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">19</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">20</span>, totalSize=<span class="number">390</span>, rawDataSize=<span class="number">40</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.226</span> seconds</span><br></pre></td></tr></table></figure>
+<p><code>stats: [numFiles=1, numRows=20, totalSize=390, rawDataSize=40]</code></p>
+<h2 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h2><p>通过上述测试可以看出,OrcFile文件的三种数据导入方式可以直接通过ANALYZE获取完整信息，其他文件格式默认只能获取到Size，除非<code>insert into</code>触发了<code>MapReduce</code>时才能获取RowCount</p>
+<p>ANALYZE耗时非常短，文件的统计数据一定是存储在某个地方不需要RunTime去计算<code>（查询了Hive MetaStore，并没有发现表Row的统计存储）</code>，猜想原因在于OrcFile的自描述Header里存储了对Row的统计信息，ANALYZE会直接获取自描述文件中的统计信息，可以看下文件的Dump</p>
+<h2 id="Hive-Orc-File-Dump"><a href="#Hive-Orc-File-Dump" class="headerlink" title="Hive Orc File Dump"></a>Hive Orc File Dump</h2><p><a href="https://cwiki.apache.org/confluence/display/Hive/LanguageManual+ORC" target="_blank" rel="noopener">Hive Orc Doc</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Orc Dump</span></span><br><span class="line"></span><br><span class="line">hive --orcfiledump hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_orc_test/part_date=2019-02-19/000000_0</span></span><br><span class="line"></span><br><span class="line"><span class="function">Java <span class="title">HotSpot</span><span class="params">(TM)</span> 64-Bit Server VM warning: ignoring option MaxPermSize</span>=<span class="number">512</span>M; support was removed in <span class="number">8.0</span></span><br><span class="line"><span class="function">Java <span class="title">HotSpot</span><span class="params">(TM)</span> 64-Bit Server VM warning: ignoring option MaxPermSize</span>=<span class="number">512</span>M; support was removed in <span class="number">8.0</span></span><br><span class="line">Structure <span class="keyword">for</span> hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_orc_test/part_date=2019-02-19/000000_0</span></span><br><span class="line">File Version: <span class="number">0.12</span> with HIVE_8732</span><br><span class="line"><span class="number">19</span>/<span class="number">02</span>/<span class="number">21</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">02</span> INFO orc.ReaderImpl: Reading ORC rows from hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_orc_test/part_date=2019-02-19/000000_0 with &#123;include: null, offset: 0, length: 9223372036854775807&#125;</span></span><br><span class="line">Rows: <span class="number">20</span></span><br><span class="line">Compression: ZLIB</span><br><span class="line">Compression size: <span class="number">262144</span></span><br><span class="line">Type: struct&lt;_col0:string,_col1:string&gt;</span><br><span class="line"></span><br><span class="line">Stripe Statistics:</span><br><span class="line">  Stripe <span class="number">1</span>:</span><br><span class="line">    Column <span class="number">0</span>: count: <span class="number">20</span> hasNull: <span class="keyword">false</span></span><br><span class="line">    Column <span class="number">1</span>: count: <span class="number">20</span> hasNull: <span class="keyword">false</span> min: <span class="number">1</span> max: <span class="number">2</span> sum: <span class="number">20</span></span><br><span class="line">    Column <span class="number">2</span>: count: <span class="number">20</span> hasNull: <span class="keyword">false</span> min: wxmimperio1 max: wxmimperio2 sum: <span class="number">220</span></span><br><span class="line"></span><br><span class="line">File Statistics:</span><br><span class="line">  Column <span class="number">0</span>: count: <span class="number">20</span> hasNull: <span class="keyword">false</span></span><br><span class="line">  Column <span class="number">1</span>: count: <span class="number">20</span> hasNull: <span class="keyword">false</span> min: <span class="number">1</span> max: <span class="number">2</span> sum: <span class="number">20</span></span><br><span class="line">  Column <span class="number">2</span>: count: <span class="number">20</span> hasNull: <span class="keyword">false</span> min: wxmimperio1 max: wxmimperio2 sum: <span class="number">220</span></span><br><span class="line"></span><br><span class="line">Stripes:</span><br><span class="line">  Stripe: offset: <span class="number">3</span> data: <span class="number">52</span> rows: <span class="number">20</span> tail: <span class="number">57</span> index: <span class="number">77</span></span><br><span class="line">    Stream: column <span class="number">0</span> section ROW_INDEX start: <span class="number">3</span> length <span class="number">11</span></span><br><span class="line">    Stream: column <span class="number">1</span> section ROW_INDEX start: <span class="number">14</span> length <span class="number">26</span></span><br><span class="line">    Stream: column <span class="number">2</span> section ROW_INDEX start: <span class="number">40</span> length <span class="number">40</span></span><br><span class="line">    Stream: column <span class="number">1</span> section DATA start: <span class="number">80</span> length <span class="number">8</span></span><br><span class="line">    Stream: column <span class="number">1</span> section LENGTH start: <span class="number">88</span> length <span class="number">6</span></span><br><span class="line">    Stream: column <span class="number">1</span> section DICTIONARY_DATA start: <span class="number">94</span> length <span class="number">5</span></span><br><span class="line">    Stream: column <span class="number">2</span> section DATA start: <span class="number">99</span> length <span class="number">8</span></span><br><span class="line">    Stream: column <span class="number">2</span> section LENGTH start: <span class="number">107</span> length <span class="number">6</span></span><br><span class="line">    Stream: column <span class="number">2</span> section DICTIONARY_DATA start: <span class="number">113</span> length <span class="number">19</span></span><br><span class="line">    Encoding column <span class="number">0</span>: DIRECT</span><br><span class="line">    Encoding column <span class="number">1</span>: DICTIONARY_V2[<span class="number">2</span>]</span><br><span class="line">    Encoding column <span class="number">2</span>: DICTIONARY_V2[<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">File length: <span class="number">365</span> bytes</span><br><span class="line">Padding length: <span class="number">0</span> bytes</span><br><span class="line">Padding ratio: <span class="number">0</span>%</span><br></pre></td></tr></table></figure>
+<p><code>可以看到Dump信息里面有Rows: 20的信息，所以可以确定ANALYZE 命令是分析了file的meta</code></p>
+<h2 id="Parquet-File-Dump"><a href="#Parquet-File-Dump" class="headerlink" title="Parquet File Dump"></a>Parquet File Dump</h2><p><a href="https://github.com/apache/parquet-mr/tree/master/parquet-tools" target="_blank" rel="noopener">Parquet Tools</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">hadoop jar parquet-tools-<span class="number">1.5</span>.0.jar dump hdfs:<span class="comment">//sdg/user/hive/warehouse/dw.db/analyze_parquet_test/part_date=2019-02-19/000000_0</span></span><br><span class="line"></span><br><span class="line">row group <span class="number">0</span> </span><br><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">id:    BINARY UNCOMPRESSED DO:<span class="number">0</span> FPO:<span class="number">4</span> SZ:<span class="number">61</span>/<span class="number">61</span>/<span class="number">1.00</span> VC:<span class="number">20</span> ENC:BIT_PACK [more]...</span><br><span class="line">name:  BINARY UNCOMPRESSED DO:<span class="number">0</span> FPO:<span class="number">65</span> SZ:<span class="number">101</span>/<span class="number">101</span>/<span class="number">1.00</span> VC:<span class="number">20</span> ENC:BIT_P [more]...</span><br><span class="line"></span><br><span class="line">    id TV=<span class="number">20</span> RL=<span class="number">0</span> DL=<span class="number">1</span> DS:   <span class="number">2</span> DE:PLAIN_DICTIONARY</span><br><span class="line">    ----------------------------------------------------------------------------</span><br><span class="line">    page <span class="number">0</span>:                   DLE:RLE RLE:BIT_PACKED VLE:PLAIN_DICTIONARY SZ:<span class="number">11</span> [more]...</span><br><span class="line"></span><br><span class="line">    name TV=<span class="number">20</span> RL=<span class="number">0</span> DL=<span class="number">1</span> DS: <span class="number">2</span> DE:PLAIN_DICTIONARY</span><br><span class="line">    ----------------------------------------------------------------------------</span><br><span class="line">    page <span class="number">0</span>:                   DLE:RLE RLE:BIT_PACKED VLE:PLAIN_DICTIONARY SZ:<span class="number">11</span> [more]...</span><br><span class="line"></span><br><span class="line">BINARY id </span><br><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">*** row group <span class="number">1</span> of <span class="number">1</span>, values <span class="number">1</span> to <span class="number">20</span> *** </span><br><span class="line">value <span class="number">1</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">2</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">3</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">4</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">5</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">6</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">7</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">8</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">9</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">10</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">11</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">12</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">13</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">14</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">15</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">16</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">17</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">18</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line">value <span class="number">19</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">1</span></span><br><span class="line">value <span class="number">20</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:<span class="number">2</span></span><br><span class="line"></span><br><span class="line">BINARY name </span><br><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">*** row group <span class="number">1</span> of <span class="number">1</span>, values <span class="number">1</span> to <span class="number">20</span> *** </span><br><span class="line">value <span class="number">1</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">2</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">3</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">4</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">5</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">6</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">7</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">8</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">9</span>:  R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">10</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">11</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">12</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">13</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">14</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">15</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">16</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">17</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">18</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br><span class="line">value <span class="number">19</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio1</span><br><span class="line">value <span class="number">20</span>: R:<span class="number">0</span> D:<span class="number">1</span> V:wxmimperio2</span><br></pre></td></tr></table></figure>
+<p><code>虽然看到Dump文件中有TV=20，但是不像ORC File 有完整的Row信息，meta还是基于列的，所以读取不到</code></p>
+<h2 id="MapReduce-统计"><a href="#MapReduce-统计" class="headerlink" title="MapReduce 统计"></a>MapReduce 统计</h2><blockquote>
+<p>我们想要获取完整的表统计信息，可以将<code>ANALYZE</code>命令的<code>noscan</code>去掉执行，则会触发一个MapReduce，这个MR会对表文件做一个统计，并将结果存储到Hive MetaStore中，后续在用<code>ANALYZE</code>分析就会直接得到结果</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_parquet_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span> COMPUTE STATISTICS</span>;</span><br><span class="line"></span><br><span class="line">Query ID = hadoop_20190221173030_d9cc4e9c-<span class="number">73f</span>6-<span class="number">403</span>e-bfbc-c3cf381b373d</span><br><span class="line">Total jobs = <span class="number">1</span></span><br><span class="line">Launching Job <span class="number">1</span> out of <span class="number">1</span></span><br><span class="line">Number of reduce tasks is set to <span class="number">0</span> since there<span class="string">'s no reduce operator</span></span><br><span class="line"><span class="string">Starting Job = job_1535945194143_1284, Tracking URL = http://wh-8-211:8088/proxy/application_1535945194143_1284/</span></span><br><span class="line"><span class="string">Kill Command = /app/opt/cloudera/parcels/CDH-5.11.1-1.cdh5.11.1.p0.4/lib/hadoop/bin/hadoop job  -kill job_1535945194143_1284</span></span><br><span class="line"><span class="string">Hadoop job information for Stage-0: number of mappers: 1; number of reducers: 0</span></span><br><span class="line"><span class="string">2019-02-21 17:30:54,865 Stage-0 map = 0%,  reduce = 0%</span></span><br><span class="line"><span class="string">2019-02-21 17:31:02,248 Stage-0 map = 100%,  reduce = 0%, Cumulative CPU 4.21 sec</span></span><br><span class="line"><span class="string">MapReduce Total cumulative CPU time: 4 seconds 210 msec</span></span><br><span class="line"><span class="string">Ended Job = job_1535945194143_1284</span></span><br><span class="line"><span class="string">Partition dw.analyze_parquet_test&#123;part_date=2019-02-21&#125; stats: [numFiles=1, numRows=20, totalSize=390, rawDataSize=60]</span></span><br><span class="line"><span class="string">MapReduce Jobs Launched: </span></span><br><span class="line"><span class="string">Stage-Stage-0: Map: 1   Cumulative CPU: 4.21 sec   HDFS Read: 2931 HDFS Write: 100 SUCCESS</span></span><br><span class="line"><span class="string">Total MapReduce CPU Time Spent: 4 seconds 210 msec</span></span><br><span class="line"><span class="string">OK</span></span><br><span class="line"><span class="string">Time taken: 21.214 seconds</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hive&gt; <span class="function">ANALYZE TABLE analyze_parquet_test <span class="title">PARTITION</span><span class="params">(part_date=<span class="string">'2019-02-21'</span>)</span> COMPUTE STATISTICS noscan</span>;</span><br><span class="line"></span><br><span class="line">Partition dw.analyze_parquet_test&#123;part_date=<span class="number">2019</span>-<span class="number">02</span>-<span class="number">21</span>&#125; stats: [numFiles=<span class="number">1</span>, numRows=<span class="number">20</span>, totalSize=<span class="number">390</span>, rawDataSize=<span class="number">60</span>]</span><br><span class="line">OK</span><br><span class="line">Time taken: <span class="number">0.219</span> seconds</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我们可以看到利用<code>ANALYZE</code>命令可以快速帮助我们分析一张表的基本统计信息，但也有缺点：<code>如果是分区表，写分区则会列出这个分区的统计，不写分区会列出所有分区的数据列表；并没有一个队整张表进行的汇总统计</code>，所以通常需要配合最开始提到的两种常用方法</p>
+<p>对于OrcFile则直接可以用<code>ANALYZE</code>命令分析，如果是TextFile、SequenceFile、ParquetFile，则需要确保Hive 表的数据加载方式是通过MapReduce，其他方式Load数据的则需要执行<code>noscan 的ANALYZE（可以准备离线任务，每天对非MR Load的数据表执行一次）；也可以在执行ETL的时候，将统计作为一个回调自动完成</code></p>
+<ul>
+<li>Size</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> size = FileSystem.getContentSummary(<span class="keyword">new</span> Path(tablePath)).getLength();</span><br></pre></td></tr></table></figure>
+<p><code>此方法可以获取一个表路径、分区路径以及具体文件的Size大小；Size是压缩后的值</code></p>
+<p><code>全表的统计可以将tablePath截止到tableName就可以，获取某个分区的统计，则tablePath精确到分区目录</code></p>
+<ul>
+<li>RowCount</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ANALYZE TABLE tablName [PARTITION(part)] COMPUTE STATISTICS noscan;</span><br></pre></td></tr></table></figure>
+<p><code>此方法会列出所有表的分区统计，解析这些统计并将numRows加总就是全表的RowCount；如果是非分区表或只想获取当前分区的统计，则只解析一条记录</code></p>
+<hr>
+<blockquote>
+<p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/19/SpringBoot-Java8Date/" rel="next" title="SpringBoot-Java8Date">
+                <i class="fa fa-chevron-left"></i> SpringBoot-Java8Date
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://wx1.sinaimg.cn/mw690/0060lm7Tly1fwf44ggkonj306o06owf1.jpg"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">50</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#两种常规方式统计："><span class="nav-number">1.</span> <span class="nav-text">两种常规方式统计：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ANALYZE-方式统计"><span class="nav-number">2.</span> <span class="nav-text">ANALYZE 方式统计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TextFile"><span class="nav-number">2.1.</span> <span class="nav-text">TextFile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SequenceFile"><span class="nav-number">2.2.</span> <span class="nav-text">SequenceFile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OrcFile"><span class="nav-number">2.3.</span> <span class="nav-text">OrcFile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parquet"><span class="nav-number">2.4.</span> <span class="nav-text">Parquet</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Result"><span class="nav-number">3.</span> <span class="nav-text">Result</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-Orc-File-Dump"><span class="nav-number">4.</span> <span class="nav-text">Hive Orc File Dump</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parquet-File-Dump"><span class="nav-number">5.</span> <span class="nav-text">Parquet File Dump</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MapReduce-统计"><span class="nav-number">6.</span> <span class="nav-text">MapReduce 统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
