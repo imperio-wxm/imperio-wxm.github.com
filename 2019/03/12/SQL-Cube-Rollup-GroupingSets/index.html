@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="大数据,Hive,SQL," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="在SQL语法中，经常用到GROUP BY来做多维度的聚合。但是遇到多个维度并列聚合的方式，通常是将每个维度用GROUP BY统计后，再使用UNION语法将结果集汇总，但是这样的SQL执行计划会在数据INPUT端从存储引擎获取多次，导致重复获取数据，浪费机器资源。CUBE、ROLLUP、GROUPING的语法可以更高效的做到多维度的聚合">
+<meta name="keywords" content="大数据,Hive,SQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL中的CUBE、ROLLUP、GROUPING用法">
+<meta property="og:url" content="http://imperio-wxm.github.io/2019/03/12/SQL-Cube-Rollup-GroupingSets/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="在SQL语法中，经常用到GROUP BY来做多维度的聚合。但是遇到多个维度并列聚合的方式，通常是将每个维度用GROUP BY统计后，再使用UNION语法将结果集汇总，但是这样的SQL执行计划会在数据INPUT端从存储引擎获取多次，导致重复获取数据，浪费机器资源。CUBE、ROLLUP、GROUPING的语法可以更高效的做到多维度的聚合">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-03-13T13:58:46.630Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SQL中的CUBE、ROLLUP、GROUPING用法">
+<meta name="twitter:description" content="在SQL语法中，经常用到GROUP BY来做多维度的聚合。但是遇到多个维度并列聚合的方式，通常是将每个维度用GROUP BY统计后，再使用UNION语法将结果集汇总，但是这样的SQL执行计划会在数据INPUT端从存储引擎获取多次，导致重复获取数据，浪费机器资源。CUBE、ROLLUP、GROUPING的语法可以更高效的做到多维度的聚合">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2019/03/12/SQL-Cube-Rollup-GroupingSets/"/>
+
+
+
+
+
+  <title>SQL中的CUBE、ROLLUP、GROUPING用法 | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/03/12/SQL-Cube-Rollup-GroupingSets/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://wx1.sinaimg.cn/mw690/0060lm7Tly1fwf44ggkonj306o06owf1.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SQL中的CUBE、ROLLUP、GROUPING用法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-03-12T20:07:43+08:00">
+                2019-03-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/Hive/" itemprop="url" rel="index">
+                    <span itemprop="name">Hive</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i> Reading
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>Times
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>在SQL语法中，经常用到GROUP BY来做多维度的聚合。但是遇到多个维度并列聚合的方式，通常是将每个维度用GROUP BY统计后，再使用UNION语法将结果集汇总，但是这样的SQL执行计划会在数据INPUT端从存储引擎获取多次，导致重复获取数据，浪费机器资源。CUBE、ROLLUP、GROUPING的语法可以更高效的做到多维度的聚合</p>
+</blockquote>
+<a id="more"></a>
+<table>
+<thead>
+<tr>
+<th>SoftWare</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Presto</td>
+<td>0.149</td>
+</tr>
+<tr>
+<td>Hive</td>
+<td>1.1.0-cdh5.11.1</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>1.8.0_121</td>
+</tr>
+</tbody>
+</table>
+<p><code>此文会以Presto On Hive 的方式演示实例，Mysql不同版本支持不同，Oracle、Sql Server的语法方式略有差异</code></p>
+<h1 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h1><h2 id="建测试表"><a href="#建测试表" class="headerlink" title="建测试表"></a>建测试表</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`wxm_test_fun`</span>(</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span> <span class="keyword">COMMENT</span> <span class="string">'null'</span>, </span><br><span class="line">  <span class="string">`name`</span> <span class="keyword">string</span> <span class="keyword">COMMENT</span> <span class="string">'null'</span>, </span><br><span class="line">  <span class="string">`area_id`</span> <span class="built_in">int</span> <span class="keyword">COMMENT</span> <span class="string">'null'</span>, </span><br><span class="line">  <span class="string">`group_id`</span> <span class="built_in">int</span> <span class="keyword">COMMENT</span> <span class="string">'null'</span>)</span><br><span class="line"><span class="keyword">COMMENT</span> <span class="string">'wxm_test_fun'</span></span><br><span class="line"><span class="keyword">ROW</span> <span class="keyword">FORMAT</span> SERDE </span><br><span class="line">  <span class="string">'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'</span> </span><br><span class="line"><span class="keyword">WITH</span> SERDEPROPERTIES ( </span><br><span class="line">  <span class="string">'field.delim'</span>=<span class="string">'\t'</span>, </span><br><span class="line">  <span class="string">'serialization.format'</span>=<span class="string">'\t'</span>) </span><br><span class="line"><span class="keyword">STORED</span> <span class="keyword">AS</span> INPUTFORMAT </span><br><span class="line">  <span class="string">'org.apache.hadoop.mapred.TextInputFormat'</span> </span><br><span class="line">OUTPUTFORMAT </span><br><span class="line">  <span class="string">'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="准备数据"><a href="#准备数据" class="headerlink" title="准备数据"></a>准备数据</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1	wxm1	000	111</span><br><span class="line">1	wxm2	001	112</span><br><span class="line">2	wxm1	000	111</span><br><span class="line">2	wxm2	001	112</span><br><span class="line">3	wxm3	000	111</span><br><span class="line">3	wxm3	001	112</span><br><span class="line">4	wxm4	000	111</span><br><span class="line">1	wxm4	000	112</span><br><span class="line">4	wxm4	002	111</span><br><span class="line">5	wxm1	003	113</span><br></pre></td></tr></table></figure>
+<h2 id="说明聚合维度"><a href="#说明聚合维度" class="headerlink" title="说明聚合维度"></a>说明聚合维度</h2><blockquote>
+<p>四个维度：id（0），name（1），area_id（2），group_id（3）</p>
+</blockquote>
+<hr>
+<h1 id="CUBE"><a href="#CUBE" class="headerlink" title="CUBE"></a>CUBE</h1><blockquote>
+<p>cube会对所有聚合可能进行计算：CUBE（A,B,C），会计算group by A union group by B group by C union group by （AB） union group by （AC） union group by （BC） union group by （BC） union all （ABC）</p>
+<p>分组的次数=2ⁿ-1；n为待分组的字段个数</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">presto:temp&gt; select id,name,area_id,count(*) count from wxm_test_fun group by cube(id,name,area_id) order by id,name,area_id;</span><br><span class="line"></span><br><span class="line">  id  | name | area_id | count </span><br><span class="line"><span class="comment">------+------+---------+-------</span></span><br><span class="line">    1 | wxm1 |       0 |     1 </span><br><span class="line">    1 | wxm1 | NULL    |     1 </span><br><span class="line">    1 | wxm2 |       1 |     1 </span><br><span class="line">    1 | wxm2 | NULL    |     1 </span><br><span class="line">    1 | wxm4 |       0 |     1 </span><br><span class="line">    1 | wxm4 | NULL    |     1 </span><br><span class="line">    1 | NULL |       0 |     2 </span><br><span class="line">    1 | NULL |       1 |     1 </span><br><span class="line">    1 | NULL | NULL    |     3 </span><br><span class="line">    2 | wxm1 |       0 |     1 </span><br><span class="line">    2 | wxm1 | NULL    |     1 </span><br><span class="line">    2 | wxm2 |       1 |     1 </span><br><span class="line">    2 | wxm2 | NULL    |     1 </span><br><span class="line">    2 | NULL |       0 |     1 </span><br><span class="line">    2 | NULL |       1 |     1 </span><br><span class="line">    2 | NULL | NULL    |     2 </span><br><span class="line">    3 | wxm3 |       0 |     1 </span><br><span class="line">    3 | wxm3 |       1 |     1 </span><br><span class="line">    3 | wxm3 | NULL    |     2 </span><br><span class="line">    3 | NULL |       0 |     1 </span><br><span class="line">    3 | NULL |       1 |     1 </span><br><span class="line">    3 | NULL | NULL    |     2 </span><br><span class="line">    4 | wxm4 |       0 |     1 </span><br><span class="line">    4 | wxm4 |       2 |     1 </span><br><span class="line">    4 | wxm4 | NULL    |     2 </span><br><span class="line">    4 | NULL |       0 |     1 </span><br><span class="line">    4 | NULL |       2 |     1 </span><br><span class="line">    4 | NULL | NULL    |     2 </span><br><span class="line">    5 | wxm1 |       3 |     1 </span><br><span class="line">    5 | wxm1 | NULL    |     1 </span><br><span class="line">    5 | NULL |       3 |     1 </span><br><span class="line">    5 | NULL | NULL    |     1 </span><br><span class="line"> NULL | wxm1 |       0 |     2 </span><br><span class="line"> NULL | wxm1 |       3 |     1 </span><br><span class="line"> NULL | wxm1 | NULL    |     3 </span><br><span class="line"> NULL | wxm2 |       1 |     2 </span><br><span class="line"> NULL | wxm2 | NULL    |     2 </span><br><span class="line"> NULL | wxm3 |       0 |     1 </span><br><span class="line"> NULL | wxm3 |       1 |     1 </span><br><span class="line"> NULL | wxm3 | NULL    |     2 </span><br><span class="line"> NULL | wxm4 |       0 |     2 </span><br><span class="line"> NULL | wxm4 |       2 |     1 </span><br><span class="line"> NULL | wxm4 | NULL    |     3 </span><br><span class="line"> NULL | NULL |       0 |     5 </span><br><span class="line"> NULL | NULL |       1 |     3 </span><br><span class="line"> NULL | NULL |       2 |     1 </span><br><span class="line"> NULL | NULL |       3 |     1 </span><br><span class="line"> NULL | NULL | NULL    |    10 </span><br><span class="line">(48 rows)</span><br><span class="line"></span><br><span class="line">Query 20190312_082310_01544_wwvpi, FINISHED, 2 nodes</span><br><span class="line">Splits: 4 total, 4 done (100.00%)</span><br><span class="line">0:00 [10 rows, 158B] [23 rows/s, 374B/s]</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2的3次方减1 = 8个维度的整合</p>
+</blockquote>
+<ul>
+<li>等价于8个union</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">presto:temp&gt; select * from (</span><br><span class="line">          -&gt; select id,null name,null area_id,count(*) count from wxm_test_fun group by id</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select null,name,null,count(*) count from wxm_test_fun group by name</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select null,null,area_id,count(*) count from wxm_test_fun group by area_id</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select id,name,area_id,count(*) count from wxm_test_fun group by id,name,area_id</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select id,name,null,count(*) count from wxm_test_fun group by id,name</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select null,name,area_id,count(*) count from wxm_test_fun group by name,area_id</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select id,null,area_id,count(*) count from wxm_test_fun group by id,area_id</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select null,null,null,count(*) count from wxm_test_fun) order by id,name,area_id;</span><br><span class="line">  id  | name | area_id | count </span><br><span class="line"><span class="comment">------+------+---------+-------</span></span><br><span class="line">    1 | wxm1 |       0 |     1 </span><br><span class="line">    1 | wxm1 | NULL    |     1 </span><br><span class="line">    1 | wxm2 |       1 |     1 </span><br><span class="line">    1 | wxm2 | NULL    |     1 </span><br><span class="line">    1 | wxm4 |       0 |     1 </span><br><span class="line">    1 | wxm4 | NULL    |     1 </span><br><span class="line">    1 | NULL |       0 |     2 </span><br><span class="line">    1 | NULL |       1 |     1 </span><br><span class="line">    1 | NULL | NULL    |     3 </span><br><span class="line">    2 | wxm1 |       0 |     1 </span><br><span class="line">    2 | wxm1 | NULL    |     1 </span><br><span class="line">    2 | wxm2 |       1 |     1 </span><br><span class="line">    2 | wxm2 | NULL    |     1 </span><br><span class="line">    2 | NULL |       0 |     1 </span><br><span class="line">    2 | NULL |       1 |     1 </span><br><span class="line">    2 | NULL | NULL    |     2 </span><br><span class="line">    3 | wxm3 |       0 |     1 </span><br><span class="line">    3 | wxm3 |       1 |     1 </span><br><span class="line">    3 | wxm3 | NULL    |     2 </span><br><span class="line">    3 | NULL |       0 |     1 </span><br><span class="line">    3 | NULL |       1 |     1 </span><br><span class="line">    3 | NULL | NULL    |     2 </span><br><span class="line">    4 | wxm4 |       0 |     1 </span><br><span class="line">    4 | wxm4 |       2 |     1 </span><br><span class="line">    4 | wxm4 | NULL    |     2 </span><br><span class="line">    4 | NULL |       0 |     1 </span><br><span class="line">    4 | NULL |       2 |     1 </span><br><span class="line">    4 | NULL | NULL    |     2 </span><br><span class="line">    5 | wxm1 |       3 |     1 </span><br><span class="line">    5 | wxm1 | NULL    |     1 </span><br><span class="line">    5 | NULL |       3 |     1 </span><br><span class="line">    5 | NULL | NULL    |     1 </span><br><span class="line"> NULL | wxm1 |       0 |     2 </span><br><span class="line"> NULL | wxm1 |       3 |     1 </span><br><span class="line"> NULL | wxm1 | NULL    |     3 </span><br><span class="line"> NULL | wxm2 |       1 |     2 </span><br><span class="line"> NULL | wxm2 | NULL    |     2 </span><br><span class="line"> NULL | wxm3 |       0 |     1 </span><br><span class="line"> NULL | wxm3 |       1 |     1 </span><br><span class="line"> NULL | wxm3 | NULL    |     2 </span><br><span class="line"> NULL | wxm4 |       0 |     2 </span><br><span class="line"> NULL | wxm4 |       2 |     1 </span><br><span class="line"> NULL | wxm4 | NULL    |     3 </span><br><span class="line"> NULL | NULL |       0 |     5 </span><br><span class="line"> NULL | NULL |       1 |     3 </span><br><span class="line"> NULL | NULL |       2 |     1 </span><br><span class="line"> NULL | NULL |       3 |     1 </span><br><span class="line"> NULL | NULL | NULL    |    10 </span><br><span class="line">(48 rows)</span><br><span class="line"></span><br><span class="line">Query 20190312_082943_01568_wwvpi, FINISHED, 2 nodes</span><br><span class="line">Splits: 42 total, 42 done (100.00%)</span><br><span class="line">0:01 [80 rows, 1.23KB] [101 rows/s, 1.57KB/s]</span><br></pre></td></tr></table></figure>
+<h1 id="ROLLUP"><a href="#ROLLUP" class="headerlink" title="ROLLUP"></a>ROLLUP</h1><blockquote>
+<p>与CUBE不同，ROLLUP仅仅只展开第一层的维度聚合：分组的次数=待分组的字段数+1</p>
+<p>cube会对所有聚合可能进行计算：CUBE（A,B,C），会计算group by y （ABC） union group by （AB） group by C union group by NULL</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">presto:temp&gt;  select name,area_id,group_id,count(*) count from wxm_test_fun group by rollup(name,area_id,group_id) order by name,area_id,group_id,count(*);</span><br><span class="line"></span><br><span class="line"> name | area_id | group_id | count </span><br><span class="line"><span class="comment">------+---------+----------+-------</span></span><br><span class="line"> wxm1 |       0 |      111 |     2 </span><br><span class="line"> wxm1 |       0 | NULL     |     2 </span><br><span class="line"> wxm1 |       3 |      113 |     1 </span><br><span class="line"> wxm1 |       3 | NULL     |     1 </span><br><span class="line"> wxm1 | NULL    | NULL     |     3 </span><br><span class="line"> wxm2 |       1 |      112 |     2 </span><br><span class="line"> wxm2 |       1 | NULL     |     2 </span><br><span class="line"> wxm2 | NULL    | NULL     |     2 </span><br><span class="line"> wxm3 |       0 |      111 |     1 </span><br><span class="line"> wxm3 |       0 | NULL     |     1 </span><br><span class="line"> wxm3 |       1 |      112 |     1 </span><br><span class="line"> wxm3 |       1 | NULL     |     1 </span><br><span class="line"> wxm3 | NULL    | NULL     |     2 </span><br><span class="line"> wxm4 |       0 |      111 |     1 </span><br><span class="line"> wxm4 |       0 |      112 |     1 </span><br><span class="line"> wxm4 |       0 | NULL     |     2 </span><br><span class="line"> wxm4 |       2 |      111 |     1 </span><br><span class="line"> wxm4 |       2 | NULL     |     1 </span><br><span class="line"> wxm4 | NULL    | NULL     |     3 </span><br><span class="line"> NULL | NULL    | NULL     |    10 </span><br><span class="line">(20 rows)</span><br><span class="line"></span><br><span class="line">Query 20190312_085457_01652_wwvpi, FINISHED, 2 nodes</span><br><span class="line">Splits: 4 total, 4 done (100.00%)</span><br><span class="line">0:00 [10 rows, 158B] [29 rows/s, 458B/s]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>等价于3 + 1 = 4个union聚合</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">presto:temp&gt; select * from (</span><br><span class="line">          -&gt; select name,null area_id,null group_id,count(*) count from wxm_test_fun group by name</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select name,area_id,null group_id,count(*) count from wxm_test_fun group by name,area_id</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select name,area_id,group_id,count(*) count from wxm_test_fun group by name,area_id,group_id</span><br><span class="line">          -&gt; union </span><br><span class="line">          -&gt; select null name,null area_id,null group_id,count(*) count from wxm_test_fun) order by name,area_id,group_id;</span><br><span class="line">          </span><br><span class="line"> name | area_id | group_id | count </span><br><span class="line"><span class="comment">------+---------+----------+-------</span></span><br><span class="line"> wxm1 |       0 |      111 |     2 </span><br><span class="line"> wxm1 |       0 | NULL     |     2 </span><br><span class="line"> wxm1 |       3 |      113 |     1 </span><br><span class="line"> wxm1 |       3 | NULL     |     1 </span><br><span class="line"> wxm1 | NULL    | NULL     |     3 </span><br><span class="line"> wxm2 |       1 |      112 |     2 </span><br><span class="line"> wxm2 |       1 | NULL     |     2 </span><br><span class="line"> wxm2 | NULL    | NULL     |     2 </span><br><span class="line"> wxm3 |       0 |      111 |     1 </span><br><span class="line"> wxm3 |       0 | NULL     |     1 </span><br><span class="line"> wxm3 |       1 |      112 |     1 </span><br><span class="line"> wxm3 |       1 | NULL     |     1 </span><br><span class="line"> wxm3 | NULL    | NULL     |     2 </span><br><span class="line"> wxm4 |       0 |      111 |     1 </span><br><span class="line"> wxm4 |       0 |      112 |     1 </span><br><span class="line"> wxm4 |       0 | NULL     |     2 </span><br><span class="line"> wxm4 |       2 |      111 |     1 </span><br><span class="line"> wxm4 |       2 | NULL     |     1 </span><br><span class="line"> wxm4 | NULL    | NULL     |     3 </span><br><span class="line"> NULL | NULL    | NULL     |    10 </span><br><span class="line">(20 rows)</span><br><span class="line"></span><br><span class="line">Query 20190312_090034_01674_wwvpi, FINISHED, 2 nodes</span><br><span class="line">Splits: 22 total, 22 done (100.00%)</span><br><span class="line">0:01 [40 rows, 632B] [50 rows/s, 795B/s]</span><br></pre></td></tr></table></figure>
+<h1 id="GROUPING-SETS"><a href="#GROUPING-SETS" class="headerlink" title="GROUPING SETS"></a>GROUPING SETS</h1><blockquote>
+<p>对任意指定分组进行聚合</p>
+<p>GROUPING SETS（（AB）,（A）,（B），（）），仅仅group by （AB） union group by A union group by B union group by null</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">presto:temp&gt; select id,name,area_id,count(*) count from wxm_test_fun group by grouping sets((id,name),name,area_id,()) order by id,name,area_id;</span><br><span class="line"></span><br><span class="line">  id  | name | area_id | count </span><br><span class="line"><span class="comment">------+------+---------+-------</span></span><br><span class="line">    1 | wxm1 | NULL    |     1 </span><br><span class="line">    1 | wxm2 | NULL    |     1 </span><br><span class="line">    1 | wxm4 | NULL    |     1 </span><br><span class="line">    2 | wxm1 | NULL    |     1 </span><br><span class="line">    2 | wxm2 | NULL    |     1 </span><br><span class="line">    3 | wxm3 | NULL    |     2 </span><br><span class="line">    4 | wxm4 | NULL    |     2 </span><br><span class="line">    5 | wxm1 | NULL    |     1 </span><br><span class="line"> NULL | wxm1 | NULL    |     3 </span><br><span class="line"> NULL | wxm2 | NULL    |     2 </span><br><span class="line"> NULL | wxm3 | NULL    |     2 </span><br><span class="line"> NULL | wxm4 | NULL    |     3 </span><br><span class="line"> NULL | NULL |       0 |     5 </span><br><span class="line"> NULL | NULL |       1 |     3 </span><br><span class="line"> NULL | NULL |       2 |     1 </span><br><span class="line"> NULL | NULL |       3 |     1 </span><br><span class="line"> NULL | NULL | NULL    |    10 </span><br><span class="line">(17 rows)</span><br><span class="line"></span><br><span class="line">Query 20190312_091338_01714_wwvpi, FINISHED, 2 nodes</span><br><span class="line">Splits: 4 total, 4 done (100.00%)</span><br><span class="line">0:00 [10 rows, 158B] [30 rows/s, 485B/s]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>等价于grouping sets中的字段union group by</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">presto:temp&gt; select * from (</span><br><span class="line">          -&gt; select id,name,null area_id,count(*) count from wxm_test_fun group by id,name</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select null id,name,null area_id,count(*) count from wxm_test_fun group by name</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select null id,null name,area_id,count(*) count from wxm_test_fun group by area_id</span><br><span class="line">          -&gt; union</span><br><span class="line">          -&gt; select null id,null name,null area_id,count(*) count from wxm_test_fun) order by id,name,area_id;</span><br><span class="line">          </span><br><span class="line">  id  | name | area_id | count </span><br><span class="line"><span class="comment">------+------+---------+-------</span></span><br><span class="line">    1 | wxm1 | NULL    |     1 </span><br><span class="line">    1 | wxm2 | NULL    |     1 </span><br><span class="line">    1 | wxm4 | NULL    |     1 </span><br><span class="line">    2 | wxm1 | NULL    |     1 </span><br><span class="line">    2 | wxm2 | NULL    |     1 </span><br><span class="line">    3 | wxm3 | NULL    |     2 </span><br><span class="line">    4 | wxm4 | NULL    |     2 </span><br><span class="line">    5 | wxm1 | NULL    |     1 </span><br><span class="line"> NULL | wxm1 | NULL    |     3 </span><br><span class="line"> NULL | wxm2 | NULL    |     2 </span><br><span class="line"> NULL | wxm3 | NULL    |     2 </span><br><span class="line"> NULL | wxm4 | NULL    |     3 </span><br><span class="line"> NULL | NULL |       0 |     5 </span><br><span class="line"> NULL | NULL |       1 |     3 </span><br><span class="line"> NULL | NULL |       2 |     1 </span><br><span class="line"> NULL | NULL |       3 |     1 </span><br><span class="line"> NULL | NULL | NULL    |    10 </span><br><span class="line">(17 rows)</span><br><span class="line"></span><br><span class="line">Query 20190312_091542_01721_wwvpi, FINISHED, 2 nodes</span><br><span class="line">Splits: 22 total, 22 done (100.00%)</span><br><span class="line">0:00 [40 rows, 632B] [85 rows/s, 1.33KB/s]</span><br></pre></td></tr></table></figure>
+<h1 id="维度信息获取"><a href="#维度信息获取" class="headerlink" title="维度信息获取"></a>维度信息获取</h1><blockquote>
+<p>通常情况下，为了group by 的灵活性，通常会选用grouping sets，这就会出现一个维度标志问题。并不知道这个聚合数据哪个维度，通常可以用case when语句解决</p>
+</blockquote>
+<ul>
+<li>以此句为例</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">id</span>,<span class="keyword">name</span>,area_id,<span class="keyword">count</span>(*) <span class="keyword">count</span> <span class="keyword">from</span> wxm_test_fun <span class="keyword">group</span> <span class="keyword">by</span> <span class="keyword">grouping</span> <span class="keyword">sets</span>((<span class="keyword">id</span>,<span class="keyword">name</span>),<span class="keyword">name</span>,area_id,()) <span class="keyword">order</span> <span class="keyword">by</span> <span class="keyword">id</span>,<span class="keyword">name</span>,area_id;</span><br></pre></td></tr></table></figure>
+<p>(id,name)维度为维度01，name为维度02，area_id为维度03，()为全局维度</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">presto:temp&gt; select </span><br><span class="line">          -&gt; case when id is not null and name is not null and area_id is null then '维度01'</span><br><span class="line">          -&gt; when id is null and name is not null and area_id is null then '维度02'</span><br><span class="line">          -&gt; when id is null and name is null and area_id is not null then '维度03'</span><br><span class="line">          -&gt; when id is null and name is null and area_id is null then '全局维度'</span><br><span class="line">          -&gt; end</span><br><span class="line">          -&gt; agg_code,id,name,area_id,count(*) count from wxm_test_fun group by grouping sets((id,name),name,area_id,()) order by id,name,area_id;</span><br><span class="line">          </span><br><span class="line"> agg_code |  id  | name | area_id | count </span><br><span class="line"><span class="comment">----------+------+------+---------+-------</span></span><br><span class="line"> 维度01   |    1 | wxm1 | NULL    |     1 </span><br><span class="line"> 维度01   |    1 | wxm2 | NULL    |     1 </span><br><span class="line"> 维度01   |    1 | wxm4 | NULL    |     1 </span><br><span class="line"> 维度01   |    2 | wxm1 | NULL    |     1 </span><br><span class="line"> 维度01   |    2 | wxm2 | NULL    |     1 </span><br><span class="line"> 维度01   |    3 | wxm3 | NULL    |     2 </span><br><span class="line"> 维度01   |    4 | wxm4 | NULL    |     2 </span><br><span class="line"> 维度01   |    5 | wxm1 | NULL    |     1 </span><br><span class="line"> 维度02   | NULL | wxm1 | NULL    |     3 </span><br><span class="line"> 维度02   | NULL | wxm2 | NULL    |     2 </span><br><span class="line"> 维度02   | NULL | wxm3 | NULL    |     2 </span><br><span class="line"> 维度02   | NULL | wxm4 | NULL    |     3 </span><br><span class="line"> 维度03   | NULL | NULL |       0 |     5 </span><br><span class="line"> 维度03   | NULL | NULL |       1 |     3 </span><br><span class="line"> 维度03   | NULL | NULL |       2 |     1 </span><br><span class="line"> 维度03   | NULL | NULL |       3 |     1 </span><br><span class="line"> 全局维度 | NULL | NULL | NULL    |    10 </span><br><span class="line">(17 rows)</span><br><span class="line"></span><br><span class="line">Query 20190312_092301_01746_wwvpi, FINISHED, 2 nodes</span><br><span class="line">Splits: 4 total, 4 done (100.00%)</span><br><span class="line">0:01 [10 rows, 158B] [15 rows/s, 242B/s]</span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Thank you for your support.</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="wxmimperio WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="wxmimperio Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
+          
+            <a href="/tags/SQL/" rel="tag"># SQL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/01/Apache-HTTP-Server-Compile-Install/" rel="next" title="Apache HTTP Server 编译与安装">
+                <i class="fa fa-chevron-left"></i> Apache HTTP Server 编译与安装
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://wx1.sinaimg.cn/mw690/0060lm7Tly1fwf44ggkonj306o06owf1.jpg"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据准备"><span class="nav-number">1.</span> <span class="nav-text">数据准备</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#建测试表"><span class="nav-number">1.1.</span> <span class="nav-text">建测试表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#准备数据"><span class="nav-number">1.2.</span> <span class="nav-text">准备数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#说明聚合维度"><span class="nav-number">1.3.</span> <span class="nav-text">说明聚合维度</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CUBE"><span class="nav-number">2.</span> <span class="nav-text">CUBE</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ROLLUP"><span class="nav-number">3.</span> <span class="nav-text">ROLLUP</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GROUPING-SETS"><span class="nav-number">4.</span> <span class="nav-text">GROUPING SETS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#维度信息获取"><span class="nav-number">5.</span> <span class="nav-text">维度信息获取</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
