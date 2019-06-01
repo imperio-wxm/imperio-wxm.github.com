@@ -93,7 +93,7 @@
 <meta property="og:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-run-normal.png?raw=true">
 <meta property="og:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/dos2unix-transform.png?raw=true">
 <meta property="og:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-run-transform.png?raw=true">
-<meta property="og:updated_time" content="2019-04-30T16:02:56.740Z">
+<meta property="og:updated_time" content="2019-06-01T11:45:31.696Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Cygwin Windows 换行符转换">
 <meta name="twitter:description" content="在Windows下编辑的Shell脚本，使用Cygwin仿Linux环境运行，出现 $’\r’: 未找到命令错误">
@@ -267,7 +267,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="wxmimperio">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://wx1.sinaimg.cn/mw690/0060lm7Tly1fwf44ggkonj306o06owf1.jpg">
+      <meta itemprop="image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Icon/wxmimperiologo-site.png?raw=true">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -333,11 +333,6 @@
           
 
           
-            <span class="post-meta-divider">|</span>
-            <span class="page-pv"><i class="fa fa-eye"></i> Reading
-            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>Times
-            </span>
-          
 
           
 
@@ -356,9 +351,7 @@
       
 
       
-        <blockquote>
-<p>在Windows下编辑的Shell脚本，使用Cygwin仿Linux环境运行，出现 $’\r’: 未找到命令错误</p>
-</blockquote>
+        <div class="note success"><p>在Windows下编辑的Shell脚本，使用Cygwin仿Linux环境运行，出现 $’\r’: 未找到命令错误 </p></div>
 <a id="more"></a>
 <p>因为在Dos or Window下回车键实际上输入的是 <code>回车（CR)</code> 和 <code>换行（LF）</code>，而Linux or Unix下回车键只输入 <code>换行（LF）</code>，所以文件在每行都会多了一个 <code>CR</code>，Linux下运行时就会报错找不到命令，需要把Dos文件格式转换为Unix格式</p>
 <h2 id="1-安装dos2unix组件"><a href="#1-安装dos2unix组件" class="headerlink" title="1. 安装dos2unix组件"></a>1. 安装dos2unix组件</h2><p><a href="https://www.cygwin.com/" target="_blank" rel="noopener">Cygwin 官网</a></p>
@@ -381,9 +374,7 @@
 <h2 id="3-目录批量转换"><a href="#3-目录批量转换" class="headerlink" title="3. 目录批量转换"></a>3. 目录批量转换</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . -type f -exec dos2unix &#123;&#125; \;</span><br></pre></td></tr></table></figure>
 <p>将转换后的文件直接upload到linux服务器上，也能正常运行</p>
 <hr>
-<blockquote>
 <p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
-</blockquote>
 <hr>
 
       
@@ -455,6 +446,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/27/GitBook-To-Pdf/" rel="prev" title="Gitbook 制作 PDF">
+                Gitbook 制作 PDF <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -564,7 +559,7 @@
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
               <img class="site-author-image" itemprop="image"
-                src="http://wx1.sinaimg.cn/mw690/0060lm7Tly1fwf44ggkonj306o06owf1.jpg"
+                src="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Icon/wxmimperiologo-site.png?raw=true"
                 alt="wxmimperio" />
             
               <p class="site-author-name" itemprop="name">wxmimperio</p>
@@ -600,7 +595,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-count">54</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
@@ -694,20 +689,6 @@
 
 
         
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-  
-
-  
-    <span class="site-pv">
-      <i class="fa fa-eye"></i>
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
-      
-    </span>
-  
-</div>
-
 
 
 
