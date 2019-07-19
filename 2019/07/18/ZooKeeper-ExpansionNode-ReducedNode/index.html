@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="wxmimperio's blog" />
+  <meta name="keywords" content="大数据,ZooKeeper," />
 
 
 
@@ -81,13 +81,18 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="logging.DEBUG">
-<meta property="og:url" content="http://imperio-wxm.github.io/categories/BigData/page/2/index.html">
+<meta name="description" content="Zookeeper是大数据领域中常用的分布式协调工具，如何不中断服务动态的扩充、缩减、迁移node？">
+<meta name="keywords" content="大数据,ZooKeeper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZooKeeper动态扩容、缩容">
+<meta property="og:url" content="http://imperio-wxm.github.io/2019/07/18/ZooKeeper-ExpansionNode-ReducedNode/index.html">
 <meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Zookeeper是大数据领域中常用的分布式协调工具，如何不中断服务动态的扩充、缩减、迁移node？">
 <meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-07-19T14:43:00.013Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="logging.DEBUG">
+<meta name="twitter:title" content="ZooKeeper动态扩容、缩容">
+<meta name="twitter:description" content="Zookeeper是大数据领域中常用的分布式协调工具，如何不中断服务动态的扩充、缩减、迁移node？">
 
 
 
@@ -117,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://imperio-wxm.github.io/categories/BigData/page/2/"/>
+  <link rel="canonical" href="http://imperio-wxm.github.io/2019/07/18/ZooKeeper-ExpansionNode-ReducedNode/"/>
 
 
 
 
 
-  <title>Category: BigData | logging.DEBUG</title>
+  <title>ZooKeeper动态扩容、缩容 | logging.DEBUG</title>
   
 
 
@@ -142,7 +147,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 	
 	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
@@ -272,255 +277,331 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block category">
-
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>BigData<small>Category</small>
-        </h1>
-      </div>
-
-      
-        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/07/18/ZooKeeper-ExpansionNode-ReducedNode/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Icon/wxmimperiologo-site.png?raw=true">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2016/01/22/Spark-JobHistory-Monitoring/" itemprop="url">
-              
-                <span itemprop="name">Spark 历史记录 Web 监控 [Spark JobHistory Web UI]</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">ZooKeeper动态扩容、缩容</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-22T11:10:15+08:00"
-              content="2016-01-22" >
-          01-22
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-18T14:19:26+08:00">
+                2019-07-18
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/01/20/Spark-Programming-Guide-1/" itemprop="url">
-              
-                <span itemprop="name">Spark 编程指南 (一) [Spark Programming Guide]</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-20T15:58:24+08:00"
-              content="2016-01-20" >
-          01-20
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+      
 
       
-        
+        <div class="note success"><p>Zookeeper是大数据领域中常用的分布式协调工具，如何不中断服务动态的扩充、缩减、迁移node？ </p></div>
+<a id="more"></a>
+<h1 id="环境说明"><a href="#环境说明" class="headerlink" title="环境说明"></a>环境说明</h1><p>先有一个3台机器的zk集群，需要先对这个集群进行扩容增加节点，随后进行缩容；最终达到节点迁移的目的</p>
+<p><code>ps：zookeeper相关概念、配置、环境搭建不在赘述</code></p>
+<p>ZooKeeper监控工具推荐用: <a href="https://github.com/DeemOpen/zkui" target="_blank" rel="noopener">zkui</a></p>
+<table>
+<thead>
+<tr>
+<th>mid</th>
+<th>node</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>node1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>node2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>node3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>node4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>node5</td>
+</tr>
+<tr>
+<td>6</td>
+<td>node6</td>
+</tr>
+</tbody>
+</table>
+<h2 id="扩容-amp-缩容"><a href="#扩容-amp-缩容" class="headerlink" title="扩容 &amp; 缩容"></a>扩容 &amp; 缩容</h2><ul>
+<li>思路</li>
+</ul>
+<blockquote>
+<p>原本有node1、2、3 的zk集群，现在要将node4、5、6的节点加入，扩充3个节点</p>
+<p>zk节点数应为3、5、7这样的奇数个，否则无法选举出leader，因此想要添加node4、5、6节点，则：</p>
+</blockquote>
+<ol>
+<li>添加node4、5，使得总节点数从3个扩充到5</li>
+<li>(n-1)/2，5节点zk允许挂掉2个节点，则先下线node1、再上线node6</li>
+<li>此时在线节点有node2、3、4、5、6</li>
+<li>最后再下线node2、3节点</li>
+<li>此时zk节点从node1、2、3切换到了node4、5、6</li>
+</ol>
+<h2 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h2><h3 id="查看node1、2、3状态"><a href="#查看node1、2、3状态" class="headerlink" title="查看node1、2、3状态"></a>查看node1、2、3状态</h3><p>node1(follower)：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Received: <span class="number">247</span></span><br><span class="line">Sent: <span class="number">246</span></span><br><span class="line">Connections: <span class="number">2</span></span><br><span class="line">Outstanding: <span class="number">0</span></span><br><span class="line">Zxid: <span class="number">0x5500000012</span></span><br><span class="line">Mode: follower</span><br><span class="line">Node count: <span class="number">37658</span></span><br><span class="line">Environment:</span><br><span class="line">zookeeper.version=<span class="number">3.4</span>.8--<span class="number">1</span>, built on <span class="number">02</span>/<span class="number">06</span>/<span class="number">2016</span> <span class="number">03</span>:<span class="number">18</span> GMT</span><br></pre></td></tr></table></figure></p>
+<p>node2(leader)<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Received: <span class="number">19</span></span><br><span class="line">Sent: <span class="number">18</span></span><br><span class="line">Connections: <span class="number">1</span></span><br><span class="line">Outstanding: <span class="number">0</span></span><br><span class="line">Zxid: <span class="number">0x5500000012</span></span><br><span class="line">Mode: leader</span><br><span class="line">Node count: <span class="number">37658</span></span><br><span class="line">Environment:</span><br><span class="line">zookeeper.version=<span class="number">3.4</span>.8--<span class="number">1</span>, built on <span class="number">02</span>/<span class="number">06</span>/<span class="number">2016</span> <span class="number">03</span>:<span class="number">18</span> GMT</span><br></pre></td></tr></table></figure></p>
+<p>node3(follower)<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Received: <span class="number">1</span></span><br><span class="line">Sent: <span class="number">0</span></span><br><span class="line">Connections: <span class="number">1</span></span><br><span class="line">Outstanding: <span class="number">0</span></span><br><span class="line">Zxid: <span class="number">0x5500000012</span></span><br><span class="line">Mode: follower</span><br><span class="line">Node count: <span class="number">37658</span></span><br><span class="line">Environment:</span><br><span class="line">zookeeper.version=<span class="number">3.4</span>.8--<span class="number">1</span>, built on <span class="number">02</span>/<span class="number">06</span>/<span class="number">2016</span> <span class="number">03</span>:<span class="number">18</span> GMT</span><br></pre></td></tr></table></figure></p>
+<h3 id="增加node4、5节点"><a href="#增加node4、5节点" class="headerlink" title="增加node4、5节点"></a>增加node4、5节点</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改zoo.cfg</span></span><br><span class="line"></span><br><span class="line">server.1=node1:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line">server.2=node2:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line">server.3=node3:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line">server.4=node4:<span class="number">2888</span>:<span class="number">3888</span></span><br><span class="line">server.5=node5:<span class="number">2888</span>:<span class="number">3888</span></span><br></pre></td></tr></table></figure>
+<p>node4(follower)<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Received: <span class="number">1</span></span><br><span class="line">Sent: <span class="number">0</span></span><br><span class="line">Connections: <span class="number">1</span></span><br><span class="line">Outstanding: <span class="number">0</span></span><br><span class="line">Zxid: <span class="number">0x5500000015</span></span><br><span class="line">Mode: follower</span><br><span class="line">Node count: <span class="number">37658</span></span><br><span class="line">Environment:</span><br><span class="line">zookeeper.version=<span class="number">3.4</span>.8--<span class="number">1</span>, built on <span class="number">02</span>/<span class="number">06</span>/<span class="number">2016</span> <span class="number">03</span>:<span class="number">18</span> GMT</span><br></pre></td></tr></table></figure></p>
+<p>node5(follower)<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Received: <span class="number">1</span></span><br><span class="line">Sent: <span class="number">0</span></span><br><span class="line">Connections: <span class="number">1</span></span><br><span class="line">Outstanding: <span class="number">0</span></span><br><span class="line">Zxid: <span class="number">0x5500000016</span></span><br><span class="line">Mode: follower</span><br><span class="line">Node count: <span class="number">37658</span></span><br><span class="line">Environment:</span><br><span class="line">zookeeper.version=<span class="number">3.4</span>.8--<span class="number">1</span>, built on <span class="number">02</span>/<span class="number">06</span>/<span class="number">2016</span> <span class="number">03</span>:<span class="number">18</span> GMT</span><br></pre></td></tr></table></figure></p>
+<h3 id="修改node1、2、3配置，重启"><a href="#修改node1、2、3配置，重启" class="headerlink" title="修改node1、2、3配置，重启"></a>修改node1、2、3配置，重启</h3><p><code>ps: 最后在重启leader节点，会触发选举，默认会选择myid最大的为新leader，即node5</code></p>
+<blockquote>
+<p>轮序重启后，原来node2：<code>Mode: leader</code>——&gt;<code>Mode: follower</code>；最后添加的node5：<code>Mode: follower</code>——&gt;<code>Mode: leader</code></p>
+</blockquote>
+<p>至此新增2个节点完成，现在集群一共5个节点</p>
+<h3 id="下线node1、上线node6"><a href="#下线node1、上线node6" class="headerlink" title="下线node1、上线node6"></a>下线node1、上线node6</h3><ul>
+<li>下线node1</li>
+</ul>
+<p>关闭node1，修改node2、3、4，去除node1配置后重启</p>
+<p>最后修改node5，新增node6配置重启，此时node5任然是leader</p>
+<p>至此node1下线，5个节点的zk允许挂掉2个节点</p>
+<ul>
+<li>上线node6</li>
+</ul>
+<p>修改node2、3、4节点，添加node6配置后重启</p>
+<p>上线node6节点，配置与node2、3、4相同</p>
+<p>node6(follower)<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Received: <span class="number">1</span></span><br><span class="line">Sent: <span class="number">0</span></span><br><span class="line">Connections: <span class="number">1</span></span><br><span class="line">Outstanding: <span class="number">0</span></span><br><span class="line">Zxid: <span class="number">0x5900000002</span></span><br><span class="line">Mode: follower</span><br><span class="line">Node count: <span class="number">37658</span></span><br><span class="line">Environment:</span><br><span class="line">zookeeper.version=<span class="number">3.4</span>.8--<span class="number">1</span>, built on <span class="number">02</span>/<span class="number">06</span>/<span class="number">2016</span> <span class="number">03</span>:<span class="number">18</span> GMT</span><br></pre></td></tr></table></figure></p>
+<p>重启node5，此时会触发选举，选择node6为新leader</p>
+<p>至此5个节点配置完全相同，node6加入集群且为新leader</p>
+<h3 id="下线node2、3"><a href="#下线node2、3" class="headerlink" title="下线node2、3"></a>下线node2、3</h3><p>关闭node2、3，修改node4、5，去除node2、3配置后重启</p>
+<p>修改node6，去除node2、3配置重启，此时会选取myid最大的node5为leader</p>
+<p style="color:red">至此node1、2、3全部下线完成，zookeeper已经从node1、2、3节点迁移到了node4、5、6节点</p>
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/01/10/Spark-With-Tachyon-on-Yarn/" itemprop="url">
-              
-                <span itemprop="name">Spark With Tachyon On Yarn</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-10T16:46:29+08:00"
-              content="2016-01-10" >
-          01-10
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/01/09/tachyon-cluster-HA/" itemprop="url">
-              
-                <span itemprop="name">Tachyon集群High Available</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-09T16:22:13+08:00"
-              content="2016-01-09" >
-          01-09
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/01/07/hadoop-deploy-cluster/" itemprop="url">
-              
-                <span itemprop="name">Hadoop集群环境搭建</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-07T15:05:52+08:00"
-              content="2016-01-07" >
-          01-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/01/06/zookeeper-deploy-cluster/" itemprop="url">
-              
-                <span itemprop="name">Zookeeper集群环境搭建</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-06T16:12:59+08:00"
-              content="2016-01-06" >
-          01-06
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/01/05/Tachyon-deploy-cluster/" itemprop="url">
-              
-                <span itemprop="name">Tachyon集群部署</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-05T17:38:17+08:00"
-              content="2016-01-05" >
-          01-05
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/01/05/Tachyon-deploy-local/" itemprop="url">
-              
-                <span itemprop="name">Tachyon本地部署</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-01-05T15:29:34+08:00"
-              content="2016-01-05" >
-          01-05
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+<h2 id="其他方案"><a href="#其他方案" class="headerlink" title="其他方案"></a>其他方案</h2><ol>
+<li>修改node4、5、6配置，添加6个节点全部配置，依次启动；<code>此时node4、5、6是无法加入节点的</code></li>
+<li>修改node1、3配置，添加node4、5、6信息，重启；<code>此时会触发选举，根据myid最大的node6为leader；之前的leader node2被踢出集群</code></li>
+<li>下线node1、2，修改node4、5，去除node1、2配置后重启，<code>此时leader依然是node6</code></li>
+<li>修改node6，去除node1、2、3配置重启，<code>此时会触发选举，根据myid选择node5为leader</code></li>
+<li>下线node3，修改node4、5，去除node3配置重启，<code>触发选举，node6为leader</code></li>
+</ol>
+<hr>
+<blockquote>
+<p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
+</blockquote>
+<hr>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Thank you for your support.</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="wxmimperio WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="wxmimperio Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/ZooKeeper/" rel="tag"># ZooKeeper</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/27/GitBook-To-Pdf/" rel="next" title="Gitbook 制作 PDF">
+                <i class="fa fa-chevron-left"></i> Gitbook 制作 PDF
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
-
-  
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/categories/BigData/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/categories/BigData/">1</a><span class="page-number current">2</span>
-  </nav>
+  </article>
 
 
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
 
 
           </div>
@@ -528,6 +609,15 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -548,8 +638,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -630,6 +729,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#环境说明"><span class="nav-number">1.</span> <span class="nav-text">环境说明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#扩容-amp-缩容"><span class="nav-number">1.1.</span> <span class="nav-text">扩容 &amp; 缩容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作步骤"><span class="nav-number">1.2.</span> <span class="nav-text">操作步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看node1、2、3状态"><span class="nav-number">1.2.1.</span> <span class="nav-text">查看node1、2、3状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加node4、5节点"><span class="nav-number">1.2.2.</span> <span class="nav-text">增加node4、5节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改node1、2、3配置，重启"><span class="nav-number">1.2.3.</span> <span class="nav-text">修改node1、2、3配置，重启</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下线node1、上线node6"><span class="nav-number">1.2.4.</span> <span class="nav-text">下线node1、上线node6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下线node2、3"><span class="nav-number">1.2.5.</span> <span class="nav-text">下线node2、3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他方案"><span class="nav-number">1.3.</span> <span class="nav-text">其他方案</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -763,6 +878,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
@@ -791,6 +910,17 @@
 
 
 
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
   
 
 

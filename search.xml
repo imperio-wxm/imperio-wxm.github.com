@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[ZooKeeper动态扩容、缩容]]></title>
+    <url>%2F2019%2F07%2F18%2FZooKeeper-ExpansionNode-ReducedNode%2F</url>
+    <content type="text"><![CDATA[Zookeeper是大数据领域中常用的分布式协调工具，如何不中断服务动态的扩充、缩减、迁移node？ 环境说明先有一个3台机器的zk集群，需要先对这个集群进行扩容增加节点，随后进行缩容；最终达到节点迁移的目的 ps：zookeeper相关概念、配置、环境搭建不在赘述 ZooKeeper监控工具推荐用: zkui mid node 1 node1 2 node2 3 node3 4 node4 5 node5 6 node6 扩容 &amp; 缩容 思路 原本有node1、2、3 的zk集群，现在要将node4、5、6的节点加入，扩充3个节点 zk节点数应为3、5、7这样的奇数个，否则无法选举出leader，因此想要添加node4、5、6节点，则： 添加node4、5，使得总节点数从3个扩充到5 (n-1)/2，5节点zk允许挂掉2个节点，则先下线node1、再上线node6 此时在线节点有node2、3、4、5、6 最后再下线node2、3节点 此时zk节点从node1、2、3切换到了node4、5、6 操作步骤查看node1、2、3状态node1(follower)：123456789Received: 247Sent: 246Connections: 2Outstanding: 0Zxid: 0x5500000012Mode: followerNode count: 37658Environment:zookeeper.version=3.4.8--1, built on 02/06/2016 03:18 GMT node2(leader)123456789Received: 19Sent: 18Connections: 1Outstanding: 0Zxid: 0x5500000012Mode: leaderNode count: 37658Environment:zookeeper.version=3.4.8--1, built on 02/06/2016 03:18 GMT node3(follower)123456789Received: 1Sent: 0Connections: 1Outstanding: 0Zxid: 0x5500000012Mode: followerNode count: 37658Environment:zookeeper.version=3.4.8--1, built on 02/06/2016 03:18 GMT 增加node4、5节点1234567// 修改zoo.cfgserver.1=node1:2888:3888server.2=node2:2888:3888server.3=node3:2888:3888server.4=node4:2888:3888server.5=node5:2888:3888 node4(follower)123456789Received: 1Sent: 0Connections: 1Outstanding: 0Zxid: 0x5500000015Mode: followerNode count: 37658Environment:zookeeper.version=3.4.8--1, built on 02/06/2016 03:18 GMT node5(follower)123456789Received: 1Sent: 0Connections: 1Outstanding: 0Zxid: 0x5500000016Mode: followerNode count: 37658Environment:zookeeper.version=3.4.8--1, built on 02/06/2016 03:18 GMT 修改node1、2、3配置，重启ps: 最后在重启leader节点，会触发选举，默认会选择myid最大的为新leader，即node5 轮序重启后，原来node2：Mode: leader——&gt;Mode: follower；最后添加的node5：Mode: follower——&gt;Mode: leader 至此新增2个节点完成，现在集群一共5个节点 下线node1、上线node6 下线node1 关闭node1，修改node2、3、4，去除node1配置后重启 最后修改node5，新增node6配置重启，此时node5任然是leader 至此node1下线，5个节点的zk允许挂掉2个节点 上线node6 修改node2、3、4节点，添加node6配置后重启 上线node6节点，配置与node2、3、4相同 node6(follower)123456789Received: 1Sent: 0Connections: 1Outstanding: 0Zxid: 0x5900000002Mode: followerNode count: 37658Environment:zookeeper.version=3.4.8--1, built on 02/06/2016 03:18 GMT 重启node5，此时会触发选举，选择node6为新leader 至此5个节点配置完全相同，node6加入集群且为新leader 下线node2、3关闭node2、3，修改node4、5，去除node2、3配置后重启 修改node6，去除node2、3配置重启，此时会选取myid最大的node5为leader 至此node1、2、3全部下线完成，zookeeper已经从node1、2、3节点迁移到了node4、5、6节点 其他方案 修改node4、5、6配置，添加6个节点全部配置，依次启动；此时node4、5、6是无法加入节点的 修改node1、3配置，添加node4、5、6信息，重启；此时会触发选举，根据myid最大的node6为leader；之前的leader node2被踢出集群 下线node1、2，修改node4、5，去除node1、2配置后重启，此时leader依然是node6 修改node6，去除node1、2、3配置重启，此时会触发选举，根据myid选择node5为leader 下线node3，修改node4、5，去除node3配置重启，触发选举，node6为leader 转载请注明出处：https://github.com/imperio-wxm]]></content>
+      <categories>
+        <category>BigData</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
+        <tag>ZooKeeper</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Gitbook 制作 PDF]]></title>
     <url>%2F2019%2F05%2F27%2FGitBook-To-Pdf%2F</url>
     <content type="text"><![CDATA[通常需要将Gitbook的内容转成PDF格式，方便离线保存 一、安装Caliber应用程序官网下载 Windows 环境变量添加： 添加到系统path末尾:1;C:\Program Files (x86)\Calibre2 验证是否安装成功 12345// cmdebook-convert --versionebook-convert.exe (calibre 3.43.0)Created by: Kovid Goyal &lt;kovid@kovidgoyal.net&gt; 二、GitBook制作PDF npm 安装 ebook-convert 1npm install ebook-convert -g Gitbook 根目录下运行： 1gitbook pdf 在根目录下会生成book.pdf 转载请注明出处：https://github.com/imperio-wxm]]></content>
@@ -46,8 +58,8 @@
         <category>Linux</category>
       </categories>
       <tags>
-        <tag>Linux</tag>
         <tag>Apache</tag>
+        <tag>Linux</tag>
       </tags>
   </entry>
   <entry>
@@ -114,8 +126,8 @@
       </categories>
       <tags>
         <tag>Linux</tag>
-        <tag>HBase</tag>
         <tag>大数据</tag>
+        <tag>HBase</tag>
       </tags>
   </entry>
   <entry>
@@ -489,8 +501,8 @@
       <tags>
         <tag>Linux</tag>
         <tag>大数据</tag>
-        <tag>开源</tag>
         <tag>ZooKeeper</tag>
+        <tag>开源</tag>
         <tag>分布式</tag>
       </tags>
   </entry>
@@ -546,9 +558,9 @@
         <category>Linux</category>
       </categories>
       <tags>
+        <tag>Apache</tag>
         <tag>Linux</tag>
         <tag>Ubuntu</tag>
-        <tag>Apache</tag>
       </tags>
   </entry>
   <entry>
