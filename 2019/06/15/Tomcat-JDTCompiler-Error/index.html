@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux,Cygwin," />
+  <meta name="keywords" content="Git,Tomcat," />
 
 
 
@@ -81,23 +81,18 @@
 
 
 
-<meta name="description" content="在Windows下编辑的Shell脚本，使用Cygwin仿Linux环境运行，出现 $’\r’: 未找到命令错误">
-<meta name="keywords" content="Linux,Cygwin">
+<meta name="description" content="不同版本的JDK编译出的JSP与Tomcat的兼容性也不相同">
+<meta name="keywords" content="Git,Tomcat">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Cygwin Windows 换行符转换">
-<meta property="og:url" content="http://imperio-wxm.github.io/2019/04/25/Cygwin-DosFiles-Format/index.html">
+<meta property="og:title" content="Tomcat-JDTCompiler-Error">
+<meta property="og:url" content="http://imperio-wxm.github.io/2019/06/15/Tomcat-JDTCompiler-Error/index.html">
 <meta property="og:site_name" content="logging.DEBUG">
-<meta property="og:description" content="在Windows下编辑的Shell脚本，使用Cygwin仿Linux环境运行，出现 $’\r’: 未找到命令错误">
+<meta property="og:description" content="不同版本的JDK编译出的JSP与Tomcat的兼容性也不相同">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-dos2unix.png?raw=true">
-<meta property="og:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-run-normal.png?raw=true">
-<meta property="og:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/dos2unix-transform.png?raw=true">
-<meta property="og:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-run-transform.png?raw=true">
-<meta property="og:updated_time" content="2019-06-01T11:45:31.696Z">
+<meta property="og:updated_time" content="2019-07-19T17:08:48.474Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Cygwin Windows 换行符转换">
-<meta name="twitter:description" content="在Windows下编辑的Shell脚本，使用Cygwin仿Linux环境运行，出现 $’\r’: 未找到命令错误">
-<meta name="twitter:image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-dos2unix.png?raw=true">
+<meta name="twitter:title" content="Tomcat-JDTCompiler-Error">
+<meta name="twitter:description" content="不同版本的JDK编译出的JSP与Tomcat的兼容性也不相同">
 
 
 
@@ -127,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://imperio-wxm.github.io/2019/04/25/Cygwin-DosFiles-Format/"/>
+  <link rel="canonical" href="http://imperio-wxm.github.io/2019/06/15/Tomcat-JDTCompiler-Error/"/>
 
 
 
 
 
-  <title>Cygwin Windows 换行符转换 | logging.DEBUG</title>
+  <title>Tomcat-JDTCompiler-Error | logging.DEBUG</title>
   
 
 
@@ -296,7 +291,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/04/25/Cygwin-DosFiles-Format/">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/06/15/Tomcat-JDTCompiler-Error/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="wxmimperio">
@@ -313,7 +308,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Cygwin Windows 换行符转换</h1>
+          <h1 class="post-title" itemprop="name headline">Tomcat-JDTCompiler-Error</h1>
         
 
         <div class="post-meta">
@@ -325,8 +320,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-04-25T16:12:23+08:00">
-                2019-04-25
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-15T10:49:46+08:00">
+                2019-06-15
               </time>
             
 
@@ -348,8 +343,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
                   </a>
                 </span>
 
@@ -385,30 +380,44 @@
       
 
       
-        <div class="note success"><p>在Windows下编辑的Shell脚本，使用Cygwin仿Linux环境运行，出现 $’\r’: 未找到命令错误 </p></div>
+        <div class="note success"><p>不同版本的JDK编译出的JSP与Tomcat的兼容性也不相同 </p></div>
 <a id="more"></a>
-<p>因为在Dos or Window下回车键实际上输入的是 <code>回车（CR)</code> 和 <code>换行（LF）</code>，而Linux or Unix下回车键只输入 <code>换行（LF）</code>，所以文件在每行都会多了一个 <code>CR</code>，Linux下运行时就会报错找不到命令，需要把Dos文件格式转换为Unix格式</p>
-<h2 id="1-安装dos2unix组件"><a href="#1-安装dos2unix组件" class="headerlink" title="1. 安装dos2unix组件"></a>1. 安装dos2unix组件</h2><p><a href="https://www.cygwin.com/" target="_blank" rel="noopener">Cygwin 官网</a></p>
-<p>下载Cygwin，双击setup-x86_64.exe，选择从本地或者internet安装，选择dos2unix组件进行安装</p>
-<p><img src="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-dos2unix.png?raw=true" alt="安装插件"></p>
+<table>
+<thead>
+<tr>
+<th>Software</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jdk</td>
+<td>1.8.0_121</td>
+</tr>
+<tr>
+<td>Tomcat</td>
+<td>7.0.27</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>最近在维护一个老项目的时候，用Jenkins jdk1.8 编译打包war后，解压放在1.7的Tomcat下</p>
+</blockquote>
+<h2 id="运行Jsp编译报错如下："><a href="#运行Jsp编译报错如下：" class="headerlink" title="运行Jsp编译报错如下："></a>运行Jsp编译报错如下：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader.&lt;init&gt;(ClassFileReader.java:<span class="number">372</span>)</span><br><span class="line">        at org.apache.jasper.compiler.JDTCompiler$<span class="number">1</span>.findType(JDTCompiler.java:<span class="number">232</span>)</span><br><span class="line">        at org.apache.jasper.compiler.JDTCompiler$<span class="number">1</span>.findType(JDTCompiler.java:<span class="number">188</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment.askForType(LookupEnvironment.java:<span class="number">113</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding.resolve(UnresolvedReferenceBinding.java:<span class="number">49</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding.resolveType(BinaryTypeBinding.java:<span class="number">122</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.lookup.PackageBinding.getTypeOrPackage(PackageBinding.java:<span class="number">168</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.lookup.Scope.getType(Scope.java:<span class="number">2472</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.ast.TypeDeclaration.resolve(TypeDeclaration.java:<span class="number">1006</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.ast.TypeDeclaration.resolve(TypeDeclaration.java:<span class="number">1258</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration.resolve(CompilationUnitDeclaration.java:<span class="number">539</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.Compiler.process(Compiler.java:<span class="number">763</span>)</span><br><span class="line">        at org.eclipse.jdt.internal.compiler.Compiler.compile(Compiler.java:<span class="number">468</span>)</span><br><span class="line">        at org.apache.jasper.compiler.JDTCompiler.generateClass(JDTCompiler.java:<span class="number">459</span>)</span><br><span class="line">        at org.apache.jasper.compiler.Compiler.compile(Compiler.java:<span class="number">378</span>)</span><br><span class="line">        at org.apache.jasper.compiler.Compiler.compile(Compiler.java:<span class="number">353</span>)</span><br><span class="line">        at org.apache.jasper.compiler.Compiler.compile(Compiler.java:<span class="number">340</span>)</span><br><span class="line">        at org.apache.jasper.JspCompilationContext.compile(JspCompilationContext.java:<span class="number">646</span>)</span><br><span class="line">        at org.apache.jasper.servlet.JspServletWrapper.service(JspServletWrapper.java:<span class="number">357</span>)</span><br><span class="line">        at org.apache.jasper.servlet.JspServlet.serviceJspFile(JspServlet.java:<span class="number">390</span>)</span><br><span class="line">        at org.apache.jasper.servlet.JspServlet.service(JspServlet.java:<span class="number">334</span>)</span><br><span class="line">        at javax.servlet.http.HttpServlet.service(HttpServlet.java:<span class="number">722</span>)</span><br><span class="line">        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:<span class="number">305</span>)</span><br><span class="line">        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:<span class="number">210</span>)</span><br><span class="line">        at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:<span class="number">684</span>)</span><br><span class="line">        at org.apache.catalina.core.ApplicationDispatcher.processRequest(ApplicationDispatcher.java:<span class="number">471</span>)</span><br><span class="line">        at org.apache.catalina.core.ApplicationDispatcher.doForward(ApplicationDispatcher.java:<span class="number">402</span>)</span><br><span class="line">        at org.apache.catalina.core.ApplicationDispatcher.forward(ApplicationDispatcher.java:<span class="number">329</span>)</span><br><span class="line">        at org.apache.struts2.dispatcher.ServletDispatcherResult.doExecute(ServletDispatcherResult.java:<span class="number">154</span>)</span><br><span class="line">        at org.apache.struts2.dispatcher.StrutsResultSupport.execute(StrutsResultSupport.java:<span class="number">186</span>)</span><br><span class="line">        at com.opensymphony.xwork2.DefaultActionInvocation.executeResult(DefaultActionInvocation.java:<span class="number">361</span>)</span><br><span class="line">        at com.opensymphony.xwork2.DefaultActionInvocation.invoke(DefaultActionInvocation.java:<span class="number">265</span>)</span><br><span class="line">        at com.opensymphony.xwork2.interceptor.DefaultWorkflowInterceptor.doIntercept(DefaultWorkflowInterceptor.java:<span class="number">163</span>)</span><br><span class="line">        at com.opensymphony.xwork2.interceptor.MethodFilterInterceptor.intercept(MethodFilterInterceptor.java:<span class="number">87</span>)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>错误原因是Jdk1.8 编译后，与Tomcat1.7 不兼容</p>
+</blockquote>
+<h2 id="处理："><a href="#处理：" class="headerlink" title="处理："></a>处理：</h2><p><a href="https://mvnrepository.com/artifact/org.eclipse.jdt.core.compiler/ecj" target="_blank" rel="noopener">Download Eclipse ECJ Jar</a></p>
 <ul>
-<li>测试脚本：</li>
+<li>1.maven 仓库下载最新的 ecj-4.6.1.jar</li>
+<li>2.Tomcat/lib 目录下，移除 ecj-3.7.2.jar</li>
+<li>3.上传 ecj-4.6.1.jar 至Tomcat/lib 重启Tomcat</li>
 </ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// windows下记事本编辑</span></span><br><span class="line">#!/bin/sh</span><br><span class="line"></span><br><span class="line">d=`date +%Y%m%d`</span><br><span class="line"></span><br><span class="line">echo $d</span><br></pre></td></tr></table></figure>
-<ul>
-<li>Cygwin直接运行：</li>
-</ul>
-<p><img src="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-run-normal.png?raw=true" alt="转换前运行"></p>
-<h2 id="2-单文件转换"><a href="#2-单文件转换" class="headerlink" title="2. 单文件转换"></a>2. 单文件转换</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dos2unix test.sh</span><br></pre></td></tr></table></figure>
-<p><img src="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/dos2unix-transform.png?raw=true" alt="转换"></p>
-<ul>
-<li>Cygwin转换后运行：</li>
-</ul>
-<p><img src="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Cygwin-DosFiles-Format/cygwin-run-transform.png?raw=true" alt="转换后运行"></p>
-<h2 id="3-目录批量转换"><a href="#3-目录批量转换" class="headerlink" title="3. 目录批量转换"></a>3. 目录批量转换</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . -type f -exec dos2unix &#123;&#125; \;</span><br></pre></td></tr></table></figure>
-<p>将转换后的文件直接upload到linux服务器上，也能正常运行</p>
+<p>问题得以解决！</p>
 <hr>
+<blockquote>
 <p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
+</blockquote>
 <hr>
 
       
@@ -456,9 +465,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Linux/" rel="tag"># Linux</a>
+            <a href="/tags/Git/" rel="tag"># Git</a>
           
-            <a href="/tags/Cygwin/" rel="tag"># Cygwin</a>
+            <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
           
         </div>
       
@@ -471,8 +480,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/12/SQL-Cube-Rollup-GroupingSets/" rel="next" title="SQL中的CUBE、ROLLUP、GROUPING用法">
-                <i class="fa fa-chevron-left"></i> SQL中的CUBE、ROLLUP、GROUPING用法
+              <a href="/2019/05/27/GitBook-To-Pdf/" rel="next" title="Gitbook 制作 PDF">
+                <i class="fa fa-chevron-left"></i> Gitbook 制作 PDF
               </a>
             
           </div>
@@ -481,8 +490,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/05/27/GitBook-To-Pdf/" rel="prev" title="Gitbook 制作 PDF">
-                Gitbook 制作 PDF <i class="fa fa-chevron-right"></i>
+              <a href="/2019/07/18/ZooKeeper-ExpansionNode-ReducedNode/" rel="prev" title="ZooKeeper动态扩容、缩容">
+                ZooKeeper动态扩容、缩容 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -679,7 +688,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-安装dos2unix组件"><span class="nav-number">1.</span> <span class="nav-text">1. 安装dos2unix组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-单文件转换"><span class="nav-number">2.</span> <span class="nav-text">2. 单文件转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-目录批量转换"><span class="nav-number">3.</span> <span class="nav-text">3. 目录批量转换</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#运行Jsp编译报错如下："><span class="nav-number">1.</span> <span class="nav-text">运行Jsp编译报错如下：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理："><span class="nav-number">2.</span> <span class="nav-text">处理：</span></a></li></ol></div>
             
 
           </div>
