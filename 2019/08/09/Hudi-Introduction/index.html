@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="大数据,Hudi," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="logging.DEBUG" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Hudi是类似Carbondata的软数据层，可以支持streaming的写入、读取，同时也支持将metadata同步到hive，提供Spark、Hive、Presto的SQL查询">
+<meta name="keywords" content="大数据,Hudi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hudi Getting Started">
+<meta property="og:url" content="http://imperio-wxm.github.io/2019/08/09/Hudi-Introduction/index.html">
+<meta property="og:site_name" content="logging.DEBUG">
+<meta property="og:description" content="Hudi是类似Carbondata的软数据层，可以支持streaming的写入、读取，同时也支持将metadata同步到hive，提供Spark、Hive、Presto的SQL查询">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-08-10T04:58:51.717Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hudi Getting Started">
+<meta name="twitter:description" content="Hudi是类似Carbondata的软数据层，可以支持streaming的写入、读取，同时也支持将metadata同步到hive，提供Spark、Hive、Presto的SQL查询">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://imperio-wxm.github.io/2019/08/09/Hudi-Introduction/"/>
+
+
+
+
+
+  <title>Hudi Getting Started | logging.DEBUG</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+	
+	<a href="https://github.com/imperio-wxm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">logging.DEBUG</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/08/09/Hudi-Introduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="wxmimperio">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Icon/wxmimperiologo-site.png?raw=true">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="logging.DEBUG">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hudi Getting Started</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-09T14:50:43+08:00">
+                2019-08-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hadoop/" itemprop="url" rel="index">
+                    <span itemprop="name">Hadoop</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hadoop/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <div class="note success"><p>Hudi是类似Carbondata的<code>软数据层</code>，可以支持streaming的写入、读取，同时也支持将metadata同步到hive，提供Spark、Hive、Presto的SQL查询 </p></div>
+<a id="more"></a>
+<table>
+<thead>
+<tr>
+<th>software</th>
+<th>version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spark</td>
+<td>2.4.0.cloudera1</td>
+</tr>
+<tr>
+<td>Hadoop</td>
+<td>2.6.0-cdh5.11.1</td>
+</tr>
+<tr>
+<td>Hive</td>
+<td>1.1.0-cdh5.11.1</td>
+</tr>
+<tr>
+<td>Hudi</td>
+<td>0.4.7</td>
+</tr>
+</tbody>
+</table>
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>可以查看官方文档的Quickstart进行编译：</p>
+<p><a href="https://hudi.apache.org/quickstart.html" target="_blank" rel="noopener">Quickstart</a></p>
+<p><a href="https://github.com/apache/incubator-hudi" target="_blank" rel="noopener">Github</a> clone 最新的tag</p>
+<ul>
+<li>支持Java 8+</li>
+<li>支持Hive 1+（Hive 2+ 据说有不少问题，可以通过Github Issue查询）</li>
+<li>支持Spark2.x+</li>
+<li>支持Apache、CDH Hadoop</li>
+</ul>
+<blockquote>
+<p>编译可选项</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd incubator-hudi-hoodie-<span class="number">0.4</span>.7</span><br><span class="line"></span><br><span class="line">mvn clean install -DskipITs -DskipTests -Dhadoop.version=<span class="number">2.6</span>.0-cdh5.11.1 -Dhive.version=<span class="number">1.1</span>.0-cdh5.11.1</span><br></pre></td></tr></table></figure>
+<p style="color:red">参数 -DskipITs用来跳过integration test，test中含有docker test，没有docker环境无法编译通过</p>
+
+<p><a href="https://github.com/apache/incubator-hudi/issues/632" target="_blank" rel="noopener">-DskipITs相关issue</a></p>
+<ul>
+<li>编译成功</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Reactor Summary <span class="keyword">for</span> Hoodie <span class="number">0.4</span>.7:</span><br><span class="line">[INFO] </span><br><span class="line">[INFO] Hoodie ............................................. SUCCESS [  <span class="number">2.894</span> s]</span><br><span class="line">[INFO] hoodie-common ...................................... SUCCESS [ <span class="number">20.807</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-mr ................................... SUCCESS [  <span class="number">2.372</span> s]</span><br><span class="line">[INFO] hoodie-hive ........................................ SUCCESS [  <span class="number">1.500</span> s]</span><br><span class="line">[INFO] hoodie-timeline-service ............................ SUCCESS [ <span class="number">15.561</span> s]</span><br><span class="line">[INFO] hoodie-client ...................................... SUCCESS [  <span class="number">5.584</span> s]</span><br><span class="line">[INFO] hoodie-spark ....................................... SUCCESS [ <span class="number">36.749</span> s]</span><br><span class="line">[INFO] hoodie-utilities ................................... SUCCESS [ <span class="number">35.936</span> s]</span><br><span class="line">[INFO] hoodie-cli ......................................... SUCCESS [ <span class="number">14.495</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-mr-bundle ............................ SUCCESS [  <span class="number">2.126</span> s]</span><br><span class="line">[INFO] hoodie-hive-bundle ................................. SUCCESS [ <span class="number">23.160</span> s]</span><br><span class="line">[INFO] hoodie-spark-bundle ................................ SUCCESS [<span class="number">02</span>:<span class="number">43</span> min]</span><br><span class="line">[INFO] hoodie-presto-bundle ............................... SUCCESS [ <span class="number">23.024</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-docker ............................... SUCCESS [  <span class="number">0.616</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-base-docker .......................... SUCCESS [  <span class="number">0.491</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-namenode-docker ...................... SUCCESS [  <span class="number">0.079</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-datanode-docker ...................... SUCCESS [  <span class="number">0.076</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-history-docker ....................... SUCCESS [  <span class="number">0.072</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-hive-docker .......................... SUCCESS [  <span class="number">0.763</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-sparkbase-docker ..................... SUCCESS [  <span class="number">0.095</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-sparkmaster-docker ................... SUCCESS [  <span class="number">0.089</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-sparkworker-docker ................... SUCCESS [  <span class="number">0.087</span> s]</span><br><span class="line">[INFO] hoodie-hadoop-sparkadhoc-docker .................... SUCCESS [  <span class="number">0.085</span> s]</span><br><span class="line">[INFO] hoodie-integ-test .................................. SUCCESS [  <span class="number">1.102</span> s]</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] BUILD SUCCESS</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Total time:  <span class="number">05</span>:<span class="number">51</span> min</span><br><span class="line">[INFO] Finished at: <span class="number">2019</span>-<span class="number">08</span>-<span class="number">09</span>T15:<span class="number">46</span>:<span class="number">24</span>+<span class="number">08</span>:<span class="number">00</span></span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<h1 id="Write-With-Spark"><a href="#Write-With-Spark" class="headerlink" title="Write With Spark"></a>Write With Spark</h1><h2 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h2><ol>
+<li>从hive的一张表查询数据</li>
+<li>转换成DF后写出到Hudi的新表</li>
+<li>将这个新表sync到hive的metadata</li>
+</ol>
+<h2 id="Write-Code"><a href="#Write-Code" class="headerlink" title="Write Code"></a>Write Code</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">String warehouseLocation = <span class="keyword">new</span> File(<span class="string">"spark-warehouse"</span>).getAbsolutePath();</span><br><span class="line">SparkSession spark = SparkSession</span><br><span class="line">		.builder()</span><br><span class="line">		.config(<span class="string">"spark.sql.warehouse.dir"</span>, warehouseLocation)</span><br><span class="line">		.enableHiveSupport()</span><br><span class="line">		.appName(<span class="string">"Spark Hudi Write Test"</span>)</span><br><span class="line">		.getOrCreate();</span><br><span class="line"></span><br><span class="line">Dataset&lt;Row&gt; hiveQuery = spark.sql(<span class="string">" select * from dw.xxx where part_date='2019-08-02'"</span>);</span><br><span class="line"></span><br><span class="line">hiveQuery.write()</span><br><span class="line">		.format(<span class="string">"com.uber.hoodie"</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.HIVE_ASSUME_DATE_PARTITION_OPT_KEY(), <span class="keyword">true</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.HIVE_URL_OPT_KEY(), <span class="string">"jdbc:hive2://xxx:10000"</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.HIVE_DATABASE_OPT_KEY(), <span class="string">"dw"</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.HIVE_SYNC_ENABLED_OPT_KEY(), <span class="keyword">true</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.HIVE_TABLE_OPT_KEY(), <span class="string">"hoodie_wxm_test"</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.HIVE_PARTITION_FIELDS_OPT_KEY(), <span class="string">"part_date"</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.RECORDKEY_FIELD_OPT_KEY(), <span class="string">"key"</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.PARTITIONPATH_FIELD_OPT_KEY(), <span class="string">"part_date"</span>)</span><br><span class="line">		.option(DataSourceWriteOptions.PRECOMBINE_FIELD_OPT_KEY(), <span class="string">"event_time"</span>)</span><br><span class="line">		.option(HoodieWriteConfig.TABLE_NAME, <span class="string">"hoodie_wxm_test"</span>)</span><br><span class="line">		.mode(SaveMode.Append)</span><br><span class="line">		.save(<span class="string">"hudi data path"</span>);</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>Options</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HIVE_ASSUME_DATE_PARTITION_OPT_KEY</td>
+<td>如果hive以日期分区，则日期的format格式，默认：yyyy/mm/dd</td>
+</tr>
+<tr>
+<td>HIVE_URL_OPT_KEY</td>
+<td>hive metastore url</td>
+</tr>
+<tr>
+<td>HIVE_DATABASE_OPT_KEY</td>
+<td>sync 到hive的库名</td>
+</tr>
+<tr>
+<td>HIVE_SYNC_ENABLED_OPT_KEY</td>
+<td>是否将hudi表的元数据sync到hive</td>
+</tr>
+<tr>
+<td>HIVE_TABLE_OPT_KEY</td>
+<td>sync 到hive 的表名</td>
+</tr>
+<tr>
+<td>HIVE_PARTITION_FIELDS_OPT_KEY</td>
+<td>sync 到hive表的分区键从哪个列中提取</td>
+</tr>
+<tr>
+<td>RECORDKEY_FIELD_OPT_KEY</td>
+<td>hudi 中recordKey从哪个列中提取</td>
+</tr>
+<tr>
+<td>PARTITIONPATH_FIELD_OPT_KEY</td>
+<td>hudi 中分区键从哪个列中提取</td>
+</tr>
+<tr>
+<td>PRECOMBINE_FIELD_OPT_KEY</td>
+<td>hudi 中预合并从哪个列中提取</td>
+</tr>
+<tr>
+<td>HoodieWriteConfig.TABLE_NAME</td>
+<td>hudi 的表名</td>
+</tr>
+</tbody>
+</table>
+<p>更多Options请参考<a href="https://hudi.apache.org/configurations.html" target="_blank" rel="noopener">Configurations</a></p>
+<h2 id="Submit-Job"><a href="#Submit-Job" class="headerlink" title="Submit Job"></a>Submit Job</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 需要将 hoodie-hadoop-mr-0.4.7.jar、hoodie-spark-0.4.7.jar、hoodie-hive-0.4.7.jar、hoodie-common-0.4.7.jar 引入到spark shell 提交依赖中</span></span><br><span class="line"></span><br><span class="line">spark2-submit --jars basePath/hoodie-hadoop-mr-<span class="number">0.4</span>.7.jar,basePath/hoodie-spark-<span class="number">0.4</span>.7.jar,basePath/hoodie-hive-<span class="number">0.4</span>.7.jar,basePath/hoodie-common-<span class="number">0.4</span>.7.jar \</span><br><span class="line">--<span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">wxmimperio</span>.<span class="title">spark</span>.<span class="title">hudi</span>.<span class="title">HudiWrite</span>  --<span class="title">master</span> <span class="title">yarn</span> --<span class="title">deploy</span>-<span class="title">mode</span> <span class="title">cluster</span>  \</span></span><br><span class="line"><span class="class">--<span class="title">driver</span>-<span class="title">memory</span> 4<span class="title">g</span> --<span class="title">executor</span>-<span class="title">memory</span> 2<span class="title">g</span> --<span class="title">executor</span>-<span class="title">cores</span> 1 <span class="title">xxxx</span>.<span class="title">jar</span></span></span><br></pre></td></tr></table></figure>
+<h2 id="自定义日期分区规则"><a href="#自定义日期分区规则" class="headerlink" title="自定义日期分区规则"></a>自定义日期分区规则</h2><blockquote>
+<p>通过HIVE_ASSUME_DATE_PARTITION_OPT_KEY参数设定后，默认的Date分区是yyyy/mm/dd，而我的业务场景下是yyyy-mm-dd，需要重写（此部分可以根据实际业务分区场景自行实现<code>PartitionValueExtractor</code>接口）</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DayPartitionValueExtractor</span> <span class="keyword">implements</span> <span class="title">PartitionValueExtractor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">transient</span> DateTimeFormatter dtfOut;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DayPartitionValueExtractor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.dtfOut = DateTimeFormat.forPattern(<span class="string">"yyyy-MM-dd"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> DateTimeFormatter <span class="title">getDtfOut</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (dtfOut == <span class="keyword">null</span>) &#123;</span><br><span class="line">            dtfOut = DateTimeFormat.forPattern(<span class="string">"yyyy-MM-dd"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dtfOut;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">extractPartitionValuesInPath</span><span class="params">(String partitionPath)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// partition path is expected to be in this format yyyy/mm/dd</span></span><br><span class="line">        String[] splits = partitionPath.split(<span class="string">"-"</span>);</span><br><span class="line">        <span class="keyword">if</span> (splits.length != <span class="number">3</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">                    <span class="string">"Partition path "</span> + partitionPath + <span class="string">" is not in the form yyyy-mm-dd "</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Get the partition part and remove the / as well at the end</span></span><br><span class="line">        <span class="keyword">int</span> year = Integer.parseInt(splits[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">int</span> mm = Integer.parseInt(splits[<span class="number">1</span>]);</span><br><span class="line">        <span class="keyword">int</span> dd = Integer.parseInt(splits[<span class="number">2</span>]);</span><br><span class="line">        DateTime dateTime = <span class="keyword">new</span> DateTime(year, mm, dd, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> Lists.newArrayList(getDtfOut().print(dateTime));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>添加配置</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.option(DataSourceWriteOptions.HIVE_PARTITION_EXTRACTOR_CLASS_OPT_KEY(),<span class="string">"com.wxmimperio.spark.hudi.DayPartitionValueExtractor"</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="Job运行"><a href="#Job运行" class="headerlink" title="Job运行"></a>Job运行</h2><p>通过查看Spark Job logs，可以发现：</p>
+<p><strong>1.默认Hudi支持<code>parquet</code>格式输出，关于ORC File的支持有相关Issue: <a href="https://github.com/apache/incubator-hudi/pull/657" target="_blank" rel="noopener">HUDI-57 support orc file</a></strong></p>
+<p><strong>2.会先生成parquet文件，然后用hive.cli相关命令建表，最后sync数据</strong></p>
+<p>sync到hive后，表结构会多几个Hudi的字段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">`_hoodie_commit_time` string, </span><br><span class="line">`_hoodie_commit_seqno` string, </span><br><span class="line">`_hoodie_record_key` string, </span><br><span class="line">`_hoodie_partition_path` string, </span><br><span class="line">`_hoodie_file_name` string,</span><br></pre></td></tr></table></figure>
+<p><strong>3.分区的File Path与正常Hive的不同</strong></p>
+<p>正常情况下Hive的分区是key=value形式，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">insert overwrite table new_table <span class="title">partition</span><span class="params">(part_date=<span class="string">'2019-08-02'</span>)</span>  select xxx from old_tabl</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// hdfs file path: /wxm/hudi/data/hoodie_test/part_date=2019-08-02</span></span><br></pre></td></tr></table></figure>
+<p>Hudi默认情况是: <code>hudi data path/2019-08-02</code>，同时如果是第一次建表，当前分区不会自动添加，第二次运行会自动添加分区并load data，不清楚这是我测试有问题还是Hudi机制就是这样</p>
+<p>已经提交了相关Issue：<a href="https://github.com/apache/incubator-hudi/issues/828" target="_blank" rel="noopener">Synchronizing to hive partition is incorrect</a></p>
+<p><strong>4.java.lang.ClassNotFoundException: com.uber.hoodie.hadoop.HoodieInputFormat</strong></p>
+<p>在我前几次执行Job的时候，通过logs得知parquet文件已经生成，但是在sync hive的时候会报<code>com.uber.hoodie.hadoop.HoodieInputFormat</code>类不存在</p>
+<p>这个类在hoodie-hadoop-mr-0.4.7.jar中，可是spark提交jar的时候，我已经将相关jar添加到了依赖中还是报这个错</p>
+<p>问题在于Hudi建hive表指定的InputFormat是<code>com.uber.hoodie.hadoop.HoodieInputFormat</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INFO yarn.ApplicationMaster: Final app status: FAILED, exitCode: 15, (reason: User class threw exception: com.uber.hoodie.hive.HoodieHiveSyncException: Failed in executing SQL CREATE EXTERNAL TABLE  IF NOT EXISTS dw.wxm_hoodie_test( `_hoodie_commit_time` string, `_hoodie_commit_seqno` string, `_hoodie_record_key` string, `_hoodie_partition_path` string, `_hoodie_file_name` string, `age` string, `key` string, `name` string, `timestamp` string) PARTITIONED BY (part string) ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' STORED AS INPUTFORMAT 'com.uber.hoodie.hadoop.HoodieInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat' LOCATION '/wxm/hudi/data'</span><br></pre></td></tr></table></figure>
+<p>需要将hoodie-hadoop-mr-0.4.7.jar、hoodie-common-0.4.7.jar两个包放到<code>$HIVE_HOME/lib</code>下，重启hive cluster</p>
+<p>已经提交了相关Issue：<a href="https://github.com/apache/incubator-hudi/issues/827" target="_blank" rel="noopener">java.lang.ClassNotFoundException: com.uber.hoodie.hadoop.HoodieInputFormat</a></p>
+<h1 id="Read-With-Spark"><a href="#Read-With-Spark" class="headerlink" title="Read With Spark"></a>Read With Spark</h1><h2 id="思路：-1"><a href="#思路：-1" class="headerlink" title="思路："></a>思路：</h2><ol>
+<li><p>直接通过spark用sql查询sync到hive的表（不做介绍，和读hive一样）</p>
+</li>
+<li><p>通过client读取parquet文件</p>
+</li>
+</ol>
+<h2 id="Read-Code"><a href="#Read-Code" class="headerlink" title="Read Code"></a>Read Code</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SparkSession spark = SparkSession</span><br><span class="line">    .builder()</span><br><span class="line">    .appName(<span class="string">"Spark Hudi Read Test"</span>)</span><br><span class="line">    .getOrCreate();</span><br><span class="line"></span><br><span class="line">spark.read()</span><br><span class="line">    .format(<span class="string">"com.uber.hoodie"</span>)</span><br><span class="line">    .option(DataSourceReadOptions.VIEW_TYPE_OPT_KEY(), DataSourceReadOptions.VIEW_TYPE_INCREMENTAL_OPT_VAL())</span><br><span class="line">    .option(DataSourceReadOptions.BEGIN_INSTANTTIME_OPT_KEY(), <span class="string">"20190809120720"</span>)</span><br><span class="line">    .option(DataSourceReadOptions.END_INSTANTTIME_OPT_KEY(), <span class="string">"20190809120729"</span>)</span><br><span class="line">    .load(<span class="string">"hudi file path"</span>)</span><br><span class="line">    .limit(<span class="number">10</span>)</span><br><span class="line">    .show();</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>Options</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BEGIN_INSTANTTIME_OPT_KEY</td>
+<td>过滤数据起始时间戳，不包含</td>
+</tr>
+<tr>
+<td>END_INSTANTTIME_OPT_KEY</td>
+<td>过滤数据终止时间戳</td>
+</tr>
+</tbody>
+</table>
+<p>更多Options请参考<a href="https://hudi.apache.org/configurations.html" target="_blank" rel="noopener">Configurations</a></p>
+<h1 id="Query-With-Hive-Cli"><a href="#Query-With-Hive-Cli" class="headerlink" title="Query With Hive Cli"></a>Query With Hive Cli</h1><p>通过hive cli查询需要添加两个依赖</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add jar file:<span class="comment">///basePath/hoodie-hive-bundle-0.4.7.jar;</span></span><br><span class="line">add jar file:<span class="comment">///basePath/hoodie-hadoop-mr-bundle-0.4.7.jar;</span></span><br></pre></td></tr></table></figure>
+<h1 id="Query-With-Presto"><a href="#Query-With-Presto" class="headerlink" title="Query With Presto"></a>Query With Presto</h1><p>需要添加一个依赖到presto hive插件中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cp basePath/packaging/hoodie-presto-bundle/target/hoodie-presto-bundle-<span class="number">0.4</span>.7.jar &lt;presto_install&gt;/plugin/hive-hadoop2/</span><br><span class="line"></span><br><span class="line"><span class="comment">// then restart presto cluster</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
+</blockquote>
+<hr>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Thank you for your support.</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="wxmimperio WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="wxmimperio Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Hudi/" rel="tag"># Hudi</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/07/Elasticsearch-Rebuild-Index/" rel="next" title="Elasticsearch 重建索引 (Modify Mappings)">
+                <i class="fa fa-chevron-left"></i> Elasticsearch 重建索引 (Modify Mappings)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMzQ0MS85OTk3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Icon/wxmimperiologo-site.png?raw=true"
+                alt="wxmimperio" />
+            
+              <p class="site-author-name" itemprop="name">wxmimperio</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/imperio-wxm" target="_blank" title="Github">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Github</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#编译"><span class="nav-number">1.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Write-With-Spark"><span class="nav-number">2.</span> <span class="nav-text">Write With Spark</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#思路："><span class="nav-number">2.1.</span> <span class="nav-text">思路：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Write-Code"><span class="nav-number">2.2.</span> <span class="nav-text">Write Code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Submit-Job"><span class="nav-number">2.3.</span> <span class="nav-text">Submit Job</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义日期分区规则"><span class="nav-number">2.4.</span> <span class="nav-text">自定义日期分区规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Job运行"><span class="nav-number">2.5.</span> <span class="nav-text">Job运行</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Read-With-Spark"><span class="nav-number">3.</span> <span class="nav-text">Read With Spark</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#思路：-1"><span class="nav-number">3.1.</span> <span class="nav-text">思路：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Read-Code"><span class="nav-number">3.2.</span> <span class="nav-text">Read Code</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Query-With-Hive-Cli"><span class="nav-number">4.</span> <span class="nav-text">Query With Hive Cli</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Query-With-Presto"><span class="nav-number">5.</span> <span class="nav-text">Query With Presto</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wxmimperio</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
