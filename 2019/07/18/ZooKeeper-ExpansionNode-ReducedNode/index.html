@@ -89,7 +89,7 @@
 <meta property="og:site_name" content="logging.DEBUG">
 <meta property="og:description" content="Zookeeper是大数据领域中常用的分布式协调工具，如何不中断服务动态的扩充、缩减、迁移node？">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-07-19T14:43:00.013Z">
+<meta property="og:updated_time" content="2019-08-15T14:12:35.728Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ZooKeeper动态扩容、缩容">
 <meta name="twitter:description" content="Zookeeper是大数据领域中常用的分布式协调工具，如何不中断服务动态的扩充、缩减、迁移node？">
@@ -384,7 +384,6 @@
 <a id="more"></a>
 <h1 id="环境说明"><a href="#环境说明" class="headerlink" title="环境说明"></a>环境说明</h1><p>先有一个3台机器的zk集群，需要先对这个集群进行扩容增加节点，随后进行缩容；最终达到节点迁移的目的</p>
 <p><code>ps：zookeeper相关概念、配置、环境搭建不在赘述</code></p>
-<p>ZooKeeper监控工具推荐用: <a href="https://github.com/DeemOpen/zkui" target="_blank" rel="noopener">zkui</a></p>
 <table>
 <thead>
 <tr>
@@ -416,6 +415,59 @@
 <tr>
 <td>6</td>
 <td>node6</td>
+</tr>
+</tbody>
+</table>
+<p>ZooKeeper监控工具推荐用: <a href="https://github.com/DeemOpen/zkui" target="_blank" rel="noopener">zkui</a></p>
+<p>ZooKeeper监控命令推荐(必须提前安装nc):</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 查看zk状态</span></span><br><span class="line">echo stat | nc <span class="number">127.0</span>.0.1 <span class="number">2181</span></span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>conf</td>
+<td>输出相关服务配置的详细信息</td>
+</tr>
+<tr>
+<td>cons</td>
+<td>列出所有连接到服务器的客户端的完全的连接/会话的详细信息,包括 接受 or 发送的包数量、会话 id 、操作延迟、最后的操作执行等等信息</td>
+</tr>
+<tr>
+<td>dump</td>
+<td>列出未经处理的会话和临时节点</td>
+</tr>
+<tr>
+<td>envi</td>
+<td>输出关于服务环境的详细信息（区别于 conf 命令）</td>
+</tr>
+<tr>
+<td>reqs</td>
+<td>列出未经处理的请求</td>
+</tr>
+<tr>
+<td>ruok</td>
+<td>测试服务是否处于正确状态;如果确实如此,那么服务返回 imok ,否则不做任何相应</td>
+</tr>
+<tr>
+<td>stat</td>
+<td>输出关于性能和连接的客户端的列表</td>
+</tr>
+<tr>
+<td>wchs</td>
+<td>列出服务器 watch 的详细信息</td>
+</tr>
+<tr>
+<td>wchc</td>
+<td>通过 session 列出服务器 watch 的详细信息,它的输出是一个与watch 相关的会话的列表</td>
+</tr>
+<tr>
+<td>wchp</td>
+<td>通过路径列出服务器 watch 的详细信息;它输出一个与 session相关的路径</td>
 </tr>
 </tbody>
 </table>
