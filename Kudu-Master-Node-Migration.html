@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="大数据,Kudu," />
+  <meta name="keywords" content=",," />
 
 
 
@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="12345678&amp;lt;!-- (事务管理)transaction manager, use JtaTransactionManager for global tx --&amp;gt;  &amp;lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&amp;gt;">
-<meta name="keywords" content="大数据,Kudu">
-<meta property="og:type" content="article">
+<meta name="description" content="在对3个或3个以上的master添加新的节点并不安全，不建议这样做所有命令必须使用UNIX 的Kudu用户操作之前必须熟悉kudu的相关配置 前期准备 在kudu master 操作期间，kudu 集群不可用 Kudu Master 的个数应该为奇数，3或者5，分别允许1个节点、2个节点失败 主备工作 a. 确认WAL 和 data 目录（默认：/var/lib/kudu/master/fs_wa">
+<meta name="keywords" content="Kudu,大数据">
+<meta property="og:type" content="website">
 <meta property="og:title" content="Kudu-Deploy-Non-ClouderaManager">
-<meta property="og:url" content="http://imperio-wxm.github.io/2019/09/05/Mybatis-Manually-Transaction/index.html">
+<meta property="og:url" content="http://imperio-wxm.github.io/Kudu-Master-Node-Migration.html">
 <meta property="og:site_name" content="logging.DEBUG">
-<meta property="og:description" content="12345678&amp;lt;!-- (事务管理)transaction manager, use JtaTransactionManager for global tx --&amp;gt;  &amp;lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&amp;gt;">
+<meta property="og:description" content="在对3个或3个以上的master添加新的节点并不安全，不建议这样做所有命令必须使用UNIX 的Kudu用户操作之前必须熟悉kudu的相关配置 前期准备 在kudu master 操作期间，kudu 集群不可用 Kudu Master 的个数应该为奇数，3或者5，分别允许1个节点、2个节点失败 主备工作 a. 确认WAL 和 data 目录（默认：/var/lib/kudu/master/fs_wa">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-09-18T14:31:19.192Z">
+<meta property="og:updated_time" content="2019-09-04T15:40:45.180Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kudu-Deploy-Non-ClouderaManager">
-<meta name="twitter:description" content="12345678&amp;lt;!-- (事务管理)transaction manager, use JtaTransactionManager for global tx --&amp;gt;  &amp;lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&amp;gt;">
+<meta name="twitter:description" content="在对3个或3个以上的master添加新的节点并不安全，不建议这样做所有命令必须使用UNIX 的Kudu用户操作之前必须熟悉kudu的相关配置 前期准备 在kudu master 操作期间，kudu 集群不可用 Kudu Master 的个数应该为奇数，3或者5，分别允许1个节点、2个节点失败 主备工作 a. 确认WAL 和 data 目录（默认：/var/lib/kudu/master/fs_wa">
 
 
 
@@ -122,7 +122,7 @@
 
 
 
-  <link rel="canonical" href="http://imperio-wxm.github.io/2019/09/05/Mybatis-Manually-Transaction/"/>
+  <link rel="canonical" href="http://imperio-wxm.github.io/Kudu-Master-Node-Migration.html"/>
 
 
 
@@ -279,250 +279,59 @@
 
   <div id="posts" class="posts-expand">
     
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/09/05/Mybatis-Manually-Transaction/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="wxmimperio">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://github.com/imperio-wxm/source/blob/master/source/posts-images/Icon/wxmimperiologo-site.png?raw=true">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="logging.DEBUG">
-    </span>
-
     
+    
+    <div class="post-block page">
       <header class="post-header">
 
-        
-        
-          <h1 class="post-title" itemprop="name headline">Kudu-Deploy-Non-ClouderaManager</h1>
-        
+	<h1 class="post-title" itemprop="name headline">Kudu-Deploy-Non-ClouderaManager</h1>
 
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-09-05T16:31:55+08:00">
-                2019-09-05
-              </time>
-            
 
-            
 
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Kudu/" itemprop="url" rel="index">
-                    <span itemprop="name">Kudu</span>
-                  </a>
-                </span>
-
-                
-                
-                  , 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Kudu/BigData/" itemprop="url" rel="index">
-                    <span itemprop="name">BigData</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
+</header>
 
       
       
-
       
-        <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&lt;!-- (事务管理)transaction manager, use JtaTransactionManager <span class="keyword">for</span> global tx --&gt;</span><br><span class="line">  &lt;bean id=<span class="string">"transactionManager"</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">"org.springframework.jdbc.datasource.DataSourceTransactionManager"</span>&gt;</span><br><span class="line">    &lt;property name=<span class="string">"dataSource"</span> ref=<span class="string">"dataSource"</span> /&gt;</span><br><span class="line">  &lt;/bean&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 使用annotation定义事务 --&gt;</span><br><span class="line">    &lt;tx:annotation-driven transaction-manager=<span class="string">"transactionManager"</span> proxy-target-<span class="class"><span class="keyword">class</span></span>=<span class="string">"true"</span> /&gt;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> MessageTpl <span class="title">saveMessage</span><span class="params">(Map&lt;String, Object&gt; mqInfo, Message message)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        <span class="comment">// 保存信息</span></span><br><span class="line">        <span class="comment">//获取Spring容器的对象</span></span><br><span class="line">　　　　　　ClassPathXmlApplicationContext contextLoader = <span class="keyword">new</span> ClassPathXmlApplicationContext(</span><br><span class="line">　　　　　　　　　　<span class="keyword">new</span> String[] &#123; <span class="string">"classpath*:spring/applicationContext.xml"</span>, <span class="string">"classpath*:spring/spring-mybatis.xml"</span>&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//1.获取事务控制管理器</span></span><br><span class="line">        DataSourceTransactionManager transactionManager = contextLoader.getBean(</span><br><span class="line">        <span class="string">"transactionManager"</span>, DataSourceTransactionManager.class);</span><br><span class="line">        <span class="comment">//2.获取事务定义</span></span><br><span class="line">        DefaultTransactionDefinition def = <span class="keyword">new</span> DefaultTransactionDefinition();</span><br><span class="line">        <span class="comment">//3.设置事务隔离级别，开启新事务</span></span><br><span class="line">        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);</span><br><span class="line">        <span class="comment">//4.获得事务状态</span></span><br><span class="line">        TransactionStatus transactionStatus = transactionManager.getTransaction(def);</span><br><span class="line">        MessageTpl messageTpl = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Date time = <span class="keyword">new</span> Date();</span><br><span class="line">            String status = Constant.MESSAGE_STATUS_TO_BE_CONFIRMED;</span><br><span class="line">            String remark = <span class="string">"optId:"</span>+mqInfo.get(<span class="string">"userId"</span>)+<span class="string">"|预发布:待确认"</span>;</span><br><span class="line">            <span class="keyword">if</span> (Constant.MQ_IS_CONFIRM_NO == (Integer) mqInfo.get(<span class="string">"isConfirm"</span>)) &#123;</span><br><span class="line">                status = Constant.MESSAGE_STATUS_TO_BE_SEND;</span><br><span class="line">                remark = <span class="string">"optId:"</span>+mqInfo.get(<span class="string">"userId"</span>)+<span class="string">"|待发送：消息不需要确认"</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            messageTpl = <span class="keyword">new</span> MessageTpl((Long) mqInfo.get(<span class="string">"mqId"</span>), message.getContent(), <span class="number">0</span>,</span><br><span class="line">                    (Long) mqInfo.get(<span class="string">"userId"</span>), status, time, time, Constant.MSG_TABLE + message.getQueueName(),</span><br><span class="line">                    MD5Util.MD5_32(message.getContent()));</span><br><span class="line">            messageDao.saveMessage(messageTpl);</span><br><span class="line">            <span class="comment">// TODO添加缓存</span></span><br><span class="line">            <span class="comment">// 保存日志</span></span><br><span class="line">            MessageLogTpl log = <span class="keyword">new</span> MessageLogTpl(<span class="keyword">null</span>, <span class="string">"预发布"</span>, status, remark, time,</span><br><span class="line">                    Constant.MSG_LOG_TABLE + message.getQueueName());</span><br><span class="line">            <span class="keyword">this</span>.messageDao.saveMessageLog(log);</span><br><span class="line">            </span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            transactionManager.rollback(transactionStatus);</span><br><span class="line">            messageTpl = <span class="keyword">null</span>;</span><br><span class="line">            logger.error(<span class="string">"saveMessage_Exception "</span>, e);</span><br><span class="line">        &#125;<span class="keyword">finally</span> &#123;     </span><br><span class="line">            transactionManager.commit(transactionStatus); </span><br><span class="line">        &#125; </span><br><span class="line">        <span class="keyword">return</span> messageTpl;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+      <div class="post-body">
+        
+        
+          <p><strong>在对3个或3个以上的master添加新的节点并不安全，不建议这样做</strong><br><strong>所有命令必须使用UNIX 的Kudu用户</strong><br><strong>操作之前必须熟悉kudu的相关配置</strong></p>
+<h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ol>
+<li>在kudu master 操作期间，kudu 集群不可用</li>
+<li>Kudu Master 的个数应该为奇数，3或者5，分别允许1个节点、2个节点失败</li>
+<li><p>主备工作<br> a. 确认WAL 和 data 目录（默认：/var/lib/kudu/master/fs_wal_dir 和 /var/lib/kudu/master/fs_data_dirs）<br> b. 确认RPCs端口，默认rpc_bind_addresses:7051<br> c. 确认Master 的UUID</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo -u kudu kudu fs dump uuid --fs_wal_dir=&lt;master_wal_dir&gt; [--fs_data_dirs=&lt;master_data_dir&gt;] <span class="number">2</span>&gt;/dev/<span class="keyword">null</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// kudu fs dump uuid --fs_wal_dir=/app/kudu/master/wal --fs_data_dirs=/app/kudu/master/data --fs_metadata_dir=/app/kudu/master/metadata</span></span><br></pre></td></tr></table></figure>
+<ol>
+<li>新节点需要注意：<ol>
+<li>master负载较小，可以与其他数据节点共用</li>
+<li>确保新机器都安装了kudu</li>
+<li>配置新机器的kudu wal 和 data相关路径</li>
+<li>配置新机器的RPCs端口</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="迁移操作"><a href="#迁移操作" class="headerlink" title="迁移操作"></a>迁移操作</h2><p>sudo -u kudu kudu fs dump uuid –fs_wal_dir=<master_wal_dir> [–fs_data_dirs=<master_data_dir>] 2&gt;/dev/null</master_data_dir></master_wal_dir></p>
+<h3 id="1-获取旧master的uuid"><a href="#1-获取旧master的uuid" class="headerlink" title="1. 获取旧master的uuid"></a>1. 获取旧master的uuid</h3><p>kudu fs dump uuid –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata</p>
+<p>145\146\147<br>211\212\213</p>
+<p>211<br>c4ad632962224df29d3c48d0c627476e<br>212<br>7b906011cbbf406a8b2620543d69143f<br>213<br>3819d8cba06142cc8c9b5299b7ad891a</p>
+<h3 id="2-format新节点，uuid为待迁移旧节点uuid"><a href="#2-format新节点，uuid为待迁移旧节点uuid" class="headerlink" title="2. format新节点，uuid为待迁移旧节点uuid"></a>2. format新节点，uuid为待迁移旧节点uuid</h3><p>sudo -u kudu kudu fs format –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata –log_dir=/app/kudu/master/logs –uuid=c4ad632962224df29d3c48d0c627476e</p>
+<h3 id="3-将一台存活master的元数据拷贝过来-用kudu用户执行，将目录改为kudu拥有者"><a href="#3-将一台存活master的元数据拷贝过来-用kudu用户执行，将目录改为kudu拥有者" class="headerlink" title="3. 将一台存活master的元数据拷贝过来,用kudu用户执行，将目录改为kudu拥有者"></a>3. 将一台存活master的元数据拷贝过来,用kudu用户执行，将目录改为kudu拥有者</h3><p>sudo -u kudu kudu local_replica copy_from_remote –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata –log_dir=/app/kudu/master/logs 00000000000000000000000000000000 10.1.8.211:7051</p>
+<h3 id="4-新master和存活master上更新master-list"><a href="#4-新master和存活master上更新master-list" class="headerlink" title="4. 新master和存活master上更新master list"></a>4. 新master和存活master上更新master list</h3><p>执行此步骤需要关闭tserver</p>
+<p>sudo -u kudu kudu local_replica cmeta rewrite_raft_config –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata –log_dir=/app/kudu/master/logs 00000000000000000000000000000000 c4ad632962224df29d3c48d0c627476e:10.1.8.145:7051 7b906011cbbf406a8b2620543d69143f:10.1.8.212:7051 3819d8cba06142cc8c9b5299b7ad891a:10.1.8.213:7051</p>
+<h3 id="5-修改-vim-etc-kudu-conf-master-gflagfile-和-vim-etc-kudu-conf-tserver-gflagfile"><a href="#5-修改-vim-etc-kudu-conf-master-gflagfile-和-vim-etc-kudu-conf-tserver-gflagfile" class="headerlink" title="5. 修改 vim /etc/kudu/conf/master.gflagfile 和 vim /etc/kudu/conf/tserver.gflagfile"></a>5. 修改 vim /etc/kudu/conf/master.gflagfile 和 vim /etc/kudu/conf/tserver.gflagfile</h3><p>重启所有节点</p>
+
+        
+      </div>
+      
+      
       
     </div>
     
     
     
-
-    
-
-    
-      <div>
-        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
-  <div>Thank you for your support.</div>
-  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
-    <span>Donate</span>
-  </button>
-  <div id="QR" style="display: none;">
-
-    
-      <div id="wechat" style="display: inline-block">
-        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="wxmimperio WeChat Pay"/>
-        <p>WeChat Pay</p>
-      </div>
-    
-
-    
-      <div id="alipay" style="display: inline-block">
-        <img id="alipay_qr" src="/images/alipay.jpg" alt="wxmimperio Alipay"/>
-        <p>Alipay</p>
-      </div>
-    
-
-    
-
-  </div>
-</div>
-
-      </div>
-    
-
-    
-
-    <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/大数据/" rel="tag"># 大数据</a>
-          
-            <a href="/tags/Kudu/" rel="tag"># Kudu</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2019/09/04/Kudu-Master-Node-Migration/" rel="next" title="Kudu-Deploy-Non-ClouderaManager">
-                <i class="fa fa-chevron-left"></i> Kudu-Deploy-Non-ClouderaManager
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/11/22/Ipsets-Operation/" rel="prev" title="Ipsets Operation">
-                Ipsets Operation <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-
-    <div class="post-spread">
-      
-        
-  <div class="bdsharebuttonbox">
-    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
-    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
-    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
-    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
-    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
-    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
-    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
-    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
-    <a href="#" class="bds_more" data-cmd="more"></a>
-    <a class="bds_count" data-cmd="count"></a>
-  </div>
-  <script>
-    window._bd_share_config = {
-      "common": {
-        "bdText": "",
-        "bdMini": "2",
-        "bdMiniList": false,
-        "bdPic": ""
-      },
-      "share": {
-        "bdSize": "16",
-        "bdStyle": "0"
-      },
-      "image": {
-        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
-        "viewText": "分享到：",
-        "viewSize": "16"
-      }
-    }
-  </script>
-
-<script>
-  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
-</script>
-
-      
-    </div>
   </div>
 
 
@@ -560,8 +369,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -580,7 +398,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">50</span>
+                  <span class="site-state-item-count">48</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -642,6 +460,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前期准备"><span class="nav-number">1.</span> <span class="nav-text">前期准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#迁移操作"><span class="nav-number">2.</span> <span class="nav-text">迁移操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-获取旧master的uuid"><span class="nav-number">2.1.</span> <span class="nav-text">1. 获取旧master的uuid</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-format新节点，uuid为待迁移旧节点uuid"><span class="nav-number">2.2.</span> <span class="nav-text">2. format新节点，uuid为待迁移旧节点uuid</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-将一台存活master的元数据拷贝过来-用kudu用户执行，将目录改为kudu拥有者"><span class="nav-number">2.3.</span> <span class="nav-text">3. 将一台存活master的元数据拷贝过来,用kudu用户执行，将目录改为kudu拥有者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-新master和存活master上更新master-list"><span class="nav-number">2.4.</span> <span class="nav-text">4. 新master和存活master上更新master list</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-修改-vim-etc-kudu-conf-master-gflagfile-和-vim-etc-kudu-conf-tserver-gflagfile"><span class="nav-number">2.5.</span> <span class="nav-text">5. 修改 vim /etc/kudu/conf/master.gflagfile 和 vim /etc/kudu/conf/tserver.gflagfile</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

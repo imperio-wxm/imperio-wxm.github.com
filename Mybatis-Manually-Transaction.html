@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="wxmimperio's blog" />
+  <meta name="keywords" content=",," />
 
 
 
@@ -81,17 +81,18 @@
 
 
 
-<meta name="description" content="切换 root 用户  安装依赖  1234sudo yum install autoconf automake cyrus-sasl-devel cyrus-sasl-gssapi \  cyrus-sasl-plain flex gcc gcc-c++ gdb git java-1.8.0-openjdk-devel \  krb5-server krb5-workstation libtoo">
+<meta name="description" content="12345678&amp;lt;!-- (事务管理)transaction manager, use JtaTransactionManager for global tx --&amp;gt;  &amp;lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&amp;gt;">
+<meta name="keywords" content="Kudu,大数据">
 <meta property="og:type" content="website">
-<meta property="og:title" content="logging.DEBUG">
-<meta property="og:url" content="http://imperio-wxm.github.io/Kudu-Deploy-Non-ClouderaManager.html">
+<meta property="og:title" content="Kudu-Deploy-Non-ClouderaManager">
+<meta property="og:url" content="http://imperio-wxm.github.io/Mybatis-Manually-Transaction.html">
 <meta property="og:site_name" content="logging.DEBUG">
-<meta property="og:description" content="切换 root 用户  安装依赖  1234sudo yum install autoconf automake cyrus-sasl-devel cyrus-sasl-gssapi \  cyrus-sasl-plain flex gcc gcc-c++ gdb git java-1.8.0-openjdk-devel \  krb5-server krb5-workstation libtoo">
+<meta property="og:description" content="12345678&amp;lt;!-- (事务管理)transaction manager, use JtaTransactionManager for global tx --&amp;gt;  &amp;lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&amp;gt;">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-08-24T14:29:25.360Z">
+<meta property="og:updated_time" content="2019-09-18T14:31:19.192Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="logging.DEBUG">
-<meta name="twitter:description" content="切换 root 用户  安装依赖  1234sudo yum install autoconf automake cyrus-sasl-devel cyrus-sasl-gssapi \  cyrus-sasl-plain flex gcc gcc-c++ gdb git java-1.8.0-openjdk-devel \  krb5-server krb5-workstation libtoo">
+<meta name="twitter:title" content="Kudu-Deploy-Non-ClouderaManager">
+<meta name="twitter:description" content="12345678&amp;lt;!-- (事务管理)transaction manager, use JtaTransactionManager for global tx --&amp;gt;  &amp;lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&amp;gt;">
 
 
 
@@ -121,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://imperio-wxm.github.io/Kudu-Deploy-Non-ClouderaManager.html"/>
+  <link rel="canonical" href="http://imperio-wxm.github.io/Mybatis-Manually-Transaction.html"/>
 
 
 
 
 
-  <title> | logging.DEBUG</title>
+  <title>Kudu-Deploy-Non-ClouderaManager | logging.DEBUG</title>
   
 
 
@@ -283,7 +284,7 @@
     <div class="post-block page">
       <header class="post-header">
 
-	<h1 class="post-title" itemprop="name headline"></h1>
+	<h1 class="post-title" itemprop="name headline">Kudu-Deploy-Non-ClouderaManager</h1>
 
 
 
@@ -295,34 +296,8 @@
       <div class="post-body">
         
         
-          <p>切换 root 用户</p>
-<ul>
-<li>安装依赖</li>
-</ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install autoconf automake cyrus-sasl-devel cyrus-sasl-gssapi \</span><br><span class="line">  cyrus-sasl-plain flex gcc gcc-c++ gdb git java-1.8.0-openjdk-devel \</span><br><span class="line">  krb5-server krb5-workstation libtool make openssl-devel patch \</span><br><span class="line">  pkgconfig redhat-lsb-core rsync unzip vim-common which</span><br></pre></td></tr></table></figure>
-<ul>
-<li>下载rpm安装包</li>
-</ul>
-<p><a href="https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.16.2/RPMS/x86_64/" target="_blank" rel="noopener">https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.16.2/RPMS/x86_64/</a></p>
-<p>wget kudu* 6个rpm</p>
-<ul>
-<li>执行安装</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh --nodeps *</span><br></pre></td></tr></table></figure>
-<ul>
-<li>创建数据目录</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /app/kudu/master/data</span><br><span class="line">mkdir -p /app/kudu/master/logs</span><br><span class="line">mkdir -p /app/kudu/master/metadata</span><br><span class="line">mkdir -p /app/kudu/master/wal</span><br><span class="line"></span><br><span class="line"><span class="comment">// 授权必须为kudu用户</span></span><br><span class="line">chown -R kudu:kudu kudu/</span><br></pre></td></tr></table></figure>
-<ul>
-<li>修改配置</li>
-</ul>
-<p>【master】<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/kudu/conf/master.gflagfile</span><br><span class="line"></span><br><span class="line">--fromenv=rpc_bind_addresses</span><br><span class="line">--fromenv=log_dir</span><br><span class="line"></span><br><span class="line">--fs_wal_dir=/app/kudu/master/wal</span><br><span class="line">--fs_data_dirs=/app/kudu/master/data</span><br><span class="line">--fs_metadata_dir=/app/kudu/master/metadata</span><br><span class="line">--log_dir=/app/kudu/master/logs</span><br><span class="line">--master_addresses=xxxx:<span class="number">7051</span>,xxxx:<span class="number">7051</span>,xxxx:<span class="number">7051</span></span><br><span class="line">--block_cache_capacity_mb=<span class="number">4096</span></span><br><span class="line">--max_log_size=<span class="number">40</span></span><br></pre></td></tr></table></figure></p>
-<p>【tserver】<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/kudu/conf/tserver.gflagfile</span><br><span class="line"></span><br><span class="line">--fromenv=rpc_bind_addresses</span><br><span class="line">--fromenv=log_dir</span><br><span class="line"></span><br><span class="line">--fs_wal_dir=/app/kudu/tserver/wal</span><br><span class="line">--fs_data_dirs=/app/kudu/tserver/data</span><br><span class="line">--fs_metadata_dir=/app/kudu/tserver/metadata</span><br><span class="line">--log_dir=/app/kudu/tserver/logs</span><br><span class="line">--tserver_master_addrs=xxxx:<span class="number">7051</span>,xxxx:<span class="number">7051</span>,xxxx:<span class="number">7051</span></span><br><span class="line">--block_cache_capacity_mb=<span class="number">4096</span></span><br><span class="line">--max_log_size=<span class="number">40</span></span><br></pre></td></tr></table></figure></p>
-<h2 id="安装和启动NTP服务的命令如下："><a href="#安装和启动NTP服务的命令如下：" class="headerlink" title="安装和启动NTP服务的命令如下："></a>安装和启动NTP服务的命令如下：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install ntp</span><br><span class="line"></span><br><span class="line">sudo /etc/init.d/ntpd restart</span><br></pre></td></tr></table></figure>
-<h2 id="启动、重启、停止kudu"><a href="#启动、重启、停止kudu" class="headerlink" title="启动、重启、停止kudu"></a>启动、重启、停止kudu</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">## 启动</span><br><span class="line">/etc/init.d/kudu-master start</span><br><span class="line">/etc/init.d/kudu-tserver start</span><br><span class="line"></span><br><span class="line">## 重启</span><br><span class="line">/etc/init.d/kudu-master restart</span><br><span class="line">/etc/init.d/kudu-tserver restart</span><br><span class="line"></span><br><span class="line">## 停止</span><br><span class="line">/etc/init.d/kudu-master stop</span><br><span class="line">/etc/init.d/kudu-tserver stop</span><br></pre></td></tr></table></figure>
-<p>master管理界面<br><a href="http://ip:8051/masters" target="_blank" rel="noopener">http://ip:8051/masters</a></p>
-<p>tablet server管理界面<br><a href="http://ip:8050/" target="_blank" rel="noopener">http://ip:8050/</a></p>
-
+          <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&lt;!-- (事务管理)transaction manager, use JtaTransactionManager <span class="keyword">for</span> global tx --&gt;</span><br><span class="line">  &lt;bean id=<span class="string">"transactionManager"</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">"org.springframework.jdbc.datasource.DataSourceTransactionManager"</span>&gt;</span><br><span class="line">    &lt;property name=<span class="string">"dataSource"</span> ref=<span class="string">"dataSource"</span> /&gt;</span><br><span class="line">  &lt;/bean&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 使用annotation定义事务 --&gt;</span><br><span class="line">    &lt;tx:annotation-driven transaction-manager=<span class="string">"transactionManager"</span> proxy-target-<span class="class"><span class="keyword">class</span></span>=<span class="string">"true"</span> /&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> MessageTpl <span class="title">saveMessage</span><span class="params">(Map&lt;String, Object&gt; mqInfo, Message message)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        <span class="comment">// 保存信息</span></span><br><span class="line">        <span class="comment">//获取Spring容器的对象</span></span><br><span class="line">　　　　　　ClassPathXmlApplicationContext contextLoader = <span class="keyword">new</span> ClassPathXmlApplicationContext(</span><br><span class="line">　　　　　　　　　　<span class="keyword">new</span> String[] &#123; <span class="string">"classpath*:spring/applicationContext.xml"</span>, <span class="string">"classpath*:spring/spring-mybatis.xml"</span>&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//1.获取事务控制管理器</span></span><br><span class="line">        DataSourceTransactionManager transactionManager = contextLoader.getBean(</span><br><span class="line">        <span class="string">"transactionManager"</span>, DataSourceTransactionManager.class);</span><br><span class="line">        <span class="comment">//2.获取事务定义</span></span><br><span class="line">        DefaultTransactionDefinition def = <span class="keyword">new</span> DefaultTransactionDefinition();</span><br><span class="line">        <span class="comment">//3.设置事务隔离级别，开启新事务</span></span><br><span class="line">        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);</span><br><span class="line">        <span class="comment">//4.获得事务状态</span></span><br><span class="line">        TransactionStatus transactionStatus = transactionManager.getTransaction(def);</span><br><span class="line">        MessageTpl messageTpl = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Date time = <span class="keyword">new</span> Date();</span><br><span class="line">            String status = Constant.MESSAGE_STATUS_TO_BE_CONFIRMED;</span><br><span class="line">            String remark = <span class="string">"optId:"</span>+mqInfo.get(<span class="string">"userId"</span>)+<span class="string">"|预发布:待确认"</span>;</span><br><span class="line">            <span class="keyword">if</span> (Constant.MQ_IS_CONFIRM_NO == (Integer) mqInfo.get(<span class="string">"isConfirm"</span>)) &#123;</span><br><span class="line">                status = Constant.MESSAGE_STATUS_TO_BE_SEND;</span><br><span class="line">                remark = <span class="string">"optId:"</span>+mqInfo.get(<span class="string">"userId"</span>)+<span class="string">"|待发送：消息不需要确认"</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            messageTpl = <span class="keyword">new</span> MessageTpl((Long) mqInfo.get(<span class="string">"mqId"</span>), message.getContent(), <span class="number">0</span>,</span><br><span class="line">                    (Long) mqInfo.get(<span class="string">"userId"</span>), status, time, time, Constant.MSG_TABLE + message.getQueueName(),</span><br><span class="line">                    MD5Util.MD5_32(message.getContent()));</span><br><span class="line">            messageDao.saveMessage(messageTpl);</span><br><span class="line">            <span class="comment">// TODO添加缓存</span></span><br><span class="line">            <span class="comment">// 保存日志</span></span><br><span class="line">            MessageLogTpl log = <span class="keyword">new</span> MessageLogTpl(<span class="keyword">null</span>, <span class="string">"预发布"</span>, status, remark, time,</span><br><span class="line">                    Constant.MSG_LOG_TABLE + message.getQueueName());</span><br><span class="line">            <span class="keyword">this</span>.messageDao.saveMessageLog(log);</span><br><span class="line">            </span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            transactionManager.rollback(transactionStatus);</span><br><span class="line">            messageTpl = <span class="keyword">null</span>;</span><br><span class="line">            logger.error(<span class="string">"saveMessage_Exception "</span>, e);</span><br><span class="line">        &#125;<span class="keyword">finally</span> &#123;     </span><br><span class="line">            transactionManager.commit(transactionStatus); </span><br><span class="line">        &#125; </span><br><span class="line">        <span class="keyword">return</span> messageTpl;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
         
       </div>
       
@@ -369,17 +344,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -398,7 +364,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">47</span>
+                  <span class="site-state-item-count">48</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -460,22 +426,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装和启动NTP服务的命令如下："><span class="nav-number">1.</span> <span class="nav-text">安装和启动NTP服务的命令如下：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动、重启、停止kudu"><span class="nav-number">2.</span> <span class="nav-text">启动、重启、停止kudu</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       

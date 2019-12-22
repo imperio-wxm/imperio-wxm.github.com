@@ -13,32 +13,6 @@
   </entry>
   <entry>
     <title><![CDATA[Kudu-Deploy-Non-ClouderaManager]]></title>
-    <url>%2F2019%2F09%2F05%2FMybatis-Manually-Transaction%2F</url>
-    <content type="text"><![CDATA[12345678&lt;!-- (事务管理)transaction manager, use JtaTransactionManager for global tx --&gt; &lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt; &lt;property name="dataSource" ref="dataSource" /&gt; &lt;/bean&gt;&lt;!-- 使用annotation定义事务 --&gt; &lt;tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" /&gt; 1234567891011121314151617181920212223242526272829303132333435363738394041424344public MessageTpl saveMessage(Map&lt;String, Object&gt; mqInfo, Message message) throws Exception&#123; // 保存信息 //获取Spring容器的对象 ClassPathXmlApplicationContext contextLoader = new ClassPathXmlApplicationContext( new String[] &#123; "classpath*:spring/applicationContext.xml", "classpath*:spring/spring-mybatis.xml"&#125;);//1.获取事务控制管理器 DataSourceTransactionManager transactionManager = contextLoader.getBean( "transactionManager", DataSourceTransactionManager.class); //2.获取事务定义 DefaultTransactionDefinition def = new DefaultTransactionDefinition(); //3.设置事务隔离级别，开启新事务 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); //4.获得事务状态 TransactionStatus transactionStatus = transactionManager.getTransaction(def); MessageTpl messageTpl = null; try &#123; Date time = new Date(); String status = Constant.MESSAGE_STATUS_TO_BE_CONFIRMED; String remark = "optId:"+mqInfo.get("userId")+"|预发布:待确认"; if (Constant.MQ_IS_CONFIRM_NO == (Integer) mqInfo.get("isConfirm")) &#123; status = Constant.MESSAGE_STATUS_TO_BE_SEND; remark = "optId:"+mqInfo.get("userId")+"|待发送：消息不需要确认"; &#125; messageTpl = new MessageTpl((Long) mqInfo.get("mqId"), message.getContent(), 0, (Long) mqInfo.get("userId"), status, time, time, Constant.MSG_TABLE + message.getQueueName(), MD5Util.MD5_32(message.getContent())); messageDao.saveMessage(messageTpl); // TODO添加缓存 // 保存日志 MessageLogTpl log = new MessageLogTpl(null, "预发布", status, remark, time, Constant.MSG_LOG_TABLE + message.getQueueName()); this.messageDao.saveMessageLog(log); &#125; catch (Exception e) &#123; transactionManager.rollback(transactionStatus); messageTpl = null; logger.error("saveMessage_Exception ", e); &#125;finally &#123; transactionManager.commit(transactionStatus); &#125; return messageTpl; &#125;]]></content>
-      <categories>
-        <category>Kudu</category>
-        <category>BigData</category>
-      </categories>
-      <tags>
-        <tag>大数据</tag>
-        <tag>Kudu</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Kudu-Deploy-Non-ClouderaManager]]></title>
-    <url>%2F2019%2F09%2F04%2FKudu-Master-Node-Migration%2F</url>
-    <content type="text"><![CDATA[在对3个或3个以上的master添加新的节点并不安全，不建议这样做所有命令必须使用UNIX 的Kudu用户操作之前必须熟悉kudu的相关配置 前期准备 在kudu master 操作期间，kudu 集群不可用 Kudu Master 的个数应该为奇数，3或者5，分别允许1个节点、2个节点失败 主备工作 a. 确认WAL 和 data 目录（默认：/var/lib/kudu/master/fs_wal_dir 和 /var/lib/kudu/master/fs_data_dirs） b. 确认RPCs端口，默认rpc_bind_addresses:7051 c. 确认Master 的UUID 123$ sudo -u kudu kudu fs dump uuid --fs_wal_dir=&lt;master_wal_dir&gt; [--fs_data_dirs=&lt;master_data_dir&gt;] 2&gt;/dev/null// kudu fs dump uuid --fs_wal_dir=/app/kudu/master/wal --fs_data_dirs=/app/kudu/master/data --fs_metadata_dir=/app/kudu/master/metadata 新节点需要注意： master负载较小，可以与其他数据节点共用 确保新机器都安装了kudu 配置新机器的kudu wal 和 data相关路径 配置新机器的RPCs端口 迁移操作sudo -u kudu kudu fs dump uuid –fs_wal_dir= [–fs_data_dirs=] 2&gt;/dev/null 1. 获取旧master的uuidkudu fs dump uuid –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata 145\146\147211\212\213 211c4ad632962224df29d3c48d0c627476e2127b906011cbbf406a8b2620543d69143f2133819d8cba06142cc8c9b5299b7ad891a 2. format新节点，uuid为待迁移旧节点uuidsudo -u kudu kudu fs format –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata –log_dir=/app/kudu/master/logs –uuid=c4ad632962224df29d3c48d0c627476e 3. 将一台存活master的元数据拷贝过来,用kudu用户执行，将目录改为kudu拥有者sudo -u kudu kudu local_replica copy_from_remote –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata –log_dir=/app/kudu/master/logs 00000000000000000000000000000000 10.1.8.211:7051 4. 新master和存活master上更新master list执行此步骤需要关闭tserver sudo -u kudu kudu local_replica cmeta rewrite_raft_config –fs_wal_dir=/app/kudu/master/wal –fs_data_dirs=/app/kudu/master/data –fs_metadata_dir=/app/kudu/master/metadata –log_dir=/app/kudu/master/logs 00000000000000000000000000000000 c4ad632962224df29d3c48d0c627476e:10.1.8.145:7051 7b906011cbbf406a8b2620543d69143f:10.1.8.212:7051 3819d8cba06142cc8c9b5299b7ad891a:10.1.8.213:7051 5. 修改 vim /etc/kudu/conf/master.gflagfile 和 vim /etc/kudu/conf/tserver.gflagfile重启所有节点]]></content>
-      <categories>
-        <category>Kudu</category>
-        <category>BigData</category>
-      </categories>
-      <tags>
-        <tag>大数据</tag>
-        <tag>Kudu</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[Kudu-Deploy-Non-ClouderaManager]]></title>
     <url>%2F2019%2F08%2F23%2FKudu-Deploy-Non-ClouderaManager%2F</url>
     <content type="text"><![CDATA[CDH 5.10.x开始支持Kudu 1.2.0+的管理，但是由于版本匹配问题，很多时候想用比较新的Kudu但是CDH版本不允许，此时就需要脱离CM手动搭建集群 环境与前期准备 Kudu与CDH版本的依赖关系 CDH版本支持 RPMS查询 (具体版本可更换url上的版本号进行查看) CDH5.16.2-Kudu 1.7.0 root用户 在安装部署Kudu的时候必须是root用户，过程中还会涉及新建kudu用户 安装依赖与配置 依赖安装 1234sudo yum install autoconf automake cyrus-sasl-devel cyrus-sasl-gssapi \ cyrus-sasl-plain flex gcc gcc-c++ gdb git java-1.8.0-openjdk-devel \ krb5-server krb5-workstation libtool make openssl-devel patch \ pkgconfig redhat-lsb-core rsync unzip vim-common which 修改系统最大文件句柄数 1234vim /etc/security/limits.conf * soft nofile 65535* hard nofile 65535 域名互通 如果节点之间有域名，则必须添加hosts，使得各节点之间可以用域名互通 下载并安装RPM安装包CDH5.16.2-Kudu 1.7.0下载 12345678910111213141516171819// 依次wgetkudu-1.7.0+cdh5.16.2+0-1.cdh5.16.2.p0.24.el6.x86_64.rpmkudu-client-devel-1.7.0+cdh5.16.2+0-1.cdh5.16.2.p0.24.el6.x86_64.rpmkudu-client0-1.7.0+cdh5.16.2+0-1.cdh5.16.2.p0.24.el6.x86_64.rpmkudu-debuginfo-1.7.0+cdh5.16.2+0-1.cdh5.16.2.p0.24.el6.x86_64.rpmkudu-master-1.7.0+cdh5.16.2+0-1.cdh5.16.2.p0.24.el6.x86_64.rpmkudu-tserver-1.7.0+cdh5.16.2+0-1.cdh5.16.2.p0.24.el6.x86_64.rpm// 下载目录rpm -ivh --nodeps *Preparing... ########################################### [100%]1:kudu ########################################### [ 17%]2:kudu-client0 ########################################### [ 33%]3:kudu-client-devel ########################################### [ 50%]4:kudu-master ########################################### [ 67%]5:kudu-tserver ########################################### [ 83%]6:kudu-debuginfo ########################################### [100%] 创建数据目录，用户授权 由于Kudu对文件系统要求很高，坏盘会导致节点Crash，元数据损坏会导致节点无法重启，所以尽量将 data、wal、metadata、logs 分多盘符存储 1234567mkdir -p /app/kudu/master/datamkdir -p /app/kudu/master/logsmkdir -p /app/kudu/master/metadatamkdir -p /app/kudu/master/wal// 授权必须为kudu用户chown -R kudu:kudu kudu/ Master and Tserver config Master 123456789101112vim /etc/kudu/conf/master.gflagfile--fromenv=rpc_bind_addresses--fromenv=log_dir--fs_wal_dir=/app/kudu/master/wal--fs_data_dirs=/app/kudu/master/data--fs_metadata_dir=/app/kudu/master/metadata--log_dir=/app/kudu/master/logs--master_addresses=xxxx:7051,xxxx:7051,xxxx:7051--block_cache_capacity_mb=4096--max_log_size=40 Tserver 123456789101112vim /etc/kudu/conf/tserver.gflagfile--fromenv=rpc_bind_addresses--fromenv=log_dir--fs_wal_dir=/app/kudu/tserver/wal--fs_data_dirs=/app/kudu/tserver/data--fs_metadata_dir=/app/kudu/tserver/metadata--log_dir=/app/kudu/tserver/logs--tserver_master_addrs=xxxx:7051,xxxx:7051,xxxx:7051--block_cache_capacity_mb=4096--max_log_size=40 NTP同步 Kudu对NTP同步要求很高，不同步会导致节点Crash 123sudo yum install ntpsudo /etc/init.d/ntpd restart 启动、停止、重启1234567891011// start/etc/init.d/kudu-master start/etc/init.d/kudu-tserver start// restart/etc/init.d/kudu-master restart/etc/init.d/kudu-tserver restart// stop/etc/init.d/kudu-master stop/etc/init.d/kudu-tserver stop Web UI12345// master管理界面http://ip:8051/masters// tablet server管理界面http://ip:8050/ 转载请注明出处：https://github.com/imperio-wxm]]></content>
       <categories>
@@ -214,8 +188,8 @@
       </categories>
       <tags>
         <tag>Linux</tag>
-        <tag>HBase</tag>
         <tag>大数据</tag>
+        <tag>HBase</tag>
       </tags>
   </entry>
   <entry>
@@ -589,8 +563,8 @@
       <tags>
         <tag>Linux</tag>
         <tag>大数据</tag>
-        <tag>ZooKeeper</tag>
         <tag>开源</tag>
+        <tag>ZooKeeper</tag>
         <tag>分布式</tag>
       </tags>
   </entry>
