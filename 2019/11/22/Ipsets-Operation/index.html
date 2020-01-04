@@ -89,7 +89,7 @@
 <meta property="og:site_name" content="logging.DEBUG">
 <meta property="og:description" content="Ip sets是一个批量操作iptables的工具，通过集合规则来管理iptables，如果有大量iptables规则的刷新将是很难维护的，通过ipsets可以有效避免这些问题">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2020-01-04T08:26:07.916Z">
+<meta property="og:updated_time" content="2020-01-04T08:32:54.564Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Ipsets Operation">
 <meta name="twitter:description" content="Ip sets是一个批量操作iptables的工具，通过集合规则来管理iptables，如果有大量iptables规则的刷新将是很难维护的，通过ipsets可以有效避免这些问题">
@@ -464,27 +464,13 @@
 <p>sudo ipset restore -f FILE_PATH</p>
 </blockquote>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 备份到文件</span><br><span class="line">sudo ipset save ipwhitelist01 -f /home/wxmimperio/bigdata/ipwhitelist01.txt</span><br><span class="line"></span><br><span class="line">vim  /home/wxmimperio/bigdata/ipwhitelist01.txt</span><br><span class="line">create ipwhitelist01 hash:ip,port family inet hashsize 1024 maxelem 65536</span><br><span class="line">add ipwhitelist01 10.1.8.141,tcp:5240</span><br><span class="line">add ipwhitelist01 10.1.8.141,udp:5340</span><br><span class="line"></span><br><span class="line">// 删除列表</span><br><span class="line">sudo ipset destroy ipwhitelist01</span><br><span class="line">// 从文件恢复</span><br><span class="line">sudo ipset restore -f /home/wxmimperio/bigdata/ipwhitelist01.txt</span><br></pre></td></tr></table></figure>
-<h1 id="Use-of-ipset-and-iptables"><a href="#Use-of-ipset-and-iptables" class="headerlink" title="Use of ipset and iptables"></a>Use of ipset and iptables</h1><blockquote>
-<p>在iptables中使用ipset，只要加上-m set –match-set即可</p>
-</blockquote>
-<h2 id="1-目的ip使用ipset（ipset集合为bbb）"><a href="#1-目的ip使用ipset（ipset集合为bbb）" class="headerlink" title="1.目的ip使用ipset（ipset集合为bbb）"></a>1.目的ip使用ipset（ipset集合为bbb）</h2><blockquote>
-<p>iptables -I INPUT -s 192.168.100.36 -m set –match-set bbb dst -j DROP</p>
-</blockquote>
-<h2 id="2-源ip使用ipset（ipset集合为aaa）"><a href="#2-源ip使用ipset（ipset集合为aaa）" class="headerlink" title="2.源ip使用ipset（ipset集合为aaa）"></a>2.源ip使用ipset（ipset集合为aaa）</h2><blockquote>
-<p>iptables -I INPUT -m set –match-set aaa src -d 192.168.100.36 -j DROP</p>
-</blockquote>
-<h2 id="3-源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）"><a href="#3-源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）" class="headerlink" title="3.源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）"></a>3.源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）</h2><blockquote>
-<p>iptables -I INPUT -m set –match-set aaa src -m set –match-set bbb dst -j DROP</p>
-</blockquote>
-<h2 id="4-设定白名单（源ip集合为ipwhitelist）"><a href="#4-设定白名单（源ip集合为ipwhitelist）" class="headerlink" title="4.设定白名单（源ip集合为ipwhitelist）"></a>4.设定白名单（源ip集合为ipwhitelist）</h2><blockquote>
-<p>iptables -A INPUT -p tcp -m set –match-set ipwhitelist src -j ACCEPT</p>
-</blockquote>
-<h2 id="5-为ipset-list开启特定端口"><a href="#5-为ipset-list开启特定端口" class="headerlink" title="5.为ipset list开启特定端口"></a>5.为ipset list开启特定端口</h2><blockquote>
-<p>iptables -A INPUT -p tcp -m multiport –destination-port 21,22 -m set –match-set ipwhitelist src -j ACCEPT</p>
-</blockquote>
-<h2 id="6-在hash-ip-port情况下，指定源、目标的权限"><a href="#6-在hash-ip-port情况下，指定源、目标的权限" class="headerlink" title="6.在hash ip:port情况下，指定源、目标的权限"></a>6.在hash ip:port情况下，指定源、目标的权限</h2><blockquote>
-<p>iptables -I INPUT -p tcp -m set –match-set ipwhitelist src,dst -j REJECT<br>表示：src为源ip，dst为目标端口</p>
-</blockquote>
+<h1 id="Use-of-ipset-and-iptables"><a href="#Use-of-ipset-and-iptables" class="headerlink" title="Use of ipset and iptables"></a>Use of ipset and iptables</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在iptables中使用ipset，只要加上-m set --match-set即可</span><br></pre></td></tr></table></figure>
+<h2 id="1-目的ip使用ipset（ipset集合为bbb）"><a href="#1-目的ip使用ipset（ipset集合为bbb）" class="headerlink" title="1.目的ip使用ipset（ipset集合为bbb）"></a>1.目的ip使用ipset（ipset集合为bbb）</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -s 192.168.100.36 -m set --match-set bbb dst -j DROP</span><br></pre></td></tr></table></figure>
+<h2 id="2-源ip使用ipset（ipset集合为aaa）"><a href="#2-源ip使用ipset（ipset集合为aaa）" class="headerlink" title="2.源ip使用ipset（ipset集合为aaa）"></a>2.源ip使用ipset（ipset集合为aaa）</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -m set --match-set aaa src -d 192.168.100.36 -j DROP</span><br></pre></td></tr></table></figure>
+<h2 id="3-源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）"><a href="#3-源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）" class="headerlink" title="3.源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）"></a>3.源和目的都使用ipset（源ip集合为aaa，目的ip集合为bbb）</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -m set --match-set aaa src -m set --match-set bbb dst -j DROP</span><br></pre></td></tr></table></figure>
+<h2 id="4-设定白名单（源ip集合为ipwhitelist）"><a href="#4-设定白名单（源ip集合为ipwhitelist）" class="headerlink" title="4.设定白名单（源ip集合为ipwhitelist）"></a>4.设定白名单（源ip集合为ipwhitelist）</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -p tcp -m set --match-set ipwhitelist src -j ACCEPT</span><br></pre></td></tr></table></figure>
+<h2 id="5-为ipset-list开启特定端口"><a href="#5-为ipset-list开启特定端口" class="headerlink" title="5.为ipset list开启特定端口"></a>5.为ipset list开启特定端口</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -p tcp -m multiport --destination-port 21,22 -m set --match-set ipwhitelist src -j ACCEPT</span><br></pre></td></tr></table></figure>
+<h2 id="6-在hash-ip-port情况下，指定源、目标的权限"><a href="#6-在hash-ip-port情况下，指定源、目标的权限" class="headerlink" title="6.在hash ip:port情况下，指定源、目标的权限"></a>6.在hash ip:port情况下，指定源、目标的权限</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -p tcp -m set --match-set ipwhitelist src,dst -j REJECT</span><br><span class="line">表示：src为源ip，dst为目标端口</span><br></pre></td></tr></table></figure>
 <hr>
 <blockquote>
 <p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
