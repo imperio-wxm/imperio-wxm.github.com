@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux,大数据,ZooKeeper,开源,分布式," />
+  <meta name="keywords" content="大数据,Flume," />
 
 
 
@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="测试环境12345678910测试环境：  Ubuntu 14.04 LTS x64  ZooKeeper：zookeeper-3.4.6.tar.gz    hostname		IP 		role  spark-master： 192.168.108.20   master &amp;amp; worker  spark-slave1： 192.168.108.21   worker  spark-s">
-<meta name="keywords" content="Linux,大数据,ZooKeeper,开源,分布式">
+<meta name="description" content="Flume TaildirSource可实时监控当前目录下一批文件，并记录每个文件最新消费位置，flume进程重启后不会有重复消费的问题；但是无法监听当前目录的子目录，要实现多目录的监听就需要配置多个group，无法做到动态识别子目录">
+<meta name="keywords" content="大数据,Flume">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Zookeeper集群环境搭建">
-<meta property="og:url" content="http://imperio-wxm.github.io/2016/01/06/zookeeper-deploy-cluster/index.html">
+<meta property="og:title" content="Flume TaildirSource 源码扩展(支持子目录)">
+<meta property="og:url" content="http://imperio-wxm.github.io/2019/12/20/Flume-TaildirSource-Expand/index.html">
 <meta property="og:site_name" content="logging.DEBUG">
-<meta property="og:description" content="测试环境12345678910测试环境：  Ubuntu 14.04 LTS x64  ZooKeeper：zookeeper-3.4.6.tar.gz    hostname		IP 		role  spark-master： 192.168.108.20   master &amp;amp; worker  spark-slave1： 192.168.108.21   worker  spark-s">
+<meta property="og:description" content="Flume TaildirSource可实时监控当前目录下一批文件，并记录每个文件最新消费位置，flume进程重启后不会有重复消费的问题；但是无法监听当前目录的子目录，要实现多目录的监听就需要配置多个group，无法做到动态识别子目录">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-06-30T13:01:49.731Z">
+<meta property="og:updated_time" content="2020-02-13T16:14:50.749Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Zookeeper集群环境搭建">
-<meta name="twitter:description" content="测试环境12345678910测试环境：  Ubuntu 14.04 LTS x64  ZooKeeper：zookeeper-3.4.6.tar.gz    hostname		IP 		role  spark-master： 192.168.108.20   master &amp;amp; worker  spark-slave1： 192.168.108.21   worker  spark-s">
+<meta name="twitter:title" content="Flume TaildirSource 源码扩展(支持子目录)">
+<meta name="twitter:description" content="Flume TaildirSource可实时监控当前目录下一批文件，并记录每个文件最新消费位置，flume进程重启后不会有重复消费的问题；但是无法监听当前目录的子目录，要实现多目录的监听就需要配置多个group，无法做到动态识别子目录">
 
 
 
@@ -122,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://imperio-wxm.github.io/2016/01/06/zookeeper-deploy-cluster/"/>
+  <link rel="canonical" href="http://imperio-wxm.github.io/2019/12/20/Flume-TaildirSource-Expand/"/>
 
 
 
 
 
-  <title>Zookeeper集群环境搭建 | logging.DEBUG</title>
+  <title>Flume TaildirSource 源码扩展(支持子目录) | logging.DEBUG</title>
   
 
 
@@ -291,7 +291,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2016/01/06/zookeeper-deploy-cluster/">
+    <link itemprop="mainEntityOfPage" href="http://imperio-wxm.github.io/2019/12/20/Flume-TaildirSource-Expand/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="wxmimperio">
@@ -308,7 +308,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Zookeeper集群环境搭建</h1>
+          <h1 class="post-title" itemprop="name headline">Flume TaildirSource 源码扩展(支持子目录)</h1>
         
 
         <div class="post-meta">
@@ -320,8 +320,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-01-06T16:12:59+08:00">
-                2016-01-06
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-20T13:09:56+08:00">
+                2019-12-20
               </time>
             
 
@@ -343,7 +343,18 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                  <a href="/categories/Flume/" itemprop="url" rel="index">
+                    <span itemprop="name">Flume</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flume/BigData/" itemprop="url" rel="index">
                     <span itemprop="name">BigData</span>
                   </a>
                 </span>
@@ -380,46 +391,94 @@
       
 
       
-        <hr>
-<h1 id="测试环境"><a href="#测试环境" class="headerlink" title="测试环境"></a>测试环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">测试环境：</span><br><span class="line">  Ubuntu 14.04 LTS x64</span><br><span class="line">  ZooKeeper：zookeeper-3.4.6.tar.gz</span><br><span class="line">  </span><br><span class="line">  hostname		IP 		role</span><br><span class="line">  spark-master： 192.168.108.20   master &amp; worker</span><br><span class="line">  spark-slave1： 192.168.108.21   worker</span><br><span class="line">  spark-slave2： 192.168.108.22   worker</span><br><span class="line">  </span><br><span class="line">  !默认情况全部操作在root下进行</span><br></pre></td></tr></table></figure>
-<hr>
+        <div class="note success"><p>Flume TaildirSource可实时监控当前目录下一批文件，并记录每个文件最新消费位置，flume进程重启后不会有重复消费的问题；但是无法监听当前目录的子目录，要实现多目录的监听就需要配置多个group，无法做到动态识别子目录</p></div>
 <a id="more"></a>
-<h1 id="下载解压ZooKeeper"><a href="#下载解压ZooKeeper" class="headerlink" title="下载解压ZooKeeper"></a>下载解压ZooKeeper</h1><p>地址：<a href="http://apache.fayea.com/zookeeper/" target="_blank" rel="noopener">ZooKeeper官方下载</a></p>
-<hr>
-<p>#配置ssh免密码登录</p>
-<p>请参考：<a href="http://imperio-wxm.github.io/2016/01/05/Tachyon-deploy-cluster/">Tachyon集群部署</a></p>
-<hr>
-<h1 id="修改目录权限"><a href="#修改目录权限" class="headerlink" title="修改目录权限"></a>修改目录权限</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod -R 775 zookeeper-3.4.6/</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="创建目录结构"><a href="#创建目录结构" class="headerlink" title="创建目录结构"></a>创建目录结构</h1><p>进入ZooKeeper目录</p>
-<ul>
-<li>创建数据目录</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir data</span><br></pre></td></tr></table></figure>
-<ul>
-<li>创建日志目录</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir logs</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="修改zoo-cfg配置文件"><a href="#修改zoo-cfg配置文件" class="headerlink" title="修改zoo.cfg配置文件"></a>修改zoo.cfg配置文件</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cp ./conf/zoo_sample.cfg ./conf/zoo.cfg</span><br><span class="line">vim ./conf/zoo.cfg</span><br><span class="line"></span><br><span class="line">tickTime=2000</span><br><span class="line">initLimit=10</span><br><span class="line">syncLimit=5</span><br><span class="line">dataDir=/home/jabo/software/zookeeper-3.4.6/data #刚才创建的data目录</span><br><span class="line">clientPort=2181</span><br><span class="line">server.1=spark-master:2888:3888</span><br><span class="line">server.2=spark-slave1:2888:3888</span><br><span class="line">server.3=spark-slave2:2888:3888</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="ZooKeeper目录分发"><a href="#ZooKeeper目录分发" class="headerlink" title="ZooKeeper目录分发"></a>ZooKeeper目录分发</h1><p>将ZooKeeper目录分别复制到其他主机</p>
-<hr>
-<h1 id="ZooKeeper环境变量"><a href="#ZooKeeper环境变量" class="headerlink" title="ZooKeeper环境变量"></a>ZooKeeper环境变量</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 分别配置每台主机的环境变量</span><br><span class="line"> */</span><br><span class="line">sudo vim /etc/profile</span><br><span class="line"> </span><br><span class="line">//添加如下信息</span><br><span class="line">export ZOO_HOME=/home/jabo/software/zookeeper-3.4.6</span><br><span class="line">export ZOO_LOG_DIR=$ZOO_HOME/logs</span><br><span class="line">export PATH=$ZOO_HOME/bin:$PATH</span><br><span class="line"></span><br><span class="line">//使配置生效</span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="配置节点ID"><a href="#配置节点ID" class="headerlink" title="配置节点ID"></a>配置节点ID</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * master切换至root下进行</span><br><span class="line"> */</span><br><span class="line">echo 1 &gt;/home/jabo/software/zookeeper-3.4.6/data/myid</span><br><span class="line">ssh spark-slave1 &quot;echo 2 &gt;/home/jabo/software/zookeeper-3.4.6/data/myid&quot;</span><br><span class="line">ssh spark-slave2 &quot;echo 3 &gt;/home/jabo/software/zookeeper-3.4.6/data/myid&quot;</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="启动和关闭"><a href="#启动和关闭" class="headerlink" title="启动和关闭"></a>启动和关闭</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 启动(分别对每台主机进行启动)</span><br><span class="line"> */</span><br><span class="line">zkServer.sh start</span><br><span class="line"></span><br><span class="line">//关闭</span><br><span class="line">zkServer.sh stop</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="查看节点"><a href="#查看节点" class="headerlink" title="查看节点"></a>查看节点</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@spark-master:jps</span><br><span class="line">20093 Jps</span><br><span class="line">17164 QuorumPeerMain</span><br><span class="line"></span><br><span class="line">root@spark-slave1: jps</span><br><span class="line">18666 QuorumPeerMain</span><br><span class="line">20352 Jps</span><br><span class="line"></span><br><span class="line">root@spark-slave2:jps</span><br><span class="line">4819 QuorumPeerMain</span><br><span class="line">94793 Jps</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">zkServer.sh status</span><br><span class="line"></span><br><span class="line">root@spark-master:/home/jabo/software/zookeeper-3.4.6# ./bin/zkServer.sh status</span><br><span class="line">JMX enabled by default</span><br><span class="line">Using config: /home/jabo/software/zookeeper-3.4.6/bin/../conf/zoo.cfg</span><br><span class="line">Mode: follower</span><br><span class="line"></span><br><span class="line">root@spark-slave1:/home/jabo/software/zookeeper-3.4.6# bin/zkServer.sh status</span><br><span class="line">JMX enabled by default</span><br><span class="line">Using config: /home/jabo/software/zookeeper-3.4.6/bin/../conf/zoo.cfg</span><br><span class="line">Mode: leader</span><br><span class="line"></span><br><span class="line">root@spark-slave2:/home/jabo/software/zookeeper-3.4.6# bin/zkServer.sh status</span><br><span class="line">JMX enabled by default</span><br><span class="line">Using config: /home/jabo/software/zookeeper-3.4.6/bin/../conf/zoo.cfg</span><br><span class="line">Mode: follower</span><br></pre></td></tr></table></figure>
-<h1 id="客户端连接"><a href="#客户端连接" class="headerlink" title="客户端连接"></a>客户端连接</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">//可以连接任一节点至集群</span><br><span class="line">./bin/zkCli.sh -server spark-slave1:2181</span><br><span class="line"></span><br><span class="line">Connecting to spark-slave1:2181</span><br><span class="line">2016-01-15 14:20:55,622 [myid:] - INFO  [main:Environment@100] - Client environment:zookeeper.version=3.4.6-1569965, built on 02/20/2014 09:09 GMT</span><br><span class="line">2016-01-15 14:20:55,640 [myid:] - INFO  [main:Environment@100] - Client environment:host.name=spark-slave2</span><br><span class="line">2016-01-15 14:20:55,640 [myid:] - INFO  [main:Environment@100] - Client environment:java.version=1.7.0_79</span><br><span class="line">2016-01-15 14:20:55,644 [myid:] - INFO  [main:Environment@100] - Client environment:java.vendor=Oracle Corporation</span><br><span class="line">2016-01-15 14:20:55,644 [myid:] - INFO  [main:Environment@100] - Client environment:java.home=/usr/lib/jvm/java/jre</span><br><span class="line">2016-01-15 14:20:55,645 [myid:] - INFO  [main:Environment@100] - Client environment:java.class.path=/home/jabo/software/zookeeper-3.4.6/bin/../build/classes:/home/jabo/software/zookeeper-3.4.6/bin/../build/lib/*.jar:/home/jabo/software/zookeeper-3.4.6/bin/../lib/slf4j-log4j12-1.6.1.jar:/home/jabo/software/zookeeper-3.4.6/bin/../lib/slf4j-api-1.6.1.jar:/home/jabo/software/zookeeper-3.4.6/bin/../lib/netty-3.7.0.Final.jar:/home/jabo/software/zookeeper-3.4.6/bin/../lib/log4j-1.2.16.jar:/home/jabo/software/zookeeper-3.4.6/bin/../lib/jline-0.9.94.jar:/home/jabo/software/zookeeper-3.4.6/bin/../zookeeper-3.4.6.jar:/home/jabo/software/zookeeper-3.4.6/bin/../src/java/lib/*.jar:/home/jabo/software/zookeeper-3.4.6/bin/../conf:.:/usr/lib/jvm/java/lib:/usr/lib/jvm/java/jre/lib</span><br><span class="line">2016-01-15 14:20:55,645 [myid:] - INFO  [main:Environment@100] - Client environment:java.library.path=/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib</span><br><span class="line">2016-01-15 14:20:55,651 [myid:] - INFO  [main:Environment@100] - Client environment:java.io.tmpdir=/tmp</span><br><span class="line">2016-01-15 14:20:55,651 [myid:] - INFO  [main:Environment@100] - Client environment:java.compiler=&lt;NA&gt;</span><br><span class="line">2016-01-15 14:20:55,651 [myid:] - INFO  [main:Environment@100] - Client environment:os.name=Linux</span><br><span class="line">2016-01-15 14:20:55,651 [myid:] - INFO  [main:Environment@100] - Client environment:os.arch=amd64</span><br><span class="line">2016-01-15 14:20:55,651 [myid:] - INFO  [main:Environment@100] - Client environment:os.version=3.13.0-32-generic</span><br><span class="line">2016-01-15 14:20:55,651 [myid:] - INFO  [main:Environment@100] - Client environment:user.name=root</span><br><span class="line">2016-01-15 14:20:55,652 [myid:] - INFO  [main:Environment@100] - Client environment:user.home=/root</span><br><span class="line">2016-01-15 14:20:55,652 [myid:] - INFO  [main:Environment@100] - Client environment:user.dir=/home/jabo/software/zookeeper-3.4.6</span><br><span class="line">2016-01-15 14:20:55,658 [myid:] - INFO  [main:ZooKeeper@438] - Initiating client connection, connectString=spark-slave1:2181 sessionTimeout=30000 watcher=org.apache.zookeeper.ZooKeeperMain$MyWatcher@4b4bc1e</span><br><span class="line">Welcome to ZooKeeper!</span><br><span class="line">2016-01-15 14:20:55,722 [myid:] - INFO  [main-SendThread(spark-slave1:2181):ClientCnxn$SendThread@975] - Opening socket connection to server spark-slave1/192.168.108.21:2181. Will not attempt to authenticate using SASL (unknown error)</span><br><span class="line">2016-01-15 14:20:55,736 [myid:] - INFO  [main-SendThread(spark-slave1:2181):ClientCnxn$SendThread@852] - Socket connection established to spark-slave1/192.168.108.21:2181, initiating session</span><br><span class="line">JLine support is enabled</span><br><span class="line">2016-01-15 14:20:55,767 [myid:] - INFO  [main-SendThread(spark-slave1:2181):ClientCnxn$SendThread@1235] - Session establishment complete on server spark-slave1/192.168.108.21:2181, sessionid = 0x25243ec79bf0001, negotiated timeout = 30000</span><br><span class="line"></span><br><span class="line">WATCHER::</span><br><span class="line"></span><br><span class="line">WatchedEvent state:SyncConnected type:None path:null</span><br><span class="line">[zk: spark-slave1:2181(CONNECTED) 0]</span><br></pre></td></tr></table></figure>
-<hr>
+<p>对TaildirSource的使用不做过多介绍，请参考官方文档：<a href="http://flume.apache.org/releases/content/1.7.0/FlumeUserGuide.html" target="_blank" rel="noopener">Flume-1.7.0 官方文档</a></p>
 <blockquote>
-<blockquote>
-<p>转载请注明出处</p>
+<p>参考源代码为flume 1.7.0版本</p>
 </blockquote>
+<p><a href="https://github.com/apache/flume/tree/flume-1.7/flume-ng-sources/flume-taildir-source" target="_blank" rel="noopener">TaildirSource 官方源码</a></p>
+<p><code>为了与官网源码区别，我将源码所有.java文件都加了前缀Multiple</code></p>
+<p><strong><a href="https://github.com/imperio-wxm/multiple-taildir-source" target="_blank" rel="noopener">MultipleTaildirSource 扩展源码</a></strong></p>
+<h2 id="源码结构"><a href="#源码结构" class="headerlink" title="源码结构"></a>源码结构</h2><blockquote>
+<p>MultipleTaildirMatcher.jar</p>
+</blockquote>
+<ul>
+<li>用于根据条件获取目录文件等操作</li>
+</ul>
+<blockquote>
+<p>MultipleReliableTaildirEventReader.jar</p>
+</blockquote>
+<ul>
+<li>用于文件位置记录维护、flume event封装、事件处理等操作</li>
+</ul>
+<blockquote>
+<p>MultipleTaildirSource.jar</p>
+</blockquote>
+<ul>
+<li>Source的入口，用于参数初始化、轮询线程池定义、文件位置更新等操作</li>
+</ul>
+<blockquote>
+<p>MultipleTailFile.jar</p>
+</blockquote>
+<ul>
+<li>封装了具体文件的操作，利用RandomAccessFile可以获取文件位置指针等信息</li>
+</ul>
+<blockquote>
+<p>MultipleTaildirSourceConfigurationConstants.jar</p>
+</blockquote>
+<ul>
+<li>参数配置的常量信息等</li>
+</ul>
+<h2 id="目录及其子目录遍历"><a href="#目录及其子目录遍历" class="headerlink" title="目录及其子目录遍历"></a>目录及其子目录遍历</h2><p>首先需要找到获取文件目录的源码地方：<code>MultipleTaildirMatcher.jar</code></p>
+<p>相关方法：<code>getMatchingFiles</code>、<code>getMatchingFilesNoCache</code>、<code>getFiles</code></p>
+<ul>
+<li>getMatchingFiles</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> currentParentDirMTime = parentDir.lastModified();</span><br><span class="line"><span class="comment">// 当前时间 - 最后一次检查时间 大于 强制刷新间隔，则进行目录的强制刷新</span></span><br><span class="line"><span class="keyword">boolean</span> needForceRefresh = (now - lastCheckedTime) &gt; forceRefreshIntervalMs;</span><br><span class="line"></span><br><span class="line"><span class="comment">// lastSeenParentDirMTime &lt; currentParentDirMTime 为根目录修改时间大于上次查看时间</span></span><br><span class="line"><span class="comment">// !(currentParentDirMTime &lt; lastCheckedTime) 为最后一次查看时间小于等于目录修改时间</span></span><br><span class="line"><span class="keyword">if</span> (!cachePatternMatching ||</span><br><span class="line">        lastSeenParentDirMTime &lt; currentParentDirMTime ||</span><br><span class="line">        !(currentParentDirMTime &lt; lastCheckedTime) ||</span><br><span class="line">        needForceRefresh) &#123;</span><br><span class="line">    logger.info(<span class="string">"Fetching files....."</span>);</span><br><span class="line">    <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">    List&lt;File&gt; files = getFiles(parentDir);</span><br><span class="line">    getAllFilesCost = System.currentTimeMillis() - start;</span><br><span class="line">    <span class="keyword">if</span> (getAllFilesCost &gt; forceRefreshIntervalMs) &#123;</span><br><span class="line">        logger.error(String.format(<span class="string">"Traversing the directory takes too long!!! cost = %s ms"</span>, getAllFilesCost));</span><br><span class="line">    &#125;</span><br><span class="line">    logger.info(String.format(<span class="string">"Getting files takes time = %s ms"</span>, getAllFilesCost));</span><br><span class="line">    lastMatchedFiles = sortByLastModifiedTime(files);</span><br><span class="line">    lastSeenParentDirMTime = currentParentDirMTime;</span><br><span class="line">    lastCheckedTime = now;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为有上一次已经识别的文件缓存<code>lastMatchedFiles</code>，以上代码的作用是检测是否需要从底层从新获取一次文件列表以更新缓存</p>
+<p>需要注意的是<code>currentParentDirMTime</code>这个变量，表示目录最后一次更新时间<code>parentDir.lastModified()</code></p>
+<p>这里有一个问题是，当我们操作子目录时（例如向子目录cp一个新文件），此时根目录的最后修改时间是不发生改变的，例如：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- root (lastModified = 12:00)</span><br><span class="line">   -- dir01 (lastModified = 12:05)</span><br><span class="line">      -- file.txt</span><br></pre></td></tr></table></figure></p>
+<p>root为根目录，在其中有dir01一个子目录，dir01下有一个file.txt文件；如果此时cp一个file_copy.txt到dir01下面，只会更新dir01目录的lastModified，而root的lastModified不发生改变，<code>此时虽然有新的文件加入了，但依然不满足if 条件，无法刷新缓存</code></p>
+<p>因为源码是只支持一个根目录的，所以源码这样写是没有问题，但是目前我们需要对其子目录也做监听，就要考虑如何进入if中</p>
+<ul>
+<li><p>方案一：每次轮训都将当前根目录下所有dir的最后时间获取，取出最大的时间更新currentParentDirMTime；此方案需要每次都轮序全目录，太消耗资源（不可用）</p>
+</li>
+<li><p>方案二：定时强制刷新缓存，即不管是否满足lastModified条件，到达一定时间就强制从底层获取文件列表更新缓存（可用）</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用方案二，加入强制刷新时间参数</span></span><br><span class="line"><span class="comment">// （当前轮序时间 - 最近一次轮训时间） &gt; 我们所设置的间隔，就强制刷新</span></span><br><span class="line"><span class="keyword">boolean</span> needForceRefresh = (now - lastCheckedTime) &gt; forceRefreshIntervalMs;</span><br></pre></td></tr></table></figure>
+<hr>
+<ul>
+<li>getMatchingFilesNoCache</li>
+</ul>
+<p>这个方法为源码方法，主要是看下源码如何获取文件路径，以及我们应该如何修改</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> List&lt;File&gt; <span class="title">getMatchingFilesNoCache</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    List&lt;File&gt; result = Lists.newArrayList();</span><br><span class="line">    <span class="keyword">try</span> (DirectoryStream&lt;Path&gt; stream = Files.newDirectoryStream(parentDir.toPath(), fileFilter)) &#123;</span><br><span class="line">        <span class="keyword">for</span> (Path entry : stream) &#123;</span><br><span class="line">            result.add(entry.toFile());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        logger.error(<span class="string">"I/O exception occurred while listing parent directory. "</span> +</span><br><span class="line">                <span class="string">"Files already matched will be returned. "</span> + parentDir.toPath(), e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法使用了<code>Files.newDirectoryStream</code>将<code>parentDir</code>下的文件全部获取，这里的<code>fileFilter</code>是通过正则过滤符合条件的文件</p>
+<ul>
+<li>getFiles</li>
+</ul>
+<p>这个方法是我自己实现的，获取目录及其子目录下的所有文件路径</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;File&gt; <span class="title">getFiles</span><span class="params">(File files)</span> </span>&#123;</span><br><span class="line">    List&lt;File&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    result.add(files);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; result.size(); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (result.get(i).isDirectory()) &#123;</span><br><span class="line">            File[] list = result.get(i).listFiles();</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">null</span> != list &amp;&amp; list.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (File f : list) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (<span class="keyword">null</span> != pattern) &#123;</span><br><span class="line">                        <span class="comment">// 只加入符合正则的文件</span></span><br><span class="line">                        <span class="keyword">if</span> (f.isFile() &amp;&amp; pattern.matcher(f.getAbsolutePath()).matches()) &#123;</span><br><span class="line">                            result.add(f);</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (f.isDirectory()) &#123;</span><br><span class="line">                            result.add(f);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        result.add(f);</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    result = result.stream().filter(File::isFile).collect(Collectors.toList());</span><br><span class="line">    result.forEach(f -&gt; logger.debug(<span class="string">"Path = "</span> + f));</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里用了一个非递归的遍历，因为在目录结构复杂层数比较多的情况下，使用递归入栈出栈和消耗的cpu、内存都要高，不是最佳选择；</p>
+<p><code>遍历目录是一个性能瓶颈点，当遍历目录的耗时已经大于你所设置的强制刷新缓存间隔时，就会出现性能问题</code></p>
+<p>关于遍历目录也有2个备选方案：</p>
+<ul>
+<li>Nio2遍历</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这种遍历是效率最高的，但是会有一个问题，当目录是软链ln -s时，根目录的文件无法被识别出来，导致遗漏文件，这个问题暂时还没深究</span></span><br><span class="line"></span><br><span class="line">FindJavaVisitor findJavaVisitor = <span class="keyword">new</span> FindJavaVisitor();</span><br><span class="line">Files.walkFileTree(startingDir, findJavaVisitor);</span><br><span class="line">System.out.println(findJavaVisitor.getFileList().size());</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">FindJavaVisitor</span> <span class="keyword">extends</span> <span class="title">SimpleFileVisitor</span>&lt;<span class="title">Path</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> List&lt;File&gt; fileList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> List&lt;File&gt; dirs = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> FileVisitResult <span class="title">visitFile</span><span class="params">(Path file, BasicFileAttributes attrs)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        fileList.add(file.toFile());</span><br><span class="line">        <span class="keyword">return</span> FileVisitResult.CONTINUE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> FileVisitResult <span class="title">preVisitDirectory</span><span class="params">(Path dir, BasicFileAttributes attrs)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        dirs.add(dir.toFile());</span><br><span class="line">        <span class="keyword">return</span> FileVisitResult.CONTINUE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;File&gt; <span class="title">getFileList</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> fileList;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;File&gt; <span class="title">getDirs</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> dirs;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Google Guava遍历</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 此方法的遍历效率最低，不推荐使用</span></span><br><span class="line"></span><br><span class="line">List&lt;File&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="keyword">for</span> (File file : com.google.common.io.Files.fileTraverser().breadthFirst(<span class="keyword">new</span> File(basePath))) &#123;</span><br><span class="line">    <span class="keyword">if</span>(file.isFile()) &#123;</span><br><span class="line">        list.add(file);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="新增参数"><a href="#新增参数" class="headerlink" title="新增参数"></a>新增参数</h2><p>在<code>MultipleTaildirSourceConfigurationConstants.jar</code>中新增了两个参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 强制刷新缓存时间间隔，默认：2 * 60 * 1000 ms</span></span><br><span class="line">forceRefreshIntervalMs</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对文件过滤的正则表达式，满足正则的文件路径才会监听，默认 null 不进行过滤全部监听 </span></span><br><span class="line">filePathRegularExpression</span><br></pre></td></tr></table></figure>
+<ul>
+<li>具体使用和测试方式参考<a href="https://github.com/imperio-wxm/multiple-taildir-source/blob/master/README.md" target="_blank" rel="noopener">README.md</a></li>
+</ul>
+<hr>
+<blockquote>
+<p>转载请注明出处：<a href="https://github.com/imperio-wxm" target="_blank" rel="noopener">https://github.com/imperio-wxm</a></p>
 </blockquote>
 <hr>
 
@@ -468,15 +527,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Linux/" rel="tag"># Linux</a>
-          
             <a href="/tags/大数据/" rel="tag"># 大数据</a>
           
-            <a href="/tags/ZooKeeper/" rel="tag"># ZooKeeper</a>
-          
-            <a href="/tags/开源/" rel="tag"># 开源</a>
-          
-            <a href="/tags/分布式/" rel="tag"># 分布式</a>
+            <a href="/tags/Flume/" rel="tag"># Flume</a>
           
         </div>
       
@@ -489,8 +542,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/05/Tachyon-deploy-cluster/" rel="next" title="Tachyon集群部署">
-                <i class="fa fa-chevron-left"></i> Tachyon集群部署
+              <a href="/2019/12/07/Elasticsearch-Shrink-Index/" rel="next" title="Elasticsearch 缩减索引Shards">
+                <i class="fa fa-chevron-left"></i> Elasticsearch 缩减索引Shards
               </a>
             
           </div>
@@ -498,10 +551,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/01/07/hadoop-deploy-cluster/" rel="prev" title="Hadoop集群环境搭建">
-                Hadoop集群环境搭建 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -697,7 +746,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#测试环境"><span class="nav-number">1.</span> <span class="nav-text">测试环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下载解压ZooKeeper"><span class="nav-number">2.</span> <span class="nav-text">下载解压ZooKeeper</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#修改目录权限"><span class="nav-number">3.</span> <span class="nav-text">修改目录权限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#创建目录结构"><span class="nav-number">4.</span> <span class="nav-text">创建目录结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#修改zoo-cfg配置文件"><span class="nav-number">5.</span> <span class="nav-text">修改zoo.cfg配置文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ZooKeeper目录分发"><span class="nav-number">6.</span> <span class="nav-text">ZooKeeper目录分发</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ZooKeeper环境变量"><span class="nav-number">7.</span> <span class="nav-text">ZooKeeper环境变量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置节点ID"><span class="nav-number">8.</span> <span class="nav-text">配置节点ID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#启动和关闭"><span class="nav-number">9.</span> <span class="nav-text">启动和关闭</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查看节点"><span class="nav-number">10.</span> <span class="nav-text">查看节点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查看状态"><span class="nav-number">11.</span> <span class="nav-text">查看状态</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#客户端连接"><span class="nav-number">12.</span> <span class="nav-text">客户端连接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#源码结构"><span class="nav-number">1.</span> <span class="nav-text">源码结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目录及其子目录遍历"><span class="nav-number">2.</span> <span class="nav-text">目录及其子目录遍历</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新增参数"><span class="nav-number">3.</span> <span class="nav-text">新增参数</span></a></li></ol></div>
             
 
           </div>
