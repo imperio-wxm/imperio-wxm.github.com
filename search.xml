@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[利用Prometheus监控Kafka Jmx]]></title>
+    <url>%2F2020%2F04%2F15%2FKafka-Prometheus-Jmx%2F</url>
+    <content type="text"><![CDATA[Kafka可以用CMAK(Kafka Manager)监控集群基本信息，但是更加详细的Jmx信息无法展现。可以通过Prometheus + Grafana监控完整的Kafka Jmx信息 Environment Software Version Kafka 1.0.0 Grafana 6.2.5 Prometheus 2.10.0 jmx_prometheus_javaagent 0.9 Prometheus + Grafana就不多说了，部署也很简单 Kafka JmxExposed Jmx kafka-server-start.sh 123......exec $base_dir/kafka-run-class.sh $EXTRA_ARGS kafka.Kafka "$@"...... kafka-run-class.sh 1234567891011......# JMX settingsif [ -z "$KAFKA_JMX_OPTS" ]; then KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false "fi# JMX port to useif [ $JMX_PORT ]; then KAFKA_JMX_OPTS="$KAFKA_JMX_OPTS -Dcom.sun.management.jmxremote.port=$JMX_PORT "fi...... Start kafka Server 12// 引入JMX_PORTJMX_PORT=9999 bin/kafka-server-start.sh config/server.properties &amp; Get Jmx Info jdk/bin/jconsole.exe，远程连接 IP:JMX_PORT Metrics详细参数参见官网 Kafka Jmx Metrics Prometheus Jmx Agentjmx_prometheus_javaagent 下载 kafka-1_0_0.yml 123lowercaseOutputName: truerules:- pattern : .* jmx_prometheus_javaagent 配置 1234// 启动的时候引入// 7999为prometheus采集端口// /app/prometheus_javaagent/kafka/ 为自定义路径export KAFKA_OPTS="-javaagent:/app/prometheus_javaagent/kafka/jmx_prometheus_javaagent-0.9.jar=7999:/app/prometheus_javaagent/kafka/kafka-1_0_0.yml" 依次重启Kafka 每个broker节点 Prometheus Scrape Data prometheus.yml 123456789// 添加配置- job_name: kafka scrape_interval: 30s static_configs:- targets: - ip1:7999 - ip2:7999 - ip3:7999 - ..... 动态刷新配置 1curl -X POST http://IP:9090/-/reload Grafana Manage -&gt; Import -&gt; Json Kafka Dashboard Json 下载 Dashboard 转载请注明出处：https://github.com/imperio-wxm]]></content>
+      <categories>
+        <category>Kafka</category>
+      </categories>
+      <tags>
+        <tag>BigData</tag>
+        <tag>Kafka</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Flink Kafka Split (分流自定义序列化器)]]></title>
     <url>%2F2020%2F03%2F27%2FFlink-Kafka-Split-Chapter-One%2F</url>
     <content type="text"><![CDATA[Flink Kafka Connecter会根据用户设置自动处理消息的序列化、反序列化；官方默认已经给出了几个序列化实现TypeInformation、Json、Avro，我们可以根据其实现扩展自己的序列化、反序列化类 Environment Software Version Flink 1.10.0 Jdk 1.8 Kafka 1.0.0 Kafka序列化、反序列化KafkaSerializationSchema replace KeyedSerializationSchema Flink在1.7版本之前，Kafka &lt; 1.0.0，对于Kafka的Producer序列化和反序列化是不直接支持ProducerRecord&lt;byte[], byte[]&gt;的，这也就导致类似Headers之类的Kafka元数据信息无法被获取和传递 Flink在1.7版本之后，Kafka &gt;= 1.0.0，加入了KafkaSerializationSchema、KafkaDeserializationSchema，可以直接对Record进行处理 Before Flink 1.7ProducerKafka &lt; 1.0.0 FlinkKafkaProducer011 FlinkKafkaProducer010 FlinkKafkaProducer09 Producer序列化器支持：KeyedSerializationSchema、SerializationSchema 两种 只支持key、value的传输 如果要动态修改路由的topic，可以重写getTargetTopic方法 12345678910111213141516171819202122232425262728// KeyedSerializationSchema&lt;T&gt;public interface KeyedSerializationSchema&lt;T&gt; extends Serializable &#123; /** * Serializes the key of the incoming element to a byte array * This method might return null if no key is available. * * @param element The incoming element to be serialized * @return the key of the element as a byte array */ byte[] serializeKey(T element); /** * Serializes the value of the incoming element to a byte array. * * @param element The incoming element to be serialized * @return the value of the element as a byte array */ byte[] serializeValue(T element); /** * Optional method to determine the target topic for the element. * * @param element Incoming element to determine the target topic from * @return null or the target topic */ String getTargetTopic(T element);&#125; 123456789101112// SerializationSchema&lt;T&gt;public interface SerializationSchema&lt;T&gt; extends Serializable &#123; /** * Serializes the incoming element to a specified type. * * @param element * The incoming element to be serialized * @return The serialized element. */ byte[] serialize(T element);&#125; ConsumerKafka &lt; 1.0.0 FlinkKafkaConsumer011 FlinkKafkaConsumer010 FlinkKafkaConsumer09 Consumer反序列化器支持：DeserializationSchema、KafkaDeserializationSchema 两种 KafkaDeserializationSchema 可以对ConsumerRecord进行自定义，DeserializationSchema只能反序列化value 12345678910111213141516171819202122// KafkaDeserializationSchema&lt;T&gt;public interface KafkaDeserializationSchema&lt;T&gt; extends Serializable, ResultTypeQueryable&lt;T&gt; &#123; /** * Method to decide whether the element signals the end of the stream. If * true is returned the element won't be emitted. * * @param nextElement The element to test for the end-of-stream signal. * * @return True, if the element signals end of stream, false otherwise. */ boolean isEndOfStream(T nextElement); /** * Deserializes the Kafka record. * * @param record Kafka record to be deserialized. * * @return The deserialized message as an object (null if the message cannot be deserialized). */ T deserialize(ConsumerRecord&lt;byte[], byte[]&gt; record) throws Exception;&#125; 123456789101112131415161718192021// DeserializationSchema&lt;T&gt;public interface DeserializationSchema&lt;T&gt; extends Serializable, ResultTypeQueryable&lt;T&gt; &#123; /** * Deserializes the byte message. * * @param message The message, as a byte array. * * @return The deserialized message as an object (null if the message cannot be deserialized). */ T deserialize(byte[] message) throws IOException; /** * Method to decide whether the element signals the end of the stream. If * true is returned the element won't be emitted. * * @param nextElement The element to test for the end-of-stream signal. * @return True, if the element signals end of stream, false otherwise. */ boolean isEndOfStream(T nextElement);&#125; After Flink 1.7 Flink 1.7之后使用FlinkKafkaConsumer、FlinkKafkaProducer统一了Kafka Producer、Consumer端 12345&lt;dependency&gt; &lt;groupId&gt;org.apache.flink&lt;/groupId&gt; &lt;artifactId&gt;flink-connector-kafka_2.11&lt;/artifactId&gt; &lt;version&gt;1.10.0&lt;/version&gt;&lt;/dependency&gt; Producer 支持KafkaSerializationSchema，可以自定义ProducerRecord 123456789101112// KafkaSerializationSchema&lt;T&gt;public interface KafkaSerializationSchema&lt;T&gt; extends Serializable &#123; /** * Serializes given element and returns it as a &#123;@link ProducerRecord&#125;. * * @param element element to be serialized * @param timestamp timestamp (can be null) * @return Kafka &#123;@link ProducerRecord&#125; */ ProducerRecord&lt;byte[], byte[]&gt; serialize(T element, @Nullable Long timestamp);&#125; 保留KeyedSerializationSchema，key、value序列化器 12345678910111213141516171819202122232425262728// KeyedSerializationSchema&lt;T&gt;public interface KeyedSerializationSchema&lt;T&gt; extends Serializable &#123; /** * Serializes the key of the incoming element to a byte array * This method might return null if no key is available. * * @param element The incoming element to be serialized * @return the key of the element as a byte array */ byte[] serializeKey(T element); /** * Serializes the value of the incoming element to a byte array. * * @param element The incoming element to be serialized * @return the value of the element as a byte array */ byte[] serializeValue(T element); /** * Optional method to determine the target topic for the element. * * @param element Incoming element to determine the target topic from * @return null or the target topic */ String getTargetTopic(T element);&#125; Flink Kafka 分流思路（不对Kakfa中value做处理，只根据条件做消息转发）： Source topic中有多重消息，使用Kafka Headers中设置路由键real_topic来确定Sink到具体哪个topic Flink Consumer消费Source Topic，ConsumerRecord&lt;byte[], byte[]&gt;并不做处理，直接转发到下游，因为value有可能是Json、Avro等，不做处理 可自定义Process对ConsumerRecord&lt;byte[], byte[]&gt;进行处理 Sink端需要从ConsumerRecord&lt;byte[], byte[]&gt;中获取Header的real_topic，确定具体Sink到哪个下游Topic，然后重新封装ProducerRecord&lt;byte[], byte[]&gt;转发出去 Consumer 反序列化 123456789101112131415161718public class KafkaRecordDeserializationSchema implements KafkaDeserializationSchema&lt;ConsumerRecord&lt;byte[], byte[]&gt;&gt; &#123; @Override public boolean isEndOfStream(ConsumerRecord&lt;byte[], byte[]&gt; nextElement) &#123; return false; &#125; @Override public ConsumerRecord&lt;byte[], byte[]&gt; deserialize(ConsumerRecord&lt;byte[], byte[]&gt; record) &#123; return record; &#125; @Override public TypeInformation&lt;ConsumerRecord&lt;byte[], byte[]&gt;&gt; getProducedType() &#123; return TypeInformation.of(new TypeHint&lt;ConsumerRecord&lt;byte[], byte[]&gt;&gt;() &#123; &#125;); &#125;&#125; Producer 序列化 12345678910111213public class KafkaRecordSerializationSchema implements KafkaSerializationSchema&lt;ConsumerRecord&lt;byte[], byte[]&gt;&gt; &#123; @Override public ProducerRecord&lt;byte[], byte[]&gt; serialize(ConsumerRecord&lt;byte[], byte[]&gt; element, @Nullable Long timestamp) &#123; // 将Header转成Map Map&lt;String, String&gt; headerMap = CommonUtils.headerToMap(element.headers()); // 从Map中获取real_tpic String realTopic = headerMap.containsKey(CommonUtils.REAL_TOPIC_KEY) ? headerMap.get(CommonUtils.REAL_TOPIC_KEY) : CommonUtils.DEFAULT_TOPIC; // 封装新消息，更新topic，转发出去 final ProducerRecord&lt;byte[], byte[]&gt; record = new ProducerRecord&lt;&gt;(realTopic, element.key(), element.value()); CommonUtils.putHeader(element, record); return record; &#125;&#125; Main 1234567891011121314151617181920212223242526272829............// 添加SoruceDataStream&lt;ConsumerRecord&lt;byte[], byte[]&gt;&gt; stream = env.addSource(new FlinkKafkaConsumer&lt;&gt;( sourceTopic, // 添加自定义反序列化器 new KafkaRecordDeserializationSchema(), properties));// 中间处理stream.process(new ProcessFunction&lt;ConsumerRecord&lt;byte[], byte[]&gt;, ConsumerRecord&lt;byte[], byte[]&gt;&gt;() &#123; @Override public void processElement(ConsumerRecord&lt;byte[], byte[]&gt; consumerRecord, Context context, Collector&lt;ConsumerRecord&lt;byte[], byte[]&gt;&gt; collector) throws Exception &#123; Map&lt;String, String&gt; headerMap = CommonUtils.headerToMap(consumerRecord.headers()); System.out.println(headerMap); &#125;&#125;).name("split-kafka").setParallelism(2);// 添加Sinkstream.addSink(new FlinkKafkaProducer&lt;&gt;( CommonUtils.DEFAULT_TOPIC, // 添加自定义序列化器 new KafkaRecordSerializationSchema(), properties, FlinkKafkaProducer.Semantic.EXACTLY_ONCE));............ Flink-Kafka-Split 完整代码 转载请注明出处：https://github.com/imperio-wxm]]></content>
@@ -121,8 +133,8 @@
         <category>Java</category>
       </categories>
       <tags>
-        <tag>Git</tag>
         <tag>Tomcat</tag>
+        <tag>Git</tag>
       </tags>
   </entry>
   <entry>
@@ -171,8 +183,8 @@
         <category>Linux</category>
       </categories>
       <tags>
-        <tag>Linux</tag>
         <tag>Apache</tag>
+        <tag>Linux</tag>
       </tags>
   </entry>
   <entry>
@@ -185,8 +197,8 @@
         <category>BigData</category>
       </categories>
       <tags>
-        <tag>Phoenix</tag>
         <tag>HBase</tag>
+        <tag>Phoenix</tag>
       </tags>
   </entry>
   <entry>
@@ -239,8 +251,8 @@
       </categories>
       <tags>
         <tag>Linux</tag>
-        <tag>HBase</tag>
         <tag>大数据</tag>
+        <tag>HBase</tag>
       </tags>
   </entry>
   <entry>
@@ -671,9 +683,9 @@
         <category>Linux</category>
       </categories>
       <tags>
+        <tag>Apache</tag>
         <tag>Linux</tag>
         <tag>Ubuntu</tag>
-        <tag>Apache</tag>
       </tags>
   </entry>
   <entry>
